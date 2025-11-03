@@ -4,7 +4,7 @@
   
       <div class="d-flex align-items-center justify-content-between">
         <a href="#" class="logo d-flex align-items-center">
-          <img src="@/assets/img/apex-logo.png" alt="">
+          <!-- <img src="@/assets/img/apex-logo.png" alt=""> -->
         </a>
         <i class="bi bi-list toggle-sidebar-btn" @click="handleSidebar"></i>
         <span class="d-none d-lg-block" style="color: darkgreen;"><strong>M-KEJA</strong> PORTAL</span>

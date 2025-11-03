@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('landlord_id');       // FK → clients.id
             $table->unsignedBigInteger('agent_id');       // FK → clients.id
             $table->foreign('landlord_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign(columns: 'agent_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign( 'agent_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('title', 20)->nullable(); // phones rarely exceed 20 chars
             $table->longText('description')->nullable(); // phones rarely exceed 20 chars
             $table->enum('type', [
@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('location', 20)->nullable(); // phones rarely exceed 20 chars
             $table->string('coordinates', 20)->nullable(); // phones rarely exceed 20 chars
             $table->decimal('rent_amount', 20)->nullable(); // phones rarely exceed 20 chars
-            $table->enum('status', ['available', 'occupied', 'maintenance'])->default('user'); // controlled roles            
+            $table->enum('status', ['available', 'occupied', 'user'])->default('user'); // controlled roles            
             $table->timestamps();
         });
     }
