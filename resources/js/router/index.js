@@ -5,6 +5,7 @@ import Register from '../views/Register.vue';
 import Home from '../views/Home.vue'
 import Users from '../views/Users.vue'
 import Properties from '../views/Properties.vue'
+import Listings from '../views/Listings.vue'
 
 const routes = [
     { path: '/', name: 'index', component: Index },
@@ -13,6 +14,7 @@ const routes = [
     { path: '/dashboard', name: 'dashboard', component: Home },
     { path: '/users', name: 'users', component: Users },
     { path: '/properties', name: 'properties', component: Properties },
+    { path: '/property-listings', name: 'listings', component: Listings },
 ];
 
 const router = createRouter({

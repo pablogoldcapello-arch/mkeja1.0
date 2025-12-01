@@ -21,10 +21,10 @@ return new class extends Migration
             $table->longText('description')->nullable(); //  rarely exceed 20 chars
             $table->enum('type', [
                 'apartment', 'house', 'bedsitter', 'studio', 'office', 'land'
-            ])->default('pending');
+            ])->default('house');
             $table->string('location', 20)->nullable(); //  rarely exceed 20 chars
             $table->string('coordinates', 20)->nullable(); //  rarely exceed 20 chars
-            $table->integer('units_no', 20)->nullable(); //  rarely exceed 20 chars
+            $table->integer('units_no')->default(0); //  rarely exceed 20 chars
             $table->enum('status', ['available', 'occupied', 'user'])->default('user'); // controlled roles            
             $table->timestamps();
         });

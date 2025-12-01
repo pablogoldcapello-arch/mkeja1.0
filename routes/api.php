@@ -14,20 +14,22 @@ use App\Http\Controllers\DisputeController;
 use App\Http\Controllers\SystemConfigController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\ListController;
+use App\Http\Controllers\ListingController;
 
 // Public routes
-Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/register', [AuthController::class, 'register'])->name('register');
+Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 // Protected routes (JWT)
-Route::middleware('auth:api')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return response()->json($request->user());
-    });
+Route::middleware(['auth:api'])->group(function () {
 
+    // Auth
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/me', [AuthController::class, 'me'])->name('me');
+    Route::post('/refresh', [AuthController::class, 'refresh'])->name('refresh');
 
-    Route::apiResource( 'users', UserController::class);
+    // Resources
+    Route::apiResource('users', UserController::class);
     Route::apiResource('properties', PropertyController::class);
     Route::apiResource('units', UnitController::class);
     Route::apiResource('tenancies', TenancyController::class);
@@ -37,7 +39,8 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('disputes', DisputeController::class);
     Route::apiResource('activity-logs', ActivityLogController::class);
     Route::apiResource('system-configs', SystemConfigController::class);
+    Route::apiResource('listings', ListingController::class);
+
+    // List route
     Route::get('lists', [ListController::class, 'index']);
-
 });
-

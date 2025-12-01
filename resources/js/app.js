@@ -31,7 +31,7 @@ import router from './router';
 
 // Axios default config
 axios.defaults.baseURL = '/';
-const token = localStorage.getItem('access_token');
+const token = localStorage.getItem('token');
 if (token) {
   axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 }

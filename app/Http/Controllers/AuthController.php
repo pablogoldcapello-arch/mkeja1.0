@@ -12,7 +12,7 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 class AuthController extends Controller
 {
     /**
-     * Register a new user
+     * Register a new user and return JWT
      */
     public function register(Request $request)
     {
@@ -36,7 +36,7 @@ class AuthController extends Controller
             'status'     => 1,
         ]);
 
-        $token = JWTAuth::fromUser($user);
+        $token = auth('api')->login($user); // use api guard explicitly
 
         return response()->json([
             'status' => 'success',
@@ -47,40 +47,56 @@ class AuthController extends Controller
     }
 
     /**
-     * Login user and return token
+     * Login user and return JWT
      */
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
 
-        if (! $token = JWTAuth::attempt($credentials)) {
+        if (!$token = auth('api')->attempt($credentials)) {
             return response()->json(['error' => 'Invalid credentials'], 401);
         }
 
         return response()->json([
+            'status' => 'success',
+            'user' => auth('api')->user(),
             'token' => $token,
-            'user' => auth()->user(),
+            'token_type' => 'bearer',
+            'expires_in' => auth('api')->factory()->getTTL() * 60
         ]);
     }
+
     /**
-     * Logout user (invalidate the token)
+     * Logout user (invalidate token)
      */
-public function logout(Request $request)
-{
-    try {
-        JWTAuth::invalidate(JWTAuth::getToken());
-        return response()->json(['message' => 'User successfully logged out']);
-    } catch (JWTException $e) {
-        return response()->json(['error' => 'Failed to logout, please try again'], 500);
+    public function logout()
+    {
+        try {
+            auth('api')->logout();
+            return response()->json(['status' => 'success', 'message' => 'User logged out successfully.']);
+        } catch (JWTException $e) {
+            return response()->json(['status' => 'error', 'message' => 'Failed to logout, please try again.'], 500);
+        }
     }
-}
-
 
     /**
-     * Get the authenticated user
+     * Get authenticated user
      */
     public function me()
     {
-        return response()->json(auth()->user());
-    }    
+        return response()->json(['status' => 'success', 'user' => auth('api')->user()]);
+    }
+
+    /**
+     * Refresh token
+     */
+    public function refresh()
+    {
+        return response()->json([
+            'status' => 'success',
+            'token' => auth('api')->refresh(),
+            'token_type' => 'bearer',
+            'expires_in' => auth('api')->factory()->getTTL() * 60
+        ]);
+    }
 }

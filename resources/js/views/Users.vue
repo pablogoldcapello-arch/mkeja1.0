@@ -210,8 +210,10 @@
                                             <select name="role" v-model="data.role" class="form-select" id="role">
                                                 <option value="0" disabled selected>Select Role</option>
                                                 <option value="1">Administrator</option>
-                                                <option value="2">Loan Officer</option>
-                                                <option value="3">User</option>
+                                                <option value="2">Landlord</option>
+                                                <option value="3">Agent/Caretaker</option>
+                                                <option value="3">Tenant</option>
+                                                <option value="3">Service Provider</option>
 
                                             </select>  
                                             <div class="invalid-feedback">Please enter role!</div>

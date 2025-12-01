@@ -920,7 +920,7 @@
         },
         loadLists() {
           this.initializing = true; // Start spinner
-          axios.get('api/lists')
+          axios.get('/api/lists')
             .then((response) => {
               this.properties = response.data.lists.properties;
               this.landlords = response.data.lists.landlords;

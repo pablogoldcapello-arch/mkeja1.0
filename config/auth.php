@@ -41,7 +41,6 @@ return [
             'provider' => 'users',
         ],
 
-        // Add this if missing 👇
         'api' => [
             'driver' => 'jwt', // <-- use 'jwt' if you're using tymon/jwt-auth
             'provider' => 'users',

@@ -12,85 +12,212 @@
         </router-link>
       </li>
 
-      <!-- System Users -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#listing-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-building"></i><span>Manage Listings</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="listing-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          
+          <li>
+              <router-link to="/property-listings" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+                <i class="bi bi-circle"></i><span>All Listings</span>
+                </a>
+              </router-link>
+          </li>
+        </ul>
+      </li>       
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#land-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-people"></i><span>Manage Landlords</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="land-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          
+          <li>
+              <router-link to="/landlords" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+                <i class="bi bi-circle"></i><span>All Landlords</span>
+                </a>
+              </router-link>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#build-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-building"></i><span>Manage Properties</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="build-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          
+          <li>
+              <router-link to="/properties" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+                <i class="bi bi-circle"></i><span>All Properties</span>
+                </a>
+              </router-link>
+          </li>
+        </ul>
+      </li>      
+
       <li v-show="user.role == 'admin'" class="nav-item">
-        <router-link to="/users" custom v-slot="{ href, navigate, isActive }">
-          <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
-            <i class="bi bi-people-fill"></i>
-            <span>System Users</span>
-          </a>
-        </router-link>
-      </li>
-
-      <!-- Properties -->
-      <li v-show="user.role == 'admin' || user.role == 'loan_officer'" class="nav-item">
-        <router-link to="/properties" custom v-slot="{ href, navigate, isActive }">
-          <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
-            <i class="bi bi-building"></i>
-            <span>Properties</span>
-          </a>
-        </router-link>
-      </li>
-
-      <!-- Tenancies -->
-      <li v-show="user.role == 'admin' || user.role == 'loan_officer'" class="nav-item">
-        <router-link to="/tenancies" custom v-slot="{ href, navigate, isActive }">
-          <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
-            <i class="bi bi-person-badge"></i>
-            <span>Tenancies</span>
-          </a>
-        </router-link>
-      </li>
-
-      <!-- Payments -->
-      <li v-show="user.role == 'admin' || user.role == 'loan_officer'" class="nav-item">
-        <router-link to="/payments" custom v-slot="{ href, navigate, isActive }">
-          <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
-            <i class="bi bi-cash-coin"></i>
-            <span>Payments</span>
-          </a>
-        </router-link>
-      </li>
-
-      <!-- Invoices -->
-      <li v-show="user.role == 'admin' || user.role == 'loan_officer'" class="nav-item">
-        <router-link to="/invoices" custom v-slot="{ href, navigate, isActive }">
-          <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
-            <i class="bi bi-receipt"></i>
-            <span>Invoices</span>
-          </a>
-        </router-link>
-      </li>
-
-      <!-- Support Tickets -->
-      <li v-show="user.role == 'admin' || user.role == 'loan_officer'" class="nav-item">
-        <router-link to="/support-tickets" custom v-slot="{ href, navigate, isActive }">
-          <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
-            <i class="bi bi-life-preserver"></i>
-            <span>Support Tickets</span>
-          </a>
-        </router-link>
-      </li>
-
-      <!-- Disputes -->
-      <li v-show="user.role == 'user'" class="nav-item">
-        <router-link to="/disputes" custom v-slot="{ href, navigate, isActive }">
-          <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
-            <i class="bi bi-exclamation-triangle"></i>
-            <span>Disputes</span>
-          </a>
-        </router-link>
-      </li>
-
-      <!-- Activity Logs -->
-      <li v-show="user.role == 'user'" class="nav-item">
-        <router-link to="/activity-logs" custom v-slot="{ href, navigate, isActive }">
-          <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
-            <i class="bi bi-clock-history"></i>
-            <span>Activity Logs</span>
-          </a>
-        </router-link>
-      </li>
+        <a class="nav-link collapsed" data-bs-target="#tenant-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-people"></i><span>Manage Tenants</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="tenant-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          
+          <li>
+              <router-link to="/tenants" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+                <i class="bi bi-circle"></i><span>All Tenants</span>
+                </a>
+              </router-link>
+          </li>
+        </ul>
+      </li> 
+      
+      <li v-show="user.role == 'admin'" class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#invoice-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-receipt"></i><span>Manage Invoices</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="invoice-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          
+          <li>
+              <router-link to="/awaitinginvoicing" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+                <i class="bi bi-circle"></i><span>Awaiting Invoicing</span>
+                </a>
+              </router-link>
+          </li>
+          <li>
+              <router-link to="/invoicestosettle" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+                <i class="bi bi-circle"></i><span>Invoices to Settled</span>
+                </a>
+              </router-link>
+          </li>
+          <li>
+              <router-link to="/settledinvoices" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+                <i class="bi bi-circle"></i><span>Settled Invoices</span>
+                </a>
+              </router-link>
+          </li>  
+          <li>
+              <router-link to="/payments" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+                <i class="bi bi-circle"></i><span>Payments</span>
+                </a>
+              </router-link>
+          </li>                              
+        </ul>
+      </li> 
+      
+      <li v-show="user.role == 'admin'" class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#support-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-receipt"></i><span>Manage Tickets</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="support-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          
+          <li>
+              <router-link to="/pendingtickets" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+                <i class="bi bi-circle"></i><span>Pending Tickets</span>
+                </a>
+              </router-link>
+          </li>
+          <li>
+              <router-link to="/closedtickets" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+                <i class="bi bi-circle"></i><span>Closed Tickets</span>
+                </a>
+              </router-link>
+          </li>                             
+        </ul>
+      </li> 
+      
+      <li v-show="user.role == 'admin'" class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#logs-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-receipt"></i><span>System Logs</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="logs-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          
+          <li>
+              <router-link to="/activitylogs" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+                <i class="bi bi-circle"></i><span>Activity Logs</span>
+                </a>
+              </router-link>
+          </li>
+          <li>
+              <router-link to="/sysconfig" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+                <i class="bi bi-circle"></i><span>System Config</span>
+                </a>
+              </router-link>
+          </li>                             
+        </ul>
+      </li>       
 
       <!-- My Profile -->
       <li class="nav-item">
@@ -102,25 +229,6 @@
         </router-link>
       </li>
 
-      <!-- System Configs -->
-      <li class="nav-item">
-        <router-link to="/system-monitoring" custom v-slot="{ href, navigate, isActive }">
-          <a :href="href" class="nav-link" @click="navigate">
-            <i class="bi bi-gear"></i>
-            <span>System Configs & Monitoring</span>
-          </a>
-        </router-link>
-      </li>
-
-      <!-- IT Support -->
-      <li class="nav-item">
-        <router-link to="/itsupport" custom v-slot="{ href, navigate, isActive }">
-          <a :href="href" class="nav-link" @click="navigate">
-            <i class="bi bi-headset"></i>
-            <span>IT Support</span>
-          </a>
-        </router-link>
-      </li>
     </ul>
   </aside>
 </template>
@@ -147,4 +255,22 @@ export default {
   font-size: 1.2rem;
   margin-right: 8px;
 }
+.sidebar .nav-link {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.sidebar .nav-link:hover {
+  background-color: #f1f1f1;
+  color: #007bff;
+}
+
+.sidebar .nav-link.active {
+  background-color: #007bff;
+  color: #fff;
+}
+
 </style>
