@@ -866,68 +866,67 @@
           await this.submitFormChanges();
         },
 
-async submitFormChanges() {
-  try {
-    const formData = new FormData();
+        async submitFormChanges() {
+          try {
+            const formData = new FormData();
 
-    // Spoof method for Laravel
-    formData.append('_method', 'PUT');
+            // Spoof method for Laravel
+            formData.append('_method', 'PUT');
 
-    // List of numeric/boolean fields in your Listing model
-    const nullableFields = [
-      'bedrooms','bathrooms','living_rooms','kitchens','balcony','floor_level','total_area',
-      'furnished','parking','parking_spaces','security','water_supply','electricity','internet',
-      'swimming_pool','gym','garden','elevator','year_built','renovated'
-    ];
+            // List of numeric/boolean fields in your Listing model
+            const nullableFields = [
+              'bedrooms','bathrooms','living_rooms','kitchens','balcony','floor_level','total_area',
+              'furnished','parking','parking_spaces','security','water_supply','electricity','internet',
+              'swimming_pool','gym','garden','elevator','year_built','renovated'
+            ];
 
-    // Append all fields, convert null/undefined to empty string for nullable numeric/boolean fields
-    for (const key in this.form) {
-      let value = this.form[key];
-      if (nullableFields.includes(key) && (value === null || value === undefined)) {
-        value = ''; // Laravel will convert empty string to NULL
-      }
-      formData.append(key, value);
-    }
+            // Append all fields, convert null/undefined to empty string for nullable numeric/boolean fields
+            for (const key in this.form) {
+              let value = this.form[key];
+              if (nullableFields.includes(key) && (value === null || value === undefined)) {
+                value = ''; // Laravel will convert empty string to NULL
+              }
+              formData.append(key, value);
+            }
 
-    // Append new images
-    if (this.newImages && this.newImages.length > 0) {
-      this.newImages.forEach(img => {
-        formData.append('images[]', img.file);
-      });
-    }
+            // Append new images
+            if (this.newImages && this.newImages.length > 0) {
+              this.newImages.forEach(img => {
+                formData.append('images[]', img.file);
+              });
+            }
 
-    // Use POST instead of PUT
-    const response = await axios.post(
-      `/api/listings/${this.form.id}`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }
-    );
+            // Use POST instead of PUT
+            const response = await axios.post(
+              `/api/listings/${this.form.id}`,
+              formData,
+              {
+                headers: {
+                  'Content-Type': 'multipart/form-data'
+                }
+              }
+            );
 
-    console.log('API response:', response);
+            console.log('API response:', response);
 
-    toast.fire('Success!', 'Listing updated!', 'success');
+            toast.fire('Success!', 'Listing updated!', 'success');
 
-    const modal = bootstrap.Modal.getInstance(document.getElementById('EditListingModal'));
-    if (modal) modal.hide();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('EditListingModal'));
+            if (modal) modal.hide();
 
-    this.loadLists();
+            this.loadLists();
 
-  } catch (error) {
-    console.error('Error updating listing:', error);
+          } catch (error) {
+            console.error('Error updating listing:', error);
 
-    toast.fire(
-      'Error!',
-      error.response?.data?.message || 'An error occurred while updating the listing.',
-      'error'
-    );
-  }
-},
+            toast.fire(
+              'Error!',
+              error.response?.data?.message || 'An error occurred while updating the listing.',
+              'error'
+            );
+          }
+        },
 
-    
         addListing()
         {
           // Show the modal after fetching data
@@ -1122,7 +1121,7 @@ async submitFormChanges() {
               console.log('error')
           })
         },
-        deleteProperty(id){
+        deleteListing(id){
                 Swal.fire({
                   title: 'Are you sure?',
                   text: "You won't be able to revert this!",
@@ -1134,10 +1133,10 @@ async submitFormChanges() {
                 }).then((result) => {
                   if (result.isConfirmed) { 
                   //send request to the server
-                  axios.delete('/api/property/'+id).then(() => {
+                  axios.delete('/api/listings/'+id).then(() => {
                   toast.fire(
                     'Deleted!',
-                    'Property has been deleted.',
+                    'Listing has been deleted.',
                     'success'
                   )
                   this.loadLists();
