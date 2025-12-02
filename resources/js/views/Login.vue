@@ -109,6 +109,14 @@
 <script>
 import axios from 'axios'
 import Swal from 'sweetalert2'
+const toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000
+});
+
+window.toast = toast;
 
 export default {
   name: 'Login',
@@ -163,7 +171,7 @@ export default {
         this.current_user_id = loggedInUser.id
 
         // Success alert (optional)
-        Swal.fire({
+        toast.fire({
             title: 'Welcome!',
             text: `Hello ${this.current_user}, you are now logged in.`,
             icon: 'success',

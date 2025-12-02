@@ -43,4 +43,8 @@ Route::middleware(['auth:api'])->group(function () {
 
     // List route
     Route::get('lists', [ListController::class, 'index']);
+    //Delete listing old image when editing
+
+    Route::delete('listings/{listing}/images/{image}', [ListingController::class, 'deleteImage']);
+
 });

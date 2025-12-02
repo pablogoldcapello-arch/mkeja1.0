@@ -91,16 +91,16 @@ class ListingController extends Controller
         $listing = Listing::create($data);
 
         // Handle multiple images
-if ($request->hasFile('images')) {
-    foreach ($request->file('images') as $imageFile) {
-        $filename = uniqid() . '_' . $imageFile->getClientOriginalName();
-        Storage::disk('public')->putFileAs('listings', $imageFile, $filename);
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $imageFile) {
+                $filename = uniqid() . '_' . $imageFile->getClientOriginalName();
+                Storage::disk('public')->putFileAs('listings', $imageFile, $filename);
 
-        $listing->images()->create([
-            'name' => $filename
-        ]);
-    }
-}
+                $listing->images()->create([
+                    'name' => $filename
+                ]);
+            }
+        }
 
         return response()->json([
             'status' => true,
@@ -133,25 +133,50 @@ if ($request->hasFile('images')) {
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        $listing = Listing::find($id);
+public function update(Request $request, $id)
+{
+    $listing = Listing::find($id);
 
-        if (!$listing) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Listing not found.'
-            ], 404);
-        }
-
-        $listing->update($request->all());
-
+    if (!$listing) {
         return response()->json([
-            'status' => true,
-            'listing' => $listing,
-            'message' => 'Listing updated successfully.'
-        ]);
+            'status' => false,
+            'message' => 'Listing not found.'
+        ], 404);
     }
+
+    $validator = Validator::make($request->all(), [
+        'title' => 'required|string|max:100',
+        'type' => 'required|in:apartment,house,bedsitter,studio,office,land',
+        'status' => 'required|in:for_sale,for_rent,sold,occupied',
+        'images.*' => 'nullable|image|max:5120',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json($validator->errors(), 422);
+    }
+
+    // Update normal fields
+    $listing->update($request->except('images'));
+
+    // Handle new images
+    if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $imageFile) {
+            $filename = uniqid() . '_' . $imageFile->getClientOriginalName();
+            Storage::disk('public')->putFileAs('listings', $imageFile, $filename);
+
+            $listing->images()->create([
+                'name' => $filename
+            ]);
+        }
+    }
+
+    return response()->json([
+        'status' => true,
+        'listing' => $listing->load('images'),
+        'message' => 'Listing updated successfully.'
+    ]);
+}
+
 
     /**
      * Remove the specified resource from storage.
@@ -174,4 +199,24 @@ if ($request->hasFile('images')) {
             'message' => 'Listing deleted successfully.'
         ]);
     }
+
+        public function deleteImage($listingId, $imageId)
+        {
+            $listing = Listing::findOrFail($listingId);
+            $image = $listing->images()->findOrFail($imageId);
+
+            // Delete the file from storage
+            if (\Storage::exists('public/listings/'.$image->name)) {
+                \Storage::delete('public/listings/'.$image->name);
+            }
+
+            // Delete the DB record
+            $image->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Image deleted successfully.'
+            ]);
+        }
+
 }

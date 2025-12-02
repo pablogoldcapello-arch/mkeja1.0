@@ -49,15 +49,17 @@
                         </thead>
                         <tbody>
                           <tr v-for="property in listings" :key="property.id">
-                            <th scope="row"><a href="#">
-                                  <img 
-      v-if="property.images && property.images.length > 0"
-      :src="getPhoto(property.images[0].name)" 
-      class="img-thumbnail" 
-      width="60" 
-      height="60"
-    />
-                            </a></th>
+                            <th scope="row">
+                              <a href="#">
+                                <img 
+                                  v-if="property.images && property.images.length > 0"
+                                  :src="getPhoto(property.images[0].name)" 
+                                  class="img-thumbnail" 
+                                  width="60" 
+                                  height="60"
+                                />
+                              </a>
+                            </th>
                             <!-- <td>{{property["images"][0]["name"]}}</td> -->
                             <td>{{property.title}}</td>
                             <td>{{(property.price).toLocaleString()}}</td>
@@ -65,21 +67,16 @@
                             <td>{{property.status}}</td>
                             <td>
                               <div class="btn-group" role="group">
-                                  <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                  <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                   Action
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
-                                  <!-- <a class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                             -->
-                                  <a v-if="property.created_by == user.id" @click="navigateTo('/editproperty/'+property.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
-                                  <a v-if="property.status == 0" @click="approveProperty(property.id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Approve</a>
-                                  <a v-if="property.featured == 0 && property.status == 1" @click="featureProperty(property.id)" class="dropdown-item" href="#"><i class="ri-eye-close-fill mr-2"></i>Feature</a>
-                                  <a v-if="property.featured == 1 && property.status == 1" @click="unfeatureProperty(property.id)" class="dropdown-item" href="#"><i class="ri-eye-close-fill mr-2"></i>Unfeature</a>
-                                  <a v-if="property.status == 1" @click="closeProperty(property.id)" class="dropdown-item" href="#"><i class="ri-eye-close-fill mr-2"></i>Close</a>
-                                  <a v-if="property.status == 2" @click="reopenProperty(property.id)" class="dropdown-item" href="#"><i class="ri-refresh-fill mr-2"></i>Reopen</a>
-                                  <a @click="deleteProperty(property.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
+                                  <a @click="viewListing(property)" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a> 
+                                  <a @click="editListing(property)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
+                                  <a @click="deleteListing(property.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
                                   </div>
                               </div>
-                            </td>
+                            </td>                            
                           </tr>
                         </tbody>
                       </table>
@@ -90,31 +87,154 @@
                 </div><!-- End Top Selling -->
 
                 <!-- Modal -->
-                <!-- <div class="modal fade" id="viewListingModal" tabindex="-1" aria-labelledby="viewListingModalLabel" aria-hidden="true">
-                      <div class="modal-dialog">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h5 class="modal-title" id="viewListingModalLabel">View Listing</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal fade" id="viewListingModal" tabindex="-1" aria-labelledby="viewListingModalLabel" aria-hidden="true">
+                  <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+
+                      <div class="modal-header">
+                        <h5 class="modal-title">Property Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                      </div>
+
+                      <div class="modal-body" v-if="selectedListing">
+
+                        <!-- SECTION: BASIC INFO -->
+                        <h5 class="mb-3">Basic Information</h5>
+                        <div class="row">
+                          <div class="col-md-6"><strong>Title:</strong> {{ selectedListing.title }}</div>
+                          <div class="col-md-6"><strong>Type:</strong> {{ selectedListing.type }}</div>
+
+                          <div class="col-md-6 mt-2">
+                            <strong>Status:</strong> {{ selectedListing.status }}
                           </div>
-                          <div class="modal-body">
-                            <p v-if="selectedListing">
-                              <strong>Title:</strong> {{ selectedListing.title }} 
-                            </p>
-                            <p v-if="selectedListing.type">
-                              <strong>Type:</strong> {{ selectedListing.type }}
-                            </p>
-                            <p v-if="selectedListing.status">
-                              <strong>Status:</strong> {{ selectedListing.status }}
-                            </p>
-                           
+                        </div>        
+
+                        <hr>
+
+                        <!-- SECTION: DESCRIPTION -->
+                        <h5 class="mb-3">Description</h5>
+                        <div class="p-3 border rounded bg-light" style="white-space: pre-wrap;">
+                          {{ selectedListing.description }}
+                        </div>
+
+                        <hr>
+
+                        <!-- SECTION: LOCATION -->
+                        <h5 class="mb-3">Location</h5>
+                        <div class="row">
+                          <div class="col-md-6"><strong>Address:</strong> {{ selectedListing.address }}</div>
+                          <div class="col-md-6"><strong>City:</strong> {{ selectedListing.city }}</div>
+
+                          <div class="col-md-6 mt-2"><strong>Neighborhood:</strong> {{ selectedListing.neighborhood }}</div>
+                          <div class="col-md-6 mt-2"><strong>Coordinates:</strong> {{ selectedListing.coordinates }}</div>
+                        </div>
+
+                        <hr>
+
+                        <!-- SECTION: PROPERTY DETAILS -->
+                        <h5 class="mb-3">Property Details</h5>
+                        <div class="row">
+                          <div class="col-md-6"><strong>Bedrooms:</strong> {{ selectedListing.bedrooms }}</div>
+                          <div class="col-md-6"><strong>Bathrooms:</strong> {{ selectedListing.bathrooms }}</div>
+
+                          <div class="col-md-6 mt-2"><strong>Living Rooms:</strong> {{ selectedListing.living_rooms }}</div>
+                          <div class="col-md-6 mt-2"><strong>Kitchens:</strong> {{ selectedListing.kitchens }}</div>
+
+                          <div class="col-md-6 mt-2"><strong>Balcony:</strong> {{ selectedListing.balcony ? 'Yes' : 'No' }}</div>
+                          <div class="col-md-6 mt-2"><strong>Floor Level:</strong> {{ selectedListing.floor_level }}</div>
+
+                          <div class="col-md-6 mt-2"><strong>Total Area:</strong> {{ selectedListing.total_area }} sq ft</div>
+                          <div class="col-md-6 mt-2"><strong>Furnished:</strong> {{ selectedListing.furnished ? 'Yes' : 'No' }}</div>
+                        </div>
+
+                        <hr>
+
+                        <!-- SECTION: FINANCIALS -->
+                        <h5 class="mb-3">Financial Details</h5>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <strong>Price:</strong> {{ selectedListing.price?.toLocaleString() }} {{ selectedListing.currency }}
                           </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                          <div class="col-md-6"><strong>Deposit:</strong> {{ selectedListing.deposit }}</div>
+
+                          <div class="col-md-6 mt-2"><strong>Payment Terms:</strong> {{ selectedListing.payment_terms }}</div>
+                        </div>
+
+                        <hr>
+
+                        <!-- SECTION: AMENITIES & FACILITIES -->
+                        <h5 class="mb-3">Amenities & Facilities</h5>
+                        <div class="row">
+                          <div class="col-md-6"><strong>Parking:</strong> {{ selectedListing.parking ? 'Yes' : 'No' }}</div>
+                          <div class="col-md-6"><strong>Parking Spaces:</strong> {{ selectedListing.parking_spaces }}</div>
+
+                          <div class="col-md-6 mt-2"><strong>Security:</strong> {{ selectedListing.security ? 'Yes' : 'No' }}</div>
+                          <div class="col-md-6 mt-2"><strong>Water Supply:</strong> {{ selectedListing.water_supply ? 'Yes' : 'No' }}</div>
+
+                          <div class="col-md-6 mt-2"><strong>Electricity:</strong> {{ selectedListing.electricity ? 'Yes' : 'No' }}</div>
+                          <div class="col-md-6 mt-2"><strong>Internet:</strong> {{ selectedListing.internet ? 'Yes' : 'No' }}</div>
+
+                          <div class="col-md-6 mt-2"><strong>Swimming Pool:</strong> {{ selectedListing.swimming_pool ? 'Yes' : 'No' }}</div>
+                          <div class="col-md-6 mt-2"><strong>Gym:</strong> {{ selectedListing.gym ? 'Yes' : 'No' }}</div>
+
+                          <div class="col-md-6 mt-2"><strong>Garden:</strong> {{ selectedListing.garden ? 'Yes' : 'No' }}</div>
+                          <div class="col-md-6 mt-2"><strong>Elevator:</strong> {{ selectedListing.elevator ? 'Yes' : 'No' }}</div>
+                        </div>
+
+                        <hr>
+
+                        <!-- SECTION: MEDIA -->
+                        <h5 class="mb-3">Media</h5>
+                        <div class="row">
+                          <div class="col-md-6"><strong>Main Image:</strong> {{ selectedListing.main_image }}</div>
+                          <div class="col-md-6"><strong>Video Tour:</strong> {{ selectedListing.video_tour }}</div>
+
+                          <div class="col-md-12 mt-2"><strong>Floor Plan:</strong> {{ selectedListing.floor_plan }}</div>
+                        </div>
+
+                        <!-- Image Gallery -->
+                        <div v-if="selectedListing.images?.length" class="mt-3">
+                          <strong>Gallery Images:</strong>
+                          <div class="d-flex flex-wrap mt-2">
+                            <div v-for="(img, i) in selectedListing.images" :key="i" class="me-2 mb-2">
+                              <img 
+                                :src="'/storage/listings/' + img.name"
+                                style="width:120px; height:100px; object-fit:cover; border-radius:4px;"
+                              >
+                            </div>
                           </div>
                         </div>
+
+                        <hr>
+
+                        <!-- SECTION: OWNER / AGENT INFO -->
+                        <h5 class="mb-3">Owner / Agent</h5>
+                        <div class="row">
+                          <div class="col-md-6"><strong>Contact Phone:</strong> {{ selectedListing.contact_phone }}</div>
+                          <div class="col-md-6"><strong>Contact Email:</strong> {{ selectedListing.contact_email }}</div>
+                        </div>
+
+                        <hr>
+
+                        <!-- SECTION: ADDITIONAL -->
+                        <h5 class="mb-3">Additional Information</h5>
+                        <div class="row">
+                          <div class="col-md-6"><strong>Year Built:</strong> {{ selectedListing.year_built }}</div>
+                          <div class="col-md-6"><strong>Renovated:</strong> {{ selectedListing.renovated ? 'Yes' : 'No' }}</div>
+
+                          <div class="col-md-12 mt-2"><strong>Special Features:</strong> {{ selectedListing.special_features }}</div>
+                        </div>
+
                       </div>
-                </div> -->
+
+                      <div class="modal-footer">
+                        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+
 
                 <!-- Add Listing Modal -->
                 <div class="modal fade" id="AddListingModal" tabindex="-1" aria-labelledby="AddListingModalLabel" aria-hidden="true">
@@ -418,6 +538,126 @@
                 </div>
                 </div>
                
+                <!-- Edit Listing Modal -->
+                <div class="modal fade" id="EditListingModal" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+
+                      <div class="modal-header">
+                        <h5 class="modal-title">Edit Listing</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                      </div>
+
+                      <div class="modal-body">
+
+                        <div class="row g-3">
+
+                          <!-- BASIC INFO -->
+                          <div class="col-md-6">
+                              <label class="form-label">Title</label>
+                              <input type="text" class="form-control" id="title" v-model="form.title" :class="{ 'is-invalid': validationErrors.title }">
+                          </div>
+
+                          <div class="col-md-6">
+                              <label class="form-label">Type</label>
+                              <input type="text" id="type" class="form-control" v-model="form.type" :class="{ 'is-invalid': validationErrors.type }">
+                          </div>
+
+                          <div class="col-md-12">
+                              <label class="form-label">Description</label>
+                              <textarea class="form-control" rows="3" id="description" v-model="form.description" :class="{ 'is-invalid': validationErrors.description }"></textarea>
+                          </div>
+
+                          <!-- LOCATION -->
+                          <div class="col-md-4">
+                              <label class="form-label">Address</label>
+                              <input type="text" class="form-control" v-model="form.address">
+                          </div>
+
+                          <div class="col-md-4">
+                              <label class="form-label">City</label>
+                              <input type="text" class="form-control" v-model="form.city">
+                          </div>
+
+                          <div class="col-md-4">
+                              <label class="form-label">Neighborhood</label>
+                              <input type="text" class="form-control" v-model="form.neighborhood">
+                          </div>
+
+                          <!-- DETAILS -->
+                          <div class="col-md-3" v-for="field in ['bedrooms','bathrooms','living_rooms','kitchens','floor_level']">
+                            <label class="form-label">{{ field.replace('_',' ') }}</label>
+                            <input type="number" class="form-control" v-model="form[field]">
+                          </div>
+
+                          <!-- BOOLEAN -->
+                          <div class="col-md-3" v-for="bool in booleanFields">
+                            <label class="form-label">{{ bool.replace('_',' ') }}</label>
+                            <select class="form-select" v-model="form[bool]">
+                                <option :value="1">Yes</option>
+                                <option :value="0">No</option>
+                            </select>
+                          </div>
+
+                          <!-- PRICE -->
+                          <div class="col-md-6">
+                              <label class="form-label">Price</label>
+                              <input type="number" class="form-control" id="price" v-model="form.price" :class="{ 'is-invalid': validationErrors.price }">
+                          </div>
+
+                          <div class="col-md-6">
+                              <label class="form-label">Deposit</label>
+                              <input type="number" class="form-control" id="deposit" v-model="form.deposit" :class="{ 'is-invalid': validationErrors.deposit }">
+                          </div>
+
+                          <!-- CONTACT -->
+                          <div class="col-md-6">
+                              <label class="form-label">Phone</label>
+                              <input type="text" class="form-control" v-model="form.contact_phone">
+                          </div>
+
+                          <div class="col-md-6">
+                              <label class="form-label">Email</label>
+                              <input type="text" class="form-control" v-model="form.contact_email">
+                          </div>
+
+                          <!-- EXISTING IMAGES -->
+                          <div class="col-md-12">
+                            <label class="form-label">Existing Images</label>
+
+                            <div class="image-preview-container">
+                                <div class="preview-box" v-for="(img, index) in existingImages" :key="img.id">
+                                    <img :src="getPhoto(img.name)" class="preview-img">
+                                    <button class="remove-btn" @click="removeExistingImage(form.id, img.id, index)">×</button>
+                                </div>
+                            </div>
+                          </div>
+
+                          <!-- NEW IMAGES -->
+                          <div class="col-md-12">
+                            <label class="form-label">Upload New Images</label>
+                            <input type="file" multiple @change="handleNewImages">
+
+                            <div class="image-preview-container mt-2">
+                                <div class="preview-box" v-for="(img, index) in newImages" :key="index">
+                                    <img :src="img.preview" class="preview-img">
+                                    <button class="remove-btn" @click="newImages.splice(index,1)">×</button>
+                                </div>
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+
+                      <div class="modal-footer">
+                        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button class="btn btn-success" @click="submitChanges()">Save Changes</button>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+               
     
             </div>
         </section>
@@ -447,14 +687,34 @@
         return {
           listings: [],
           user: [],
-          selectedUser: {},
+          selectedListing: {},
           form: {
-            name: '',
-            email: '',
-            role: '',
-          
+            id: "",
+            title: "",
+            type: "",
+            description: "",
+            address: "",
+            city: "",
+            neighborhood: "",
+            bedrooms: null,
+            bathrooms: null,
+            living_rooms: null,
+            kitchens: null,
+            floor_level: null,
+            price: "",
+            deposit: "",
+            contact_phone: "",
+            contact_email: "",
+            // boolean fields will be filled in by your loader
           },
+          validationErrors: {},
           images: [],
+          existingImages: [],
+          newImages: [],
+          booleanFields: [
+            'balcony','furnished','parking','security','water_supply','electricity',
+            'internet','swimming_pool','gym','garden','elevator','renovated'
+          ],          
         data: {
         // Basic Info
         title: '',
@@ -514,9 +774,9 @@
         }
       },
       methods: {
-getPhoto(name) {
-  return "/storage/listings/" + name;
-},
+        getPhoto(name) {
+          return "/storage/listings/" + name;
+        },
 
         handleImages(e) {
             const files = e.target.files;
@@ -537,6 +797,137 @@ getPhoto(name) {
         navigateTo(location){
             this.$router.push(location)
         },
+        viewListing(listing)
+        {
+          console.log(this.selectedListing)
+          this.selectedListing = listing;
+          // Show the modal after fetching data
+          const modal = new bootstrap.Modal(document.getElementById('viewListingModal'));
+          modal.show();
+        },
+        editListing(listing)
+        {
+          this.form = listing;
+          // convert booleans to 1 or 0
+          this.booleanFields.forEach(key => {
+            this.form[key] = listing[key] ? 1 : 0;
+          });
+
+          // images
+          this.existingImages = listing.images;
+          this.newImages = [];          
+          // Show the modal after fetching data
+          const modal = new bootstrap.Modal(document.getElementById('EditListingModal'));
+          modal.show();
+        },
+        handleNewImages(event) {
+          const files = event.target.files;
+          for (let i = 0; i < files.length; i++) {
+            this.newImages.push({
+              file: files[i],
+              preview: URL.createObjectURL(files[i])
+            });
+          }
+        },
+        async removeExistingImage(listingId, imageId, index) {
+            try {
+                await axios.delete(`/api/listings/${listingId}/images/${imageId}`);
+                this.form.images.splice(index, 1); // remove from array
+                toast.fire('Success!', 'Image removed!', 'success');
+            } catch (error) {
+                console.error(error);
+                toast.fire('Error!', 'Could not remove image.', 'error');
+            }
+        },
+        validateFormChanges() {
+          this.validationErrors = {}; // RESET
+
+          const requiredFields = ["title", "type", "description", "price", "deposit"];
+
+          requiredFields.forEach(field => {
+            if (this.form[field] === "" || this.form[field] == null) {
+              this.validationErrors[field] = true;
+            }
+          });
+
+          return Object.keys(this.validationErrors).length === 0;
+        },
+            
+        async submitChanges() {
+          console.log("SUBMIT CLICKED");
+
+          if (!this.validateFormChanges()) {
+            console.log("❌ Validation failed:", this.validationErrors);
+            toast.fire("Error!", "Please fill all required fields.", "error");
+            return;
+          }
+
+          console.log("✅ Validation passed. Sending API request...");
+          await this.submitFormChanges();
+        },
+
+async submitFormChanges() {
+  try {
+    const formData = new FormData();
+
+    // Spoof method for Laravel
+    formData.append('_method', 'PUT');
+
+    // List of numeric/boolean fields in your Listing model
+    const nullableFields = [
+      'bedrooms','bathrooms','living_rooms','kitchens','balcony','floor_level','total_area',
+      'furnished','parking','parking_spaces','security','water_supply','electricity','internet',
+      'swimming_pool','gym','garden','elevator','year_built','renovated'
+    ];
+
+    // Append all fields, convert null/undefined to empty string for nullable numeric/boolean fields
+    for (const key in this.form) {
+      let value = this.form[key];
+      if (nullableFields.includes(key) && (value === null || value === undefined)) {
+        value = ''; // Laravel will convert empty string to NULL
+      }
+      formData.append(key, value);
+    }
+
+    // Append new images
+    if (this.newImages && this.newImages.length > 0) {
+      this.newImages.forEach(img => {
+        formData.append('images[]', img.file);
+      });
+    }
+
+    // Use POST instead of PUT
+    const response = await axios.post(
+      `/api/listings/${this.form.id}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
+
+    console.log('API response:', response);
+
+    toast.fire('Success!', 'Listing updated!', 'success');
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById('EditListingModal'));
+    if (modal) modal.hide();
+
+    this.loadLists();
+
+  } catch (error) {
+    console.error('Error updating listing:', error);
+
+    toast.fire(
+      'Error!',
+      error.response?.data?.message || 'An error occurred while updating the listing.',
+      'error'
+    );
+  }
+},
+
+    
         addListing()
         {
           // Show the modal after fetching data
