@@ -1,6 +1,5 @@
 <template>
   <main class="background-image">
-      <div class="container">
       <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
         <div class="container">
           <div class="row justify-content-center">
@@ -111,7 +110,6 @@
           </div>
         </div>
       </section>
-    </div>
   </main>
 </template>
 <script>
@@ -234,18 +232,53 @@
   </script>
 
   <style scoped>
+main {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-attachment: fixed;
+  margin: 0;
+  padding: 0;
+}
+
+/* Full background image */
 .background-image {
-  /* background-image: url('@/assets/img/april.png'); */
+  background-image: url('@/assets/img/slides-3.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  height: 100vh;
+  background-attachment: fixed;
+  min-height: 100vh;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
 }
 
-.container {
-  height: 100%;
+/* Centers everything with NO margins */
+.section.register {
+  width: 100%;
+  display: flex;
   align-items: center;
   justify-content: center;
 }
+
+/* Wrapper to avoid Bootstrap's container margins */
+.login-wrapper {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* Glass-like card */
+.card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
 </style>

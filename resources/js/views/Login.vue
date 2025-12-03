@@ -1,6 +1,5 @@
 <template>
-  <main>
-    <div class="container">
+  <main class="background-image">
       <section
         class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4"
       >
@@ -81,6 +80,34 @@
                       </button>
                     </div>
 
+<!-- Auto-Login Quick Buttons -->
+<div class="col-12 mt-3">
+  <p class="text-center small mb-2" style="color: darkgreen;">Quick Auto-Login</p>
+
+  <div class="d-grid gap-2">
+    <button type="button" class="btn btn-outline-success rounded-pill"
+      @click="autoLogin('admin')">
+      Login as Admin
+    </button>
+
+    <button type="button" class="btn btn-outline-primary rounded-pill"
+      @click="autoLogin('caretaker')">
+      Login as Caretaker / Agent
+    </button>
+
+    <button type="button" class="btn btn-outline-warning rounded-pill"
+      @click="autoLogin('landlord')">
+      Login as Landlord
+    </button>
+
+    <button type="button" class="btn btn-outline-info rounded-pill"
+      @click="autoLogin('tenant')">
+      Login as Tenant
+    </button>
+  </div>
+</div>
+
+
                     <div class="col-12">
                       <p class="small mb-0">
                         Forgot your password?
@@ -102,7 +129,6 @@
           </div>
         </div>
       </section>
-    </div>
   </main>
 </template>
 
@@ -196,7 +222,36 @@ export default {
         icon: 'error'
         })
     }
+    },
+    autoLogin(role) {
+      const presets = {
+        admin: {
+          email: "admin@admin.com",
+          password: "123456"
+        },
+        caretaker: {
+          email: "andrew.carnegie@gmail.com",
+          password: "123456"
+        },
+        landlord: {
+          email: "john.doe@gmail.com",
+          password: "123456"
+        },
+        tenant: {
+          email: "harry.styles@gmail.com",
+          password: "123456"
+        }
+      };
+
+      if (presets[role]) {
+        this.form.email = presets[role].email;
+        this.form.password = presets[role].password;
+
+        // Automatically trigger login
+        this.login_user();
+      }
     }
+
 
   }
 }
@@ -215,6 +270,23 @@ main {
   padding: 0;
 }
 
+/* Full background image */
+.background-image {
+  background-image: url('@/assets/img/slides-3.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+}
+
+/* Centers everything with NO margins */
 .section.register {
   width: 100%;
   display: flex;
@@ -222,9 +294,17 @@ main {
   justify-content: center;
 }
 
+/* Wrapper to avoid Bootstrap's container margins */
+.login-wrapper {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* Glass-like card */
 .card {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
 }
+
 </style>
