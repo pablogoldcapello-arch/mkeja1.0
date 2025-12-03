@@ -15,20 +15,38 @@ class UserFactory extends Factory
      * The current password being used by the factory.
      */
     protected static ?string $password;
+    protected $model = \App\Models\User::class;
 
     /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
+    public function definition()
     {
+        $roles = ['admin', 'landlord', 'caretaker', 'tenant', 'techsupport', 'service_provider'];
+
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'name' => $this->faker->name(),
+            'email' => $this->faker->unique()->safeEmail(),
+            'password' => Hash::make('password123'), // default password
+            'profile_photo' => null,
+            'phone' => $this->faker->phoneNumber(),
+            'role' => $this->faker->randomElement($roles),
+            'property_count' => 0,
+            'assigned_properties' => null,
+            'skills' => null,
+            'is_email_verified' => true,
+            '2fa_enabled' => false,
+            'status' => 'active',
+            'dob' => $this->faker->date(),
+            'gender' => $this->faker->randomElement(['male', 'female', 'other']),
+            'address' => $this->faker->streetAddress(),
+            'city' => $this->faker->city(),
+            'county' => $this->faker->state(),
+            'postal_code' => $this->faker->postcode(),
+            'last_login' => now(),
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
         ];
     }
 

@@ -57,6 +57,8 @@
                                   class="img-thumbnail" 
                                   width="60" 
                                   height="60"
+                                  @click="openImageModal(property.images)"
+                                  style="cursor: pointer;"
                                 />
                               </a>
                             </th>
@@ -64,7 +66,14 @@
                             <td>{{property.title}}</td>
                             <td>{{(property.price).toLocaleString()}}</td>
                             <td>{{property.address}}</td>
-                            <td>{{property.status}}</td>
+                            <td>
+                              <span v-if="property.status == 'for_rent'" class="badge bg-warning text-dark">
+                                <i class="bi bi-house-door me-1"></i> For Rent
+                              </span>
+                              <span v-else-if="property.status == 'for_sale'" class="badge bg-success">
+                                <i class="bi bi-cash-stack me-1"></i> For Sale
+                              </span>
+                            </td>
                             <td>
                               <div class="btn-group" role="group">
                                   <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -85,6 +94,40 @@
     
                   </div>
                 </div><!-- End Top Selling -->
+
+                <!-- Image Preview Modal -->
+                <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                      <div class="modal-body p-0">
+
+                        <!-- Carousel -->
+                        <div id="imageCarousel" class="carousel slide" data-bs-ride="carousel">
+                          <div class="carousel-inner">
+                            <div 
+                              class="carousel-item" 
+                              :class="{ active: index === 0 }"
+                              v-for="(img, index) in modalImages" 
+                              :key="index"
+                            >
+                              <img :src="getPhoto(img.name)" class="d-block w-100" />
+                            </div>
+                          </div>
+
+                          <!-- Controls -->
+                          <button class="carousel-control-prev" type="button" data-bs-target="#imageCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon"></span>
+                          </button>
+                          <button class="carousel-control-next" type="button" data-bs-target="#imageCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon"></span>
+                          </button>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
 
                 <!-- Modal -->
                 <div class="modal fade" id="viewListingModal" tabindex="-1" aria-labelledby="viewListingModalLabel" aria-hidden="true">
@@ -707,6 +750,7 @@
             contact_email: "",
             // boolean fields will be filled in by your loader
           },
+          modalImages: [],
           validationErrors: {},
           images: [],
           existingImages: [],
@@ -777,7 +821,13 @@
         getPhoto(name) {
           return "/storage/listings/" + name;
         },
+        openImageModal(images) {
+          this.modalImages = images;
 
+          // Open Bootstrap modal programmatically
+          let modal = new bootstrap.Modal(document.getElementById("imageModal"));
+          modal.show();
+        },
         handleImages(e) {
             const files = e.target.files;
 

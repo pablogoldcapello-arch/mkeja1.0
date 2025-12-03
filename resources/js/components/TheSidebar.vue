@@ -34,11 +34,23 @@
       </li>       
 
       <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#land-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-people"></i><span>Manage Landlords</span><i class="bi bi-chevron-down ms-auto"></i>
+        <a class="nav-link collapsed" data-bs-target="#users-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-people"></i><span>Manage Users</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
-        <ul id="land-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+        <ul id="users-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           
+          <li>
+              <router-link to="/users" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+                <i class="bi bi-circle"></i><span>All Users</span>
+                </a>
+              </router-link>
+          </li>
           <li>
               <router-link to="/landlords" custom v-slot="{ href, navigate, isActive }">
                 <a
@@ -47,10 +59,46 @@
                   class="nav-link"
                   @click="navigate"
                 >
-                <i class="bi bi-circle"></i><span>All Landlords</span>
+                <i class="bi bi-circle"></i><span>Landlords</span>
                 </a>
               </router-link>
-          </li>
+          </li>  
+          <li>
+              <router-link to="/caretakers" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+                <i class="bi bi-circle"></i><span>Caretakers</span>
+                </a>
+              </router-link>
+          </li>                      
+          <li>
+              <router-link to="/service-providers" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+                <i class="bi bi-circle"></i><span>Service Providers</span>
+                </a>
+              </router-link>
+          </li>  
+          <li>
+              <router-link to="/tenants" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+                <i class="bi bi-circle"></i><span>Tenants</span>
+                </a>
+              </router-link>
+          </li>                              
         </ul>
       </li>
 
@@ -74,27 +122,6 @@
           </li>
         </ul>
       </li>      
-
-      <li v-show="user.role == 'admin'" class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#tenant-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-people"></i><span>Manage Tenants</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="tenant-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          
-          <li>
-              <router-link to="/tenants" custom v-slot="{ href, navigate, isActive }">
-                <a
-                  :href="href"
-                  :class="{ active: isActive }"
-                  class="nav-link"
-                  @click="navigate"
-                >
-                <i class="bi bi-circle"></i><span>All Tenants</span>
-                </a>
-              </router-link>
-          </li>
-        </ul>
-      </li> 
       
       <li v-show="user.role == 'admin'" class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#invoice-nav" data-bs-toggle="collapse" href="#">

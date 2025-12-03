@@ -80,32 +80,17 @@
                       </button>
                     </div>
 
-<!-- Auto-Login Quick Buttons -->
-<div class="col-12 mt-3">
-  <p class="text-center small mb-2" style="color: darkgreen;">Quick Auto-Login</p>
-
-  <div class="d-grid gap-2">
-    <button type="button" class="btn btn-outline-success rounded-pill"
-      @click="autoLogin('admin')">
-      Login as Admin
-    </button>
-
-    <button type="button" class="btn btn-outline-primary rounded-pill"
-      @click="autoLogin('caretaker')">
-      Login as Caretaker / Agent
-    </button>
-
-    <button type="button" class="btn btn-outline-warning rounded-pill"
-      @click="autoLogin('landlord')">
-      Login as Landlord
-    </button>
-
-    <button type="button" class="btn btn-outline-info rounded-pill"
-      @click="autoLogin('tenant')">
-      Login as Tenant
-    </button>
-  </div>
-</div>
+                  <!-- Auto-Login Quick Buttons -->
+                  <div class="mt-4 text-center">
+                    <p class="small mb-2" style="color: darkgreen;">Quick Auto-Login</p>
+                    <div class="d-grid gap-2">
+                      <button class="btn btn-outline-success rounded-pill" @click="autoLogin('admin')">Admin</button>
+                      <button class="btn btn-outline-primary rounded-pill" @click="autoLogin('caretaker')">Caretaker / Agent</button>
+                      <button class="btn btn-outline-warning rounded-pill" @click="autoLogin('landlord')">Landlord</button>
+                      <button class="btn btn-outline-info rounded-pill" @click="autoLogin('tenant')">Tenant</button>
+                      <button class="btn btn-outline-secondary rounded-pill" @click="autoLogin('service_provider')">Service Provider</button>
+                    </div>
+                  </div>
 
 
                     <div class="col-12">
@@ -226,21 +211,25 @@ export default {
     autoLogin(role) {
       const presets = {
         admin: {
-          email: "admin@admin.com",
-          password: "123456"
+          email: "admin@mk.com",
+          password: "admin123"
         },
         caretaker: {
-          email: "andrew.carnegie@gmail.com",
-          password: "123456"
+          email: "john.landlord@mk.com",
+          password: "labdlord123"
         },
         landlord: {
-          email: "john.doe@gmail.com",
-          password: "123456"
+          email: "jane.agent@mk.com",
+          password: "agent123"
         },
         tenant: {
-          email: "harry.styles@gmail.com",
-          password: "123456"
-        }
+          email: "harry.tenant@mk.com",
+          password: "tenant123"
+        },
+        service_provider: {
+          email: "service.pro@mk.com",
+          password: "service123"
+        }        
       };
 
       if (presets[role]) {

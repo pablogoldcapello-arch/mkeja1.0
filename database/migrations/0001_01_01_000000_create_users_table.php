@@ -15,12 +15,35 @@ return new class extends Migration
             $table->bigIncrements('id'); // Primary key
             $table->string('name')->nullable();
             $table->string('email')->unique();
+            $table->string('profile_photo')->nullable();
+            $table->string('profile_photo_url')->nullable();
+
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('phone')->nullable();
-            $table->enum('role', ['tenant', 'landlord', 'agent', 'provider', 'admin'])->default('tenant'); // controlled roles
+            $table->enum('role', ['tenant', 'landlord', 'caretaker', 'techsupport', 'service_provider', 'admin'])->default('tenant'); // controlled roles
+
+            // Role-specific optional fields
+            $table->integer('property_count')->default(0); // for landlords
+            $table->json('assigned_properties')->nullable(); // for agents/caretakers
+            $table->json('skills')->nullable(); // for service providers / tech support
+
+            $table->boolean('is_email_verified')->default(false);
+            $table->boolean('2fa_enabled')->default(false);
             $table->enum('status', ['active', 'suspended', 'pending'])->default('active'); // controlled roles
-            $table->enum('kyc_status', ['verified', 'unverified', 'pending'])->default('verified'); // controlled roles
+
+            // Optional personal info
+            $table->date('dob')->nullable();
+            $table->enum('gender', ['male', 'female', 'other'])->nullable();
+            
+            // Address info
+            $table->string('address')->nullable();
+            $table->string('city')->nullable();
+            $table->string('county')->nullable();
+            $table->string('postal_code')->nullable();
+            
+            // System tracking
+            $table->timestamp('last_login')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

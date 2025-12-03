@@ -22,6 +22,24 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
+        'profile_photo',
+        'profile_photo_url',
+        'phone',
+        'role',
+        'property_count',
+        'assigned_properties',
+        'skills',
+        'is_email_verified',
+        '2fa_enabled',
+        'status',
+        'dob',
+        'gender',
+        'address',
+        'city',
+        'county',
+        'postal_code',
+        'last_login',
+        'email_verified_at',
     ];
 
     /**
@@ -33,6 +51,15 @@ class User extends Authenticatable implements JWTSubject
         'password',
         'remember_token',
     ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'is_email_verified' => 'boolean',
+        '2fa_enabled' => 'boolean',
+        'assigned_properties' => 'array',
+        'skills' => 'array',
+        'last_login' => 'datetime',
+    ];    
 
     /**
      * Get the attributes that should be cast.
