@@ -13,7 +13,7 @@ class ListController extends Controller
     {
         $users = User::latest()->get();
         $landlords = User::latest()->where('role','landlord')->get();
-        $properties = Property::latest()->get();
+        $properties = Property::with('landlord')->latest()->get();
         $listings = Listing::with('images')->latest()->get();
 
         return response()->json([

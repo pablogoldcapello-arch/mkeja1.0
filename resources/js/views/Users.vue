@@ -298,10 +298,11 @@
                                           <div class="col-sm-12">
                                            <select name="role" v-model="form.role" class="form-select" id="userrole">
                                                 <option value="0" disabled selected>Select Role</option>
-                                                <option value="1">Administrator</option>
-                                                <option value="2">Landlord</option>
-                                                <option value="other">Agent/Caretaker</option>
-                                                <option value="other">Tenant</option>
+                                                <option value="admin">Administrator</option>
+                                                <option value="landlord">Landlord</option>
+                                                <option value="caretaker">Caretaker</option>
+                                                <option value="service_provider">Service Provider</option>
+                                                <option value="tenant">Tenant</option>
 
                                             </select>  
                                             <div class="invalid-feedback">Please enter role!</div>

@@ -75,7 +75,7 @@
                           </tr>
                         </tbody>
                         <tbody v-else>
-                          <tr v-for="item in items" :key="item.id">
+                          <tr v-for="item in properties" :key="item.id">
                             <td>{{item.title ?? "N/A"}}</td>
                             <td>{{item.landlord.name}}</td>
                             <td>{{item.type ?? "N/A"}}</td>
@@ -205,7 +205,7 @@
                                         <div class="col-sm-6">
                                           <label for="units_no" class="form-label">Number of Units*</label>
                                           <div class="col-sm-12">
-                                              <input type="number" placeholder="Number of Units" v-model="form.units_no" id="units_no" name="units_no" class="form-control"
+                                              <input type="number" id="units_no" placeholder="Number of Units" v-model="form.units_no" name="units_no" class="form-control"
                                                 required />
                                               <div class="invalid-feedback" v-if="!form.units_no">Please enter number of units</div>
                                           </div>
@@ -224,28 +224,70 @@
                                               placeholder="Search landlord..."
                                               class="form-control"
                                             />
-                                            <select v-model="form.landlord_id" class="form-control" size="5">
+                                            <select id="landlord" v-model="form.landlord_id" class="form-control" size="5">
                                               <option
                                                 v-for="landlord in filteredLandlords"
                                                 :key="landlord.id"
                                                 :value="landlord.id"
                                               >
-                                                {{ landlord.first_name }} {{ landlord.last_name }} - {{ landlord.phone_no ?? 'N/A' }}
+                                                {{ landlord.name }} - {{ landlord.phone ?? 'N/A' }}
                                               </option>
                                             </select>
                     
                                           <div class="invalid-feedback" v-if="!form.landlord_id">Please select a landlord</div>
                                           </div>
-                                      </div>                
-                                              <!--             <div class="col-sm-6">
-                                          <label for="commission" class="form-label">% of Commission*
-                                              <p>the percentage to be deducted from the total rent collected. Click <strong @click="showFixed">here</strong> to add fixed amount</p>
-                                          </label>
-                                          <div class="col-sm-10">
-                                              <input v-if="!showFixedCommission" type="text" placeholder="Write in decimal e.g 0.05" v-model="form.commission" id="commission" name="commission" class="form-control" required />
-                                              <input v-else type="text" placeholder="Fixed commission amount" v-model="form.fixed_commission" id="fixedCommission" name="fixedCommission" class="form-control" required />
-                                          </div>
-                                      </div> -->
+                                      </div>  
+                                      <div class="row mb-3"></div>
+                                      <!-- Description -->
+                                      <div class="col-md-12">
+                                        <label for="description" class="form-label">Description</label>
+                                        <textarea id="description" v-model="form.description" placeholder="Enter property description" class="form-control" rows="3"></textarea>
+                                      </div>
+                                      <div class="row mb-3"></div>
+                                      <!-- Type -->
+                                      <div class="col-md-6">
+                                        <label for="type" class="form-label">Type</label>
+                                        <select name="type" v-model="form.type" class="form-select" id="type">
+                                            <option value="0" disabled selected>Select Type</option>
+                                            <option value="apartment">Apartment</option>
+                                            <option value="house">House</option>
+                                            <option value="bedsitter">Bedsitter</option>
+                                            <option value="studio">Studio</option>
+                                            <option value="office">Office</option>
+                                            <option value="land">Land</option>
+
+                                        </select> 
+                                      </div>
+
+                                      <!-- Location -->
+                                      <div class="col-md-6">
+                                        <label for="location" class="form-label">Location</label>
+                                        <input type="text" id="location" v-model="form.location" placeholder="Physical location or address" class="form-control">
+                                      </div>
+                                      <div class="row mb-3"></div>
+
+                                      <!-- Coordinates -->
+                                      <div class="col-md-6">
+                                        <label for="coordinates" class="form-label">Coordinates</label>
+                                        <input type="text" id="coordinates" v-model="form.coordinates" placeholder="Latitude, Longitude" class="form-control">
+                                      </div>
+
+                                      <!-- Rent Amount -->
+                                      <div class="col-md-6">
+                                        <label for="rent_amount" class="form-label">Rent Amount</label>
+                                        <input type="number" id="rent_amount" v-model="form.rent_amount" placeholder="e.g 15000" class="form-control">
+                                      </div>
+                                      <div class="row mb-3"></div>
+
+                                      <!-- Status -->
+                                      <div class="col-md-6">
+                                        <label for="status" class="form-label">Status</label>
+                                        <select id="status" v-model="form.status" class="form-select">
+                                          <option value="available">Available</option>
+                                          <option value="occupied">Occupied</option>
+                                          <option value="under_maintenance">Under Maintenance</option>
+                                        </select>
+                                      </div>
                                   
                                       </div>
                                       <div class="row mb-3"></div>
@@ -255,7 +297,12 @@
                               </div>
                               <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click.prevent="submit()">Save changes</button>
+                                <button type="button" style="background-color: darkgreen; border-color: darkgreen;" 
+                                        class="btn btn-primary" 
+                                        @click.prevent="submit">
+                                  Save changes
+                                </button>
+
                               </div>
                             </div>
                           </div>
@@ -539,22 +586,29 @@
       data(){
         return {
           properties: [],
-          categories: [],
+          landlords: [],
           propertytypes: [],
           user: [],
+          form: {
+            title: "",
+            units_no: "",
+            landlord_id: ""
+          },          
           searchQuery: '',
           filteredLandlords: [],
           selectedProperty: {},
           form: {
-            name: '',
-            landlord_id: '',
-            commission: '',
-            fixed_commission: '',
-            paybill_number: '',
-            account_number: '',
-            units_no: ''
-          
+              landlord_id: '',       // selected landlord
+              title: '',             // property title
+              description: '',       // property description
+              type: '',              // property type
+              location: '',          // property location
+              coordinates: '',       // lat,long coordinates
+              rent_amount: '',       // rent amount
+              status: 'active'       // default status
+              // agent_id will be added on backend using logged-in user ID
           },
+
 
           initializing: true
 
@@ -731,29 +785,34 @@
           modal.show();
         },
         async submit() {
-            if (this.validateForm()) {
+            console.log("Submit triggered!", this.form);
 
-                // Start submitting process
-                this.submitting = true;
-                
-                try {
-                    // Simulate asynchronous submission process (you would replace this with your actual submission logic)
-                    await this.submitForm();
+            // Start submitting process
+            this.submitting = true;
 
-                    // Submission successful
-                    this.submitted = true;
-                } catch (error) {
-                    // Handle submission error
-                    console.error("Submission error:", error);
-                } finally {
-                    // End submitting process
-                    this.submitting = false;
-                }
+            try {
+                // Directly call submitForm() without validation
+                await this.submitForm();
+
+                // Submission successful
+                this.submitted = true;
+            } catch (error) {
+                // Handle submission error
+                console.error("Submission error:", error);
+                toast.fire(
+                    'Error!',
+                    error.response?.data?.message || 'An error occurred while adding the property.',
+                    'error'
+                );
+            } finally {
+                // End submitting process
+                this.submitting = false;
             }
         },
+
         validateForm() {
           let isValid = true;
-          if (!this.form.name) {
+          if (!this.form.title) {
               isValid = false;
               document.getElementById('title').classList.add('is-invalid');
           } else {
@@ -778,11 +837,11 @@
                 this.submitting = true;
                 try {
                     // Create the property and wait for the response
-                    const response = await axios.post("api/pmsproperties", this.form);
+                    const response = await axios.post("api/properties", this.form);
                     console.log(response);
 
                     // Retrieve property ID
-                    this.propertyId = response.data.property.id;
+                    this.propertyId = response.data.id;
                     console.log("property", this.propertyId);
 
                     // Display success notification
@@ -791,16 +850,6 @@
                         'Property added!',
                         'success'
                     );
-
-                    // Register activity after property creation
-                    const payload = {
-                        description: `${this.current_user} added property ID ${this.propertyId}`,
-                        user_id: this.current_user_id,
-                    };
-
-                    // Wait for the activity logging request to complete
-                    const activityResponse = await axios.post('api/activity', payload);
-                    console.log(activityResponse);
 
                     // Navigate to the units page of the newly created property
                     this.$router.push('/pmsunits/' + this.propertyId);

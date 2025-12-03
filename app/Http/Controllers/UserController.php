@@ -140,15 +140,91 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $user = User::find($id);
-        $user->name = $request->name;
-        $user->email = $request->email;
-        // $user->password = $request->password;
-        $user->password = Hash::make('123456');
-        $user->role = $request->role;
-        $user->save();
-        return response()->json($user);        
+        $user = User::findOrFail($id);
+
+        // Validate only what can change
+        $validated = $request->validate([
+            'name'         => 'nullable|string|max:255',
+            'email'             => ['nullable','email', Rule::unique('users','email')->ignore($user->id)],
+            'password'          => 'nullable|string|min:6',
+
+            'role'              => 'nullable|string|max:50',
+            'phone'             => 'nullable|string|max:30',
+            'dob'               => 'nullable|date',
+            'gender'            => 'nullable|string|max:20',
+            'address'           => 'nullable|string|max:255',
+            'city'              => 'nullable|string|max:100',
+            'county'            => 'nullable|string|max:100',
+            'postal_code'       => 'nullable|string|max:50',
+            'status'            => 'nullable|string|max:50',
+            'property_count'    => 'nullable|integer',
+
+            'assigned_properties'=> 'nullable',
+            'skills'            => 'nullable',
+
+            'is_email_verified' => 'nullable|boolean',
+            '2fa_enabled'       => 'nullable|boolean',
+
+            'profile_photo'     => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+            'profile_photo_url' => 'nullable|url',
+        ]);
+
+        // Optional password update
+        if ($request->filled('password')) {
+            $validated['password'] = Hash::make($request->password);
+        }
+
+        // Handle assigned_properties
+        if ($request->has('assigned_properties')) {
+            $ap = $request->input('assigned_properties');
+            if (is_array($ap)) {
+                $validated['assigned_properties'] = json_encode($ap);
+            } else {
+                json_decode($ap);
+                $validated['assigned_properties'] = json_last_error() === JSON_ERROR_NONE ? $ap : null;
+            }
+        }
+
+        // Handle skills
+        if ($request->has('skills')) {
+            $sk = $request->input('skills');
+            if (is_array($sk)) {
+                $validated['skills'] = json_encode($sk);
+            } else {
+                json_decode($sk);
+                $validated['skills'] = json_last_error() === JSON_ERROR_NONE ? $sk : null;
+            }
+        }
+
+        // ⭐ Handle profile photo upload
+        if ($request->hasFile('profile_photo')) {
+            $file = $request->file('profile_photo');
+            $filename = 'profile_' . Str::random(8) . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('profiles', $filename, 'public');
+
+            // delete old file if exists
+            if ($user->profile_photo && Storage::disk('public')->exists($user->profile_photo)) {
+                Storage::disk('public')->delete($user->profile_photo);
+            }
+
+            $validated['profile_photo'] = $path;
+            $validated['profile_photo_url'] = null;
+        }
+        // ⭐ If URL provided instead of file
+        elseif ($request->filled('profile_photo_url')) {
+            $validated['profile_photo'] = null;
+            $validated['profile_photo_url'] = $request->profile_photo_url;
+        }
+
+        // Update user
+        $user->update($validated);
+
+        return response()->json([
+            'message' => 'User updated successfully',
+            'user' => $user
+        ]);
     }
+
 
     /**
      * Remove the specified resource from storage.

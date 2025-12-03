@@ -21,19 +21,27 @@ class PropertyController extends Controller
      */
     public function store(Request $request)
     {
-        $property = new Property();
-        $property->landlord_id = $request->landlord_id;
-        $property->agent_id = $request->agent_id;
-        $property->title = $request->title;
-        $property->description = $request->description;
-        $property->type = $request->type;
-        $property->location = $request->location;
-        $property->coordinates = $request->coordinates;
-        $property->rent_amount = $request->rent_amount;
-        $property->status = $request->status;
-        $property->save();
-        return response()->json($property);        
+        // Validate the request if needed
+        $validated = $request->validate([
+            'landlord_id'   => 'required|integer|exists:users,id',
+            'title'         => 'required|string|max:255',
+            'description'   => 'nullable|string',
+            'type'          => 'nullable|string|max:100',
+            'location'      => 'nullable|string|max:255',
+            'coordinates'   => 'nullable|string|max:100',
+            // 'rent_amount'   => 'nullable|numeric',
+            'status'        => 'nullable|string|max:50',
+        ]);
+
+        // Assign agent_id as the logged-in user
+        $validated['agent_id'] = auth()->id();
+
+        // Create the property
+        $property = Property::create($validated);
+
+        return response()->json($property, 201);
     }
+
 
     /**
      * Display the specified resource.

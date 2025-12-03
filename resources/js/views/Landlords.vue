@@ -60,7 +60,8 @@
                           <tr>
                             <th scope="col">Full Name</th>
                             <th scope="col">Email Address</th>
-                            <th scope="col">Role</th>
+                            <th scope="col">Properties</th>
+                            <th scope="col">Status</th>
                             <th scope="col">Action</th>
                           </tr>
                         </thead>
@@ -78,7 +79,24 @@
                           <tr v-for="user in landlords" :key="user.id">
                             <td>{{user.name}}</td>
                             <td>{{user.email ?? "N/A"}}</td>
-                            <td>{{user.role ?? "N/A"}}</td>
+                            <td>{{user.property_count ?? "N/A"}}</td>
+                            <td>
+                              <!-- ACTIVE -->
+                              <span v-if="user.status == 'active'" class="badge bg-success">
+                                <i class="bi bi-check-circle me-1"></i> Active
+                              </span>
+
+                              <!-- PENDING -->
+                              <span v-else-if="user.status == 'pending'" class="badge bg-warning text-dark">
+                                <i class="bi bi-hourglass-split me-1"></i> Pending
+                              </span>
+
+                              <!-- SUSPENDED -->
+                              <span v-else-if="user.status == 'suspended'" class="badge bg-danger">
+                                <i class="bi bi-slash-circle me-1"></i> Suspended
+                              </span>
+                            </td>
+                           
                             <td>
                               <div class="btn-group" role="group">
                                   <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -113,23 +131,19 @@
                     <div class="modal-body" v-if="selectedLandlord">
 
                       <!-- Profile Photo -->
-<div class="text-center mb-3" v-if="selectedLandlord">
-  <img 
-    :src="selectedLandlord.profile_photo
-            ? `/storage/${selectedLandlord.profile_photo}` 
-            : (selectedLandlord.profile_photo_url 
-                ? selectedLandlord.profile_photo_url 
-                : defaultProfile)"
-    @error="($event.target.src = defaultProfile)" 
-    alt="Profile Photo" 
-    class="rounded-circle border" 
-    style="height: 120px; width: 120px; object-fit: cover; object-position: center;"
-  />
-</div>
-
-
-
-
+                      <div class="text-center mb-3" v-if="selectedLandlord">
+                        <img 
+                          :src="selectedLandlord.profile_photo
+                                  ? `/storage/${selectedLandlord.profile_photo}` 
+                                  : (selectedLandlord.profile_photo_url 
+                                      ? selectedLandlord.profile_photo_url 
+                                      : defaultProfile)"
+                          @error="($event.target.src = defaultProfile)" 
+                          alt="Profile Photo" 
+                          class="rounded-circle border" 
+                          style="height: 120px; width: 120px; object-fit: cover; object-position: center;"
+                        />
+                      </div>
 
 
                       <div class="row g-3">
@@ -321,21 +335,33 @@
                           </div>
 
                           <!-- Additional Fields -->
-                          <div class="col-md-6">
+                          <div v-if="data.role == 'landlord'" class="col-md-6">
                             <label class="form-label">Property Count</label>
                             <input type="number" class="form-control" v-model="data.property_count">
                           </div>
 
-                          <div class="col-md-6">
+                          <div v-if="data.role == 'landlord'" class="col-md-6">
                             <label class="form-label">Assigned Properties (JSON)</label>
                             <input type="text" class="form-control" v-model="data.assigned_properties" placeholder='e.g. [1,2,3]'>
                           </div>
 
                           <!-- Skills -->
-                          <div class="col-md-6">
-                            <label class="form-label">Skills (JSON)</label>
-                            <input type="text" class="form-control" v-model="data.skills" placeholder='e.g. ["plumbing"]'>
+                          <div v-if="data.role == 'service_provider'" class="col-md-6">
+                            <label class="form-label">Skills</label>
+                            <div class="d-flex flex-wrap gap-2">
+                              <button 
+                                v-for="skill in availableSkills" 
+                                :key="skill"
+                                type="button"
+                                class="btn"
+                                :class="data.skills.includes(skill) ? 'btn-success' : 'btn-outline-secondary'"
+                                @click="toggleSkill(skill)"
+                              >
+                                {{ skill }}
+                              </button>
+                            </div>
                           </div>
+
 
                           <!-- Status -->
                           <div class="col-md-6">
@@ -399,93 +425,164 @@
                 </div>
 
 
-                <!--Edit Landlord Modal -->
+                <!-- EDIT LANDLORD MODAL -->
                 <div class="modal fade" id="EditLandlordModal" tabindex="-1" aria-labelledby="EditLandlordModalLabel" aria-hidden="true">
-                          <div class="modal-dialog">
-                            <div class="modal-content">
-                              <div class="modal-header">
-                                <h5 class="modal-title" id="AddLandlordModalLabel">Edit Landlord</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+
+                      <div class="modal-header">
+                        <h5 class="modal-title">Edit Landlord</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                      </div>
+
+                      <div class="modal-body">
+                        <form class="row g-3">
+
+                          <!-- Hidden ID -->
+                          <input type="hidden" v-model="form.id" />
+
+                          <!-- First & Last Name -->
+                          <div class="col-md-12">
+                            <label class="form-label">Name*</label>
+                            <input type="text" id="name_edit" class="form-control" v-model="form.name" required>
+                          </div>
+
+                          <!-- Email -->
+                          <div class="col-md-6">
+                            <label class="form-label">Email*</label>
+                            <input type="email" id="mail_edit" class="form-control" v-model="form.email" required>
+                          </div>
+
+                          <!-- Role (locked) -->
+                          <div class="col-md-6">
+                            <label class="form-label">Role</label>
+                            <select class="form-select" v-model="form.role" disabled>
+                              <option value="landlord">Landlord</option>
+                            </select>
+                          </div>
+
+                          <!-- Phone -->
+                          <div class="col-md-6">
+                            <label class="form-label">Phone</label>
+                            <input type="text" class="form-control" v-model="form.phone">
+                          </div>
+
+                          <!-- Address -->
+                          <div class="col-md-6">
+                            <label class="form-label">Address</label>
+                            <input type="text" class="form-control" v-model="form.address">
+                          </div>
+
+                          <div class="col-md-6">
+                            <label class="form-label">City</label>
+                            <input type="text" class="form-control" v-model="form.city">
+                          </div>
+
+                          <div class="col-md-6">
+                            <label class="form-label">County</label>
+                            <input type="text" class="form-control" v-model="form.county">
+                          </div>
+
+                          <div class="col-md-6">
+                            <label class="form-label">Postal Code</label>
+                            <input type="text" class="form-control" v-model="form.postal_code">
+                          </div>
+
+                          <!-- DOB + Gender -->
+                          <div class="col-md-6">
+                            <label class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" v-model="form.dob">
+                          </div>
+
+                          <div class="col-md-6">
+                            <label class="form-label">Gender</label>
+                            <select class="form-select" v-model="form.gender">
+                              <option value="">Select</option>
+                              <option value="male">Male</option>
+                              <option value="female">Female</option>
+                              <option value="other">Other</option>
+                            </select>
+                          </div>
+
+                          <!-- Property Count -->
+                          <div class="col-md-6">
+                            <label class="form-label">Property Count</label>
+                            <input type="number" class="form-control" v-model="form.property_count">
+                          </div>
+
+                          <!-- Assigned Properties (multi-select) -->
+                          <div class="col-md-6">
+                            <label class="form-label">Assigned Properties</label>
+                            <select 
+                              class="form-select"
+                              multiple
+                              v-model="form.assigned_properties"
+                            >
+                              <option
+                                v-for="property in userProperties"
+                                :key="property.id"
+                                :value="property.id"
+                              >
+                                {{ property.title }} ({{ property.location }})
+                              </option>
+                            </select>
+                            <small class="text-muted">Hold CTRL to select multiple</small>
+                          </div>
+
+                          <!-- Status -->
+                          <div class="col-md-6">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" v-model="form.status">
+                              <option value="active">Active</option>
+                              <option value="pending">Pending</option>
+                              <option value="suspended">Suspended</option>
+                            </select>
+                          </div>
+
+                          <!-- Profile Photo (file or URL) -->
+                          <div class="col-md-12">
+                            <label class="form-label">Profile Photo</label>
+
+                            <div class="mb-2">
+                              <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" value="file" v-model="photoMode">
+                                <label class="form-check-label">Upload file</label>
                               </div>
-                              <div class="modal-body">
-    
-                                <div class="row m-auto p-auto justify-content- g-3 needs-validation" novalidate="" autocomplete="off">
-                    
-                                    <div class="row mb-3"></div>
-                                    <div class="form-group row">
-                                      <input
-                                          type="hidden"
-                                          id="user_id"
-                                          name="user_id"
-                                          value="1"
-                                          class="form-control"
-                                      />
-                                        <div class="col-sm-12">
-                                          <label for="inputPassword" class="form-label">Name*</label>
-                                          <div class="col-sm-12">
-                                            <input
-                                                type="text"
-                                                placeholder="Name"
-                                                id="name"
-                                                name="name"
-                                                v-model="form.name"
-                                                class="form-control"
-                                                required=""
-                                            />
-                                            <div class="invalid-feedback" v-if="!form.name">Please enter name!</div>
-                                          </div>
-                                      </div>
-                    
-                                    </div>
-                                    <div class="row mb-3"></div>
-                                    <div class="form-group row">
-                                      <div class="col-sm-6">
-                                          <label for="inputPassword" class="form-label">Email Address</label>
-                                          <div class="col-sm-12">
-                                            <input
-                                                type="text"
-                                                placeholder="Email Address"
-                                                id="mail"
-                                                name="title"
-                                                v-model="form.email"
-                                                class="form-control"
-                                                required=""
-                                            />
-                                            <div class="invalid-feedback">Please enter email address!</div>
-                                          </div>
-                                      </div>
-                                      <div class="col-sm-6">
-                                          <label for="inputPassword" class="form-label">Role</label>
-                                          <div class="col-sm-12">
-                                           <select name="role" v-model="form.role" class="form-select" id="userrole">
-                                                <option value="0" disabled selected>Select Role</option>
-                                                <option value="1">Administrator</option>
-                                                <option value="2">Landlord</option>
-                                                <option value="other">Agent/Caretaker</option>
-                                                <option value="other">Tenant</option>
 
-                                            </select>  
-                                            <div class="invalid-feedback">Please enter role!</div>
-                                          </div>
-                                      </div>
-
-                                    </div>
-
-                                    <div class="row mb-3"></div>
-
-                                </div>
-
-
-                                
-
-                              </div>
-                              <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click.prevent="submitChanges()">Save changes</button>
+                              <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" value="url" v-model="photoMode">
+                                <label class="form-check-label">Use URL</label>
                               </div>
                             </div>
+
+                            <div v-if="photoMode === 'file'">
+                              <input type="file" class="form-control" @change="handleEditPhotoUpload">
+                            </div>
+
+                            <div v-if="photoMode === 'url'">
+                              <input type="url" class="form-control" v-model="form.profile_photo_url" @input="updateEditPreviewFromUrl">
+                            </div>
+
+                            <div v-if="form.profile_photo_preview" class="mt-2">
+                              <img :src="form.profile_photo_preview" class="img-thumbnail" style="max-height: 130px;">
+                            </div>
+
                           </div>
+
+                        </form>
+                      </div>
+
+                      <div class="modal-footer">
+                        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button class="btn btn-success" @click="submitChanges" style="background: darkgreen; border-color: darkgreen;">
+                          Save Changes
+                        </button>
+                      </div>
+
+                    </div>
+                  </div>
                 </div>
+
                     
 
             </div>
@@ -523,10 +620,26 @@
           photoMode: 'file', // 'file' or 'url' — default to file
           errors: {},
           form: {
-            name: '',
-            email: '',
+            id: "",
+            name: "",
+            email: "",
+            password: "",
+            phone: "",
+            address: "",
+            city: "",
+            county: "",
             role: "landlord",
-          
+            postal_code: "",
+            dob: "",
+            gender: "",
+            property_count: 0,
+            assigned_properties: "",
+            skills: [],
+            status: "active",
+
+            profile_photo_file: null,
+            profile_photo_preview: null,
+            profile_photo_url: '' // for URL input
           },
           data: {
             id: "",
@@ -544,13 +657,22 @@
             gender: "",
             property_count: 0,
             assigned_properties: "",
-            skills: "",
+            skills: [],
             status: "active",
 
             profile_photo_file: null,
             profile_photo_preview: null,
             profile_photo_url: '' // for URL input
           },
+          availableSkills: [
+            'Plumbing',
+            'Electrical',
+            'Carpentry',
+            'Painting',
+            'Landscaping',
+            'Cleaning',
+            'Security',
+          ],
           initializing: true
 
         }
@@ -571,26 +693,44 @@
       },      
       methods: {
         handlePhotoUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+          const file = event.target.files[0];
+          if (!file) return;
 
-      // Validate type & size
-      if (!file.type.startsWith('image/')) {
-        this.errors.profile_photo = 'Selected file is not an image';
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        this.errors.profile_photo = 'Image must be <= 5 MB';
-        return;
-      }
+          // Validate type & size
+          if (!file.type.startsWith('image/')) {
+            this.errors.profile_photo = 'Selected file is not an image';
+            return;
+          }
+          if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            this.errors.profile_photo = 'Image must be <= 5 MB';
+            return;
+          }
 
-      this.errors.profile_photo = null;
-      this.data.profile_photo_file = file;
+          this.errors.profile_photo = null;
+          this.data.profile_photo_file = file;
 
-      // Preview
-      const reader = new FileReader();
-      reader.onload = e => this.data.profile_photo_preview = e.target.result;
-      reader.readAsDataURL(file);
+          // Preview
+          const reader = new FileReader();
+          reader.onload = e => this.data.profile_photo_preview = e.target.result;
+          reader.readAsDataURL(file);
+          },
+          handleEditPhotoUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+              this.form.profile_photo_file = file;
+              this.form.profile_photo_preview = URL.createObjectURL(file);
+            }
+          },
+
+          toggleSkill(skill) {
+          const index = this.data.skills.indexOf(skill);
+          if (index > -1) {
+            // Remove if already selected
+            this.data.skills.splice(index, 1);
+          } else {
+            // Add if not selected
+            this.data.skills.push(skill);
+          }
         },
         updatePreviewFromUrl() {
           const url = this.data.profile_photo_url?.trim();
@@ -607,7 +747,11 @@
 
           this.data.profile_photo_preview = url;
           this.errors.profile_photo = null;
-        },    
+        }, 
+        updateEditPreviewFromUrl() {
+          this.form.profile_photo_preview = this.form.profile_photo_url;
+        },
+          
         viewLandlord(landlord)
         {
           console.log(this.selectedLandlord)
@@ -618,33 +762,54 @@
         },
         editLandlord(landlord)
         {
-          this.form = landlord;
+          this.form = {
+            id: landlord.id,
+            name: landlord.name ?? "",
+            email: landlord.email ?? "",
+            role: landlord.role ?? "",
+            phone: landlord.phone ?? "",
+            address: landlord.address ?? "",
+            city: landlord.city ?? "",
+            county: landlord.county ?? "",
+            postal_code: landlord.postal_code ?? "",
+            dob: landlord.dob ?? "",
+            gender: landlord.gender ?? "",
+            status: landlord.status ?? "",
+
+            property_count: landlord.property_count ?? "",
+            assigned_properties: landlord.assigned_properties ?? "",
+            skills: landlord.skills ?? [],
+            profile_photo_url: landlord.profile_photo_url || null,
+            profile_photo_preview: landlord.profile_photo 
+                ? `/storage/${landlord.profile_photo}`
+                : landlord.profile_photo_url
+          }; 
+           // Set correct mode
+          this.photoMode = landlord.profile_photo ? "file" : "url";         
           // Show the modal after fetching data
           const modal = new bootstrap.Modal(document.getElementById('EditLandlordModal'));
           modal.show();
         },
         validateFormChanges() {
           let isValid = true;
+
           if (!this.form.name) {
-              isValid = false;
-              document.getElementById('name').classList.add('is-invalid');
+            isValid = false;
+            document.getElementById('name_edit').classList.add('is-invalid');
           } else {
-              document.getElementById('name').classList.remove('is-invalid');
+            document.getElementById('name_edit').classList.remove('is-invalid');
           }
+
           if (!this.form.email) {
-              isValid = false;
-              document.getElementById('mail').classList.add('is-invalid');
+            isValid = false;
+            document.getElementById('mail_edit').classList.add('is-invalid');
           } else {
-              document.getElementById('mail').classList.remove('is-invalid');
+            document.getElementById('mail_edit').classList.remove('is-invalid');
           }
-          if (!this.form.role) {
-              isValid = false;
-              document.getElementById('userrole').classList.add('is-invalid');
-          } else {
-              document.getElementById('userrole').classList.remove('is-invalid');
-          }          
+
           return isValid;
-       },    
+        },
+          
         async submitChanges() {
             if (this.validateFormChanges()) {        
                 // Start submitting process
@@ -667,33 +832,66 @@
         },
         async submitFormChanges() {
           try {
-            // Update client details
-            const response = await axios.put(`/api/users/${this.form.id}`, this.form);
-            console.log(response);
+            let formData = new FormData();
 
-            // Show success notification
-            toast.fire(
-              'Success!',
-              'Landlord details updated!',
-              'success'
+            // Merge names back to single "name" for backend
+            const fullName = `${this.form.first_name} ${this.form.last_name}`.trim();
+            formData.append("name", fullName);
+
+            // Append normal fields
+            const fields = [
+              "email", "role", "phone", "address", "city",
+              "county", "postal_code", "dob", "gender",
+              "status", "property_count", "assigned_properties"
+            ];
+
+            fields.forEach(field => {
+              if (this.form[field] !== undefined) {
+                formData.append(field, this.form[field]);
+              }
+            });
+
+            // Handle Skills (array)
+            if (Array.isArray(this.form.skills)) {
+              formData.append("skills", JSON.stringify(this.form.skills));
+            }
+
+            // Handle Photo Upload
+            if (this.photoMode === "file" && this.form.profile_photo_file) {
+              formData.append("profile_photo", this.form.profile_photo_file);
+            }
+
+            // Handle Photo URL
+            if (this.photoMode === "url" && this.form.profile_photo_url) {
+              formData.append("profile_photo_url", this.form.profile_photo_url);
+            }
+
+            const response = await axios.post(
+              `/api/users/${this.form.id}?_method=PUT`,
+              formData,
+              { headers: { "Content-Type": "multipart/form-data" } }
             );
 
-            // Close the modal after submit
-            const modal = bootstrap.Modal.getInstance(document.getElementById('EditLandlordModal'));
+            // Success
+            toast.fire('Success!', 'Landlord details updated!', 'success');
+
+            const modal = bootstrap.Modal.getInstance(
+              document.getElementById('EditLandlordModal')
+            );
             modal.hide();
-            // this.form = '';
+
             this.loadLists();
-            
+
           } catch (error) {
             console.error(error);
-            // Display an error notification
             toast.fire(
               'Error!',
-              error.response?.data?.message || 'An error occurred while updating the landlord details.',
+              error.response?.data?.message || 'Something went wrong.',
               'error'
             );
           }
         },
+
         addLandlord()
         {
           // Show the modal after fetching data
