@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('tenant_id');       // FK → tenancies.id
             $table->enum('status', ['unpaid', 'paid', 'overdue'])->default('unpaid');             
             $table->string('invoice_number')->nullable();
+            $table->string('rent_month')->nullable();
             $table->decimal('amount_due')->nullable();
             $table->date('due_date')->nullable();
             $table->foreign( 'tenant_id')->references('id')->on('users')->onDelete('cascade');

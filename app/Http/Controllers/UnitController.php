@@ -21,14 +21,24 @@ class UnitController extends Controller
      */
     public function store(Request $request)
     {
-        $unit = new Unit();
-        $unit->property_id = $request->property_id;
-        $unit->unit_number = $request->unit_number;
-        $unit->rent = $request->rent;
-        $unit->status = $request->status;
-        $unit->save();
-        return response()->json($unit);          
+        $validated = $request->validate([
+            'property_id'        => 'required|integer|exists:properties,id',
+            'unit_number'        => 'required|string|max:255',
+            'type'               => 'nullable|string|max:255',
+            'deposit'            => 'nullable|numeric',
+            'monthly_rent'       => 'nullable|numeric',
+            'status'             => 'nullable|string|max:50',
+        ]);
+
+        // Create using mass assignment
+        $unit = Unit::create($validated);
+
+        return response()->json([
+            'message' => 'Unit created successfully',
+            'unit'    => $unit
+        ]);
     }
+
 
     /**
      * Display the specified resource.
@@ -42,16 +52,31 @@ class UnitController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        $unit = Unit::find($id);
-        $unit->property_id = $request->property_id;
-        $unit->unit_number = $request->unit_number;
-        $unit->rent = $request->rent;
-        $unit->status = $request->status;
-        $unit->save();
-        return response()->json($unit);          
+        // Find the unit
+        $unit = Unit::findOrFail($id);
+
+        // Validate input
+        $validated = $request->validate([
+            'property_id'        => 'sometimes|exists:properties,id',
+            'unit_number'        => 'sometimes|string|max:255',
+            'type'               => 'sometimes|string|max:255',
+            'deposit'            => 'sometimes|numeric|min:0',
+            'monthly_rent'       => 'sometimes|numeric|min:0',
+            'status'             => 'sometimes|string|in:vacant,occupied,maintenance'
+        ]);
+
+        // Update the unit
+        $unit->update($validated);
+
+        // Return updated unit
+        return response()->json([
+            'message' => 'Unit updated successfully',
+            'unit' => $unit
+        ]);
     }
+
 
     /**
      * Remove the specified resource from storage.

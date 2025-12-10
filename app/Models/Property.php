@@ -34,5 +34,11 @@ class Property extends Model
     {
         return $this->belongsTo(User::class, 'agent_id');
     }
+
+    // Add this relationship
+    public function units()
+    {
+        return $this->hasMany(Unit::class);
+    }
     
 }

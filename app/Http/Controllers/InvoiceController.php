@@ -21,12 +21,18 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
+
+    // Get the current date and format it for reference number
+        $orgDate = now();
+        $newDate = $orgDate->format('YmdHis'); // Using Carbon formatting
+        $refno = "INV" . $newDate . " " . $request->tenant_id; // Proper string concatenation
+            
         $invoice = new Invoice();
-        $invoice->tenancy_id = $request->tenancy_id;
-        $invoice->invoice_number = $request->invoice_number;
+        $invoice->tenant_id = $request->tenant_id;
+        $invoice->invoice_number = $refno;
         $invoice->amount_due = $request->amount_due;
-        $invoice->due_date = $request->due_date;
-        $invoice->status = $request->status;
+        $invoice->rent_month = $request->rent_month;
+        $invoice->status = 'unpaid';
         $invoice->save();
         return response()->json($invoice);         
     }

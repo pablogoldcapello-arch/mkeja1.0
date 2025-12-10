@@ -214,11 +214,11 @@ export default {
           email: "admin@mk.com",
           password: "admin123"
         },
-        caretaker: {
-          email: "john.landlord@mk.com",
-          password: "labdlord123"
-        },
         landlord: {
+          email: "john.landlord@mk.com",
+          password: "landlord123"
+        },
+        caretaker: {
           email: "jane.agent@mk.com",
           password: "agent123"
         },

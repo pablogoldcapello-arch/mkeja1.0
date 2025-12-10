@@ -21,7 +21,7 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">Users <span>| System users of M-Keja</span></h5>
+                      <h5 class="card-title">Caretakers <span>| Caretakers of properties of M-Keja</span></h5>
                       <p class="card-text">
                         <div class="row">
                           <div class="col d-flex">
@@ -35,7 +35,7 @@
                                   style="background-color: darkgreen; border-color: darkgreen;"
                                   @click="addLandlord()"
                                 >
-                                  Add User
+                                  Add Caretaker
                                 </a>
                             <!-- </router-link> -->
                           </div>
@@ -76,7 +76,7 @@
                           </tr>
                         </tbody>
                         <tbody v-else>
-                          <tr v-for="user in users" :key="user.id">
+                          <tr v-for="user in caretakers" :key="user.id">
                             <td>{{user.name}}</td>
                             <td>{{user.email ?? "N/A"}}</td>
                             <td>{{user.phone ?? "N/A"}}</td>
@@ -124,7 +124,7 @@
                   <div class="modal-content">
 
                     <div class="modal-header">
-                      <h5 class="modal-title">View User Details</h5>
+                      <h5 class="modal-title">View Caretaker Details</h5>
                       <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
 
@@ -247,7 +247,7 @@
                     <div class="modal-content">
 
                       <div class="modal-header">
-                        <h5 class="modal-title" id="AddLandlordModalLabel">Add User</h5>
+                        <h5 class="modal-title" id="AddLandlordModalLabel">Add Caretaker</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
 
@@ -277,14 +277,8 @@
                           <!-- Role -->
                           <div class="col-md-6">
                             <label class="form-label">Role*</label>
-                            <select name="role" v-model="data.role" class="form-select" id="userrole">
-                                <option value="" selected disabled>Select role</option>
-                                <option value="admin">Administrator</option>
-                                <option value="landlord">Landlord</option>
+                            <select name="role" v-model="data.role" class="form-select" id="userrole" disabled>
                                 <option value="caretaker">Caretaker</option>
-                                <option value="tenant">Tenant</option>
-                                <option value="service_provider">Service Provider</option>
-                                <option value="techsupport">Tech Support</option>
                             </select>
 
                           </div>
@@ -440,7 +434,7 @@
                     <div class="modal-content">
 
                       <div class="modal-header">
-                        <h5 class="modal-title">Edit User</h5>
+                        <h5 class="modal-title">Edit Caretaker</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
 
@@ -464,14 +458,8 @@
 
                           <div class="col-md-6">
                             <label class="form-label">Role*</label>
-                            <select name="role" v-model="form.role" class="form-select" id="userrole">
-                                <option value="" selected disabled>Select role</option>
-                                <option value="admin">Administrator</option>
-                                <option value="landlord">Landlord</option>
+                            <select name="role" v-model="form.role" class="form-select" id="userrole" disabled>
                                 <option value="caretaker">Caretaker</option>
-                                <option value="tenant">Tenant</option>
-                                <option value="service_provider">Service Provider</option>
-                                <option value="techsupport">Tech Support</option>
                             </select>
 
                           </div>
@@ -627,7 +615,7 @@
     export default {
       data(){
         return {
-          users: [],
+          caretakers: [],
           user: [],
           selectedLandlord: {},
           showPassword: false,
@@ -643,7 +631,7 @@
             address: "",
             city: "",
             county: "",
-            role: "",
+            role: "caretaker",
             postal_code: "",
             dob: "",
             gender: "",
@@ -666,7 +654,7 @@
             address: "",
             city: "",
             county: "",
-            role: "",
+            role: "caretaker",
             postal_code: "",
             dob: "",
             gender: "",
@@ -884,7 +872,7 @@
             );
 
             // Success
-            toast.fire('Success!', 'User details updated!', 'success');
+            toast.fire('Success!', 'Caretaker details updated!', 'success');
 
             const modal = bootstrap.Modal.getInstance(
               document.getElementById('EditLandlordModal')
@@ -980,7 +968,7 @@
 
             toast.fire(
               'Success!',
-              'User added!',
+              'Caretaker added!',
               'success'
             );
 
@@ -999,7 +987,7 @@
               address: "",
               city: "",
               county: "",
-              role: "landlord",
+              role: "caretaker",
               postal_code: "",
               dob: "",
               gender: "",
@@ -1057,7 +1045,7 @@
                   axios.delete('/api/users/'+id).then(() => {
                   toast.fire(
                     'Deleted!',
-                    'User has been deleted.',
+                    'Caretaker has been deleted.',
                     'success'
                   )
                   this.loadLists();
@@ -1078,7 +1066,7 @@
           this.initializing = true; // Start spinner
           axios.get('api/lists')
             .then((response) => {
-              this.users = response.data.lists.users;
+              this.caretakers = response.data.lists.caretakers;
               console.log(response)
 
               setTimeout(() => {

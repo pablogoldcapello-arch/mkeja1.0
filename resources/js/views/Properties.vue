@@ -86,6 +86,9 @@
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
                                   <a @click="viewProperty(item)" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a> 
+                                  <a @click.prevent="navigateTo('/units/' + item.id)" class="dropdown-item">
+                                      <i class="ri-eye-fill mr-2"></i>View Units
+                                  </a>
                                   <a @click="editProperty(item)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
                                   <a @click="deleteProperty(item.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
                                   </div>
@@ -588,12 +591,7 @@
           properties: [],
           landlords: [],
           propertytypes: [],
-          user: [],
-          form: {
-            title: "",
-            units_no: "",
-            landlord_id: ""
-          },          
+          user: [],         
           searchQuery: '',
           filteredLandlords: [],
           selectedProperty: {},
@@ -605,7 +603,8 @@
               location: '',          // property location
               coordinates: '',       // lat,long coordinates
               rent_amount: '',       // rent amount
-              status: 'active'       // default status
+              status: 'active',       // default status
+              units_no: ""
               // agent_id will be added on backend using logged-in user ID
           },
 
@@ -614,7 +613,15 @@
 
         }
       },
+      watch: {
+          '$route.params.id': 'loadUnits' // watches route change
+      },
       methods: {
+
+        navigateTo(location) {
+            this.$router.push({ path: location, query: { t: Date.now() } });
+        },
+
         filterLandlords() {
           const query = this.searchQuery.toLowerCase();
           this.filteredLandlords = this.landlords.filter(landlord => {
@@ -679,16 +686,6 @@
               'success'
             );
 
-            // Register activity after landlord creation
-            const payload = {
-              description: `${this.current_user} added landlord ID ${this.createdLandlordId}`,
-              user_id: this.current_user_id,
-            };
-
-            // Wait for the activity registration to complete
-            const activityResponse = await axios.post('/api/activity', payload);
-            console.log(activityResponse);
-
             // Close the modal after submit
             const modal = bootstrap.Modal.getInstance(document.getElementById('AddLandlordModal'));
                 modal.hide();
@@ -737,17 +734,7 @@
                         'Success!',
                         'Property updated!',
                         'success'
-                    );
-
-                  // Register activity after property edit
-                  const payload = {
-                    description: `${this.current_user} updated property ID ${this.$route.params.id}`,
-                    user_id: this.current_user_id,
-                  };
-
-                  axios.post('/api/activity', payload).then((response) => {
-                    console.log(response)
-                  })                    
+                    );                  
 
                   // Close the modal after submit
                   const modal = bootstrap.Modal.getInstance(document.getElementById('EditPropertyModal'));
@@ -852,7 +839,7 @@
                     );
 
                     // Navigate to the units page of the newly created property
-                    this.$router.push('/pmsunits/' + this.propertyId);
+                    this.$router.push('/units/' + this.propertyId);
                 } catch (error) {
                     console.error("Submission error:", error);
 
@@ -935,7 +922,7 @@
                 }).then((result) => {
                   if (result.isConfirmed) { 
                   //send request to the server
-                  axios.delete('/api/pmsproperty/'+id).then(() => {
+                  axios.delete('/api/properties/'+id).then(() => {
                   toast.fire(
                     'Deleted!',
                     'Property has been deleted.',

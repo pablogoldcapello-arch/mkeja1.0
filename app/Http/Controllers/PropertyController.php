@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Property;
+use App\Models\Unit;
 
 class PropertyController extends Controller
 {
@@ -19,28 +20,48 @@ class PropertyController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        // Validate the request if needed
-        $validated = $request->validate([
-            'landlord_id'   => 'required|integer|exists:users,id',
-            'title'         => 'required|string|max:255',
-            'description'   => 'nullable|string',
-            'type'          => 'nullable|string|max:100',
-            'location'      => 'nullable|string|max:255',
-            'coordinates'   => 'nullable|string|max:100',
-            // 'rent_amount'   => 'nullable|numeric',
-            'status'        => 'nullable|string|max:50',
+public function store(Request $request)
+{
+    // Validate property data
+    $validated = $request->validate([
+        'landlord_id'   => 'required|integer|exists:users,id',
+        'title'         => 'required|string',
+        'description'   => 'nullable|string',
+        'type'          => 'nullable|string|max:100',
+        'location'      => 'nullable|string|max:255',
+        'coordinates'   => 'nullable|string|max:100',
+        'status'        => 'nullable|string|max:50',
+        'units_no'      => 'required|integer|min:1', // ✅ fixed
+    ]);
+
+    // Assign agent_id
+    $validated['agent_id'] = auth()->id();
+
+    // Create property
+    $property = Property::create($validated);
+
+    // Auto-create units
+    for ($i = 1; $i <= $validated['units_no']; $i++) {
+        $property->units()->create([
+            'unit_number'        => "Unit-" . $i,
+            'deposit'            => null,
+            'monthly_rent'       => null,
+            'garbage_fee'        => null,
+            'security_fee'       => null,
+            'water_meter'        => null,
+            'water_deposit'      => null,
+            'electricity_meter'  => null,
+            'electricity_deposit'=> null,
+            'paybill_number'     => null,
+            'account_number'     => null,
+            'status'             => 'vacant',
         ]);
-
-        // Assign agent_id as the logged-in user
-        $validated['agent_id'] = auth()->id();
-
-        // Create the property
-        $property = Property::create($validated);
-
-        return response()->json($property, 201);
     }
+
+    return response()->json($property->load('units'), 201);
+}
+
+
 
 
     /**
@@ -79,4 +100,16 @@ class PropertyController extends Controller
         Property::destroy($id);
         return response()->json(['message' => 'Deleted']);        
     }
+
+    public function units($id)
+    {
+        $units = Unit::where('property_id', $id)->get();
+
+        return response()->json([
+            'success' => true,
+            'units' => $units
+        ]);
+    }
+
+
 }

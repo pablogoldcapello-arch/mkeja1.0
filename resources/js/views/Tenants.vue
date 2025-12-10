@@ -21,7 +21,7 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">Users <span>| System users of M-Keja</span></h5>
+                      <h5 class="card-title">Tenants <span>| Tenants of M-Keja properties</span></h5>
                       <p class="card-text">
                         <div class="row">
                           <div class="col d-flex">
@@ -35,7 +35,7 @@
                                   style="background-color: darkgreen; border-color: darkgreen;"
                                   @click="addLandlord()"
                                 >
-                                  Add User
+                                  Add Tenant
                                 </a>
                             <!-- </router-link> -->
                           </div>
@@ -76,7 +76,7 @@
                           </tr>
                         </tbody>
                         <tbody v-else>
-                          <tr v-for="user in users" :key="user.id">
+                          <tr v-for="user in tenants" :key="user.id">
                             <td>{{user.name}}</td>
                             <td>{{user.email ?? "N/A"}}</td>
                             <td>{{user.phone ?? "N/A"}}</td>
@@ -124,7 +124,7 @@
                   <div class="modal-content">
 
                     <div class="modal-header">
-                      <h5 class="modal-title">View User Details</h5>
+                      <h5 class="modal-title">View Tenant Details</h5>
                       <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
 
@@ -225,9 +225,20 @@
                           <strong>Assigned Properties:</strong> <br> {{ selectedLandlord.assigned_properties }}
                         </div>
 
-                        <div class="col-md-6" v-if="selectedLandlord.skills && selectedLandlord.role === 'service_provider'">
-                          <strong>Skills:</strong> <br> {{ selectedLandlord.skills }}
+                        <div class="col-md-6" 
+                            v-if="parsedSkills.length && selectedLandlord.role === 'service_provider'">
+                        <strong>Skills:</strong>
+                        <div class="mt-2">
+                            <span 
+                            v-for="(skill, index) in parsedSkills" 
+                            :key="index"
+                            class="badge bg-primary me-1 mb-1"
+                            >
+                            {{ skill }}
+                            </span>
                         </div>
+                        </div>
+
 
                       </div>
                     </div>
@@ -247,7 +258,7 @@
                     <div class="modal-content">
 
                       <div class="modal-header">
-                        <h5 class="modal-title" id="AddLandlordModalLabel">Add User</h5>
+                        <h5 class="modal-title" id="AddLandlordModalLabel">Add Tenant</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
 
@@ -277,17 +288,34 @@
                           <!-- Role -->
                           <div class="col-md-6">
                             <label class="form-label">Role*</label>
-                            <select name="role" v-model="data.role" class="form-select" id="userrole">
-                                <option value="" selected disabled>Select role</option>
-                                <option value="admin">Administrator</option>
-                                <option value="landlord">Landlord</option>
-                                <option value="caretaker">Caretaker</option>
+                            <select name="role" v-model="data.role" class="form-select" id="userrole" disabled>
                                 <option value="tenant">Tenant</option>
-                                <option value="service_provider">Service Provider</option>
-                                <option value="techsupport">Tech Support</option>
                             </select>
 
                           </div>
+
+<!-- Property Selection -->
+<div class="col-md-6" v-if="data.role?.toLowerCase() === 'tenant'">
+  <label class="form-label">Select Property*</label>
+  <select class="form-select" v-model.number="data.property_id" @change="loadUnits">
+    <option value="">-- Select Property --</option>
+    <option v-for="p in properties" :key="p.id" :value="p.id">
+      {{ p.title }} - {{ p.location }}
+    </option>
+  </select>
+</div>
+
+<!-- Units -->
+<div class="col-md-6" v-if="data.role?.toLowerCase() === 'tenant' && units.length > 0">
+  <label class="form-label">Select Unit*</label>
+  <select class="form-select" v-model="data.unit_id">
+    <option value="">-- Select Unit --</option>
+    <option v-for="u in units" :key="u.id" :value="u.id">
+      {{ u.unit_number }} (Ksh {{ u.monthly_rent }})
+    </option>
+  </select>
+</div>
+
 
                           <!-- Password -->
                           <div class="col-md-6">
@@ -440,7 +468,7 @@
                     <div class="modal-content">
 
                       <div class="modal-header">
-                        <h5 class="modal-title">Edit User</h5>
+                        <h5 class="modal-title">Edit Tenant</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
 
@@ -464,14 +492,8 @@
 
                           <div class="col-md-6">
                             <label class="form-label">Role*</label>
-                            <select name="role" v-model="form.role" class="form-select" id="userrole">
-                                <option value="" selected disabled>Select role</option>
-                                <option value="admin">Administrator</option>
-                                <option value="landlord">Landlord</option>
-                                <option value="caretaker">Caretaker</option>
+                            <select name="role" v-model="form.role" class="form-select" id="userrole" disabled>
                                 <option value="tenant">Tenant</option>
-                                <option value="service_provider">Service Provider</option>
-                                <option value="techsupport">Tech Support</option>
                             </select>
 
                           </div>
@@ -627,7 +649,9 @@
     export default {
       data(){
         return {
-          users: [],
+          tenants: [],
+          properties: [],
+          units: [],
           user: [],
           selectedLandlord: {},
           showPassword: false,
@@ -643,7 +667,7 @@
             address: "",
             city: "",
             county: "",
-            role: "",
+            role: "tenant",
             postal_code: "",
             dob: "",
             gender: "",
@@ -663,10 +687,12 @@
             email: "",
             password: "",
             phone: "",
+            property_id: "",
+            unit_id: "",
             address: "",
             city: "",
             county: "",
-            role: "",
+            role: "tenant",
             postal_code: "",
             dob: "",
             gender: "",
@@ -705,8 +731,36 @@
             this.data.profile_photo_preview = this.data.profile_photo_url || '';
           }
         }
-      },      
+      },
+        computed: {
+        parsedSkills() {
+            if (!this.selectedLandlord?.skills) return [];
+
+            // Already an array, return as-is
+            if (Array.isArray(this.selectedLandlord.skills)) {
+            return this.selectedLandlord.skills;
+            }
+
+            // Try JSON parse
+            try {
+            return JSON.parse(this.selectedLandlord.skills);
+            } catch (e) {
+            return [];
+            }
+        }
+        },
       methods: {
+        async loadUnits() {
+        if (!this.data.property_id) {
+            this.units = [];
+            return;
+        }
+
+        const response = await axios.get(`/api/properties/${this.data.property_id}/units`);
+        this.units = response.data.units;
+        console.log("kapkugo", this.units)
+        },
+
         handlePhotoUpload(event) {
           const file = event.target.files[0];
           if (!file) return;
@@ -884,7 +938,7 @@
             );
 
             // Success
-            toast.fire('Success!', 'User details updated!', 'success');
+            toast.fire('Success!', 'Tenant details updated!', 'success');
 
             const modal = bootstrap.Modal.getInstance(
               document.getElementById('EditLandlordModal')
@@ -980,7 +1034,7 @@
 
             toast.fire(
               'Success!',
-              'User added!',
+              'Tenant added!',
               'success'
             );
 
@@ -999,7 +1053,7 @@
               address: "",
               city: "",
               county: "",
-              role: "landlord",
+              role: "service_provider",
               postal_code: "",
               dob: "",
               gender: "",
@@ -1057,7 +1111,7 @@
                   axios.delete('/api/users/'+id).then(() => {
                   toast.fire(
                     'Deleted!',
-                    'User has been deleted.',
+                    'Tenant has been deleted.',
                     'success'
                   )
                   this.loadLists();
@@ -1078,7 +1132,8 @@
           this.initializing = true; // Start spinner
           axios.get('api/lists')
             .then((response) => {
-              this.users = response.data.lists.users;
+              this.tenants = response.data.lists.tenants;
+              this.properties = response.data.lists.properties;
               console.log(response)
 
               setTimeout(() => {

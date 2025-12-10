@@ -7,6 +7,11 @@ import Users from '../views/Users.vue'
 import Properties from '../views/Properties.vue'
 import Listings from '../views/Listings.vue'
 import Landlords from '../views/Landlords.vue'
+import Caretakers from '../views/Caretakers.vue'
+import ServiceProviders from '../views/ServiceProviders.vue'
+import Tenants from '../views/Tenants.vue'
+import Units from '../views/Units.vue'
+import AwaitingInvoicing from '../views/AwaitingInvoicing.vue'
 
 const routes = [
     { path: '/', name: 'index', component: Login },
@@ -17,6 +22,11 @@ const routes = [
     { path: '/properties', name: 'properties', component: Properties },
     { path: '/property-listings', name: 'listings', component: Listings },
     { path: '/landlords', name: 'landlords', component: Landlords },
+    { path: '/caretakers', name: 'caretakers', component: Caretakers },
+    { path: '/service-providers', name: 'serviceproviders', component: ServiceProviders },
+    { path: '/tenants', name: 'tenants', component: Tenants },
+    { path: '/units/:id', name: 'units', component: Units },
+    { path: '/awaitinginvoicing', name: 'awaitinginvoicing', component: AwaitingInvoicing },
 ];
 
 const router = createRouter({
