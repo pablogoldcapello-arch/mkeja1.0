@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SupportTicket;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Property;
@@ -24,6 +25,17 @@ class ListController extends Controller
         ->with(['tenant'])
         ->where('status', 'unpaid')
         ->get();
+        $pendingtickets = SupportTicket::with('images')
+        ->where('status', 'open')
+        ->orWhere('status', 'open')
+        ->orWhere('status', 'in progress')
+        ->latest()->get();
+        $pendingtickets = SupportTicket::with('images')
+        ->where('status', 'resolved')
+        ->orWhere('status', 'closed')
+        ->latest()->get();        
+        $closedtickets = SupportTicket::with('images')->latest()->get();
+
 
         return response()->json([
             "lists" => [
@@ -35,6 +47,8 @@ class ListController extends Controller
                 'properties' => $properties,
                 'awaitinginvoicing' => $awaitinginvoicing,
                 'listings' => $listings,
+                'pendingtickets' => $pendingtickets,
+                'closedtickets' => $closedtickets
                 
             ]
         ]);

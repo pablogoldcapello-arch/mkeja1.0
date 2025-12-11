@@ -566,7 +566,7 @@
 
           try {
             // Proceed to create the invoice
-            const response = await axios.post("/api/pmsinvoicestatement", this.form);
+            const response = await axios.post("/api/invoices", this.form);
             console.log("samantha", response);
             this.successMessage = 'Tenant invoice created!';
             toast.fire('Success!', 'Invoice created!', 'success');
@@ -597,10 +597,7 @@
           this.form.paid = this.selectedStatement.paid;
           this.form.balance = this.selectedStatement.balance;
           this.form.total = this.selectedStatement.total;
-          this.form.water_bill = this.selectedStatement.water_bill;
-          this.firstName = this.selectedStatement.tenant.first_name;
-          this.lastName = this.selectedStatement.tenant.last_name;
-          this.tenant = this.firstName + " " + this.lastName;
+          this.tenant = this.selectedStatement.name;
           // Show the modal after fetching data
             const modal = new bootstrap.Modal(document.getElementById('EditInvoiceModal'));
             modal.show();
