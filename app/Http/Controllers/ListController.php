@@ -25,16 +25,14 @@ class ListController extends Controller
         ->with(['tenant'])
         ->where('status', 'unpaid')
         ->get();
-        $pendingtickets = SupportTicket::with('images')
+        $pendingtickets = SupportTicket::with(['images','user'])
         ->where('status', 'open')
-        ->orWhere('status', 'open')
         ->orWhere('status', 'in progress')
         ->latest()->get();
-        $pendingtickets = SupportTicket::with('images')
+        $closedtickets = SupportTicket::with(['images','user'])
         ->where('status', 'resolved')
         ->orWhere('status', 'closed')
         ->latest()->get();        
-        $closedtickets = SupportTicket::with('images')->latest()->get();
 
 
         return response()->json([

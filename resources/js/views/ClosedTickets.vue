@@ -21,7 +21,7 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">Pending Tickets <span>| Open support tickets of M-Keja</span></h5>
+                      <h5 class="card-title">Closed Tickets <span>| Closed support tickets of M-Keja</span></h5>
                       <p class="card-text">
                         <div class="row">
                           <div class="col d-flex">
@@ -55,7 +55,7 @@
             
                       </p>
     
-                      <table id="PendingTicketsTable" class="table table-borderless">
+                      <table id="ClosedTicketsTable" class="table table-borderless">
                         <thead>
                           <tr>
                             <th scope="col">Full Name</th>
@@ -77,7 +77,7 @@
                         </tbody>
                         <tbody v-else>
                           <tr v-for="ticket in closedtickets" :key="ticket.id">
-                            <td>{{ticket.name}}</td>
+                            <td>{{ticket.user.name}}</td>
                             <td>{{ticket.priority ?? "N/A"}}</td>
                             <td>{{ticket.description ?? "N/A"}}</td>
                             <td>
@@ -130,20 +130,18 @@
 
                     <div class="modal-body" v-if="selectedTicket">
 
-                      <!-- Profile Photo -->
-                      <div class="text-center mb-3" v-if="selectedTicket">
-                        <img 
-                          :src="selectedTicket.profile_photo
-                                  ? `/storage/${selectedLandlord.profile_photo}` 
-                                  : (selectedLandlord.profile_photo_url 
-                                      ? selectedLandlord.profile_photo_url 
-                                      : defaultProfile)"
-                          @error="($event.target.src = defaultProfile)" 
-                          alt="Profile Photo" 
-                          class="rounded-circle border" 
-                          style="height: 120px; width: 120px; object-fit: cover; object-position: center;"
-                        />
-                      </div>
+                        <!-- Image Gallery -->
+                        <div v-if="selectedTicket.images?.length" class="mt-3">
+                          <strong>Gallery Images:</strong>
+                          <div class="d-flex flex-wrap mt-2">
+                            <div v-for="(img, i) in selectedTicket.images" :key="i" class="me-2 mb-2">
+                              <img 
+                                :src="'/storage/tickets/' + img.name"
+                                style="width:120px; height:100px; object-fit:cover; border-radius:4px;"
+                              >
+                            </div>
+                          </div>
+                        </div>
 
 
                       <div class="row g-3">
@@ -197,8 +195,9 @@
                           <!-- Priority -->
                           <div class="col-md-6">
                             <label class="form-label">Priority*</label>
-                            <select name="role" v-model="data.priority" class="form-select" id="userrole">
+                            <select name="role" v-model="data.priority" class="form-select" id="priority">
                                 <option value="" selected disabled>Select priority</option>
+                                <option value="critical">Critical</option>
                                 <option value="high">High</option>
                                 <option value="medium">Medium</option>
                                 <option value="low">Low</option>
@@ -206,111 +205,43 @@
 
                           </div>
 
-                          <!-- Password -->
-                          <div class="col-md-6">
-                            <label class="form-label">Password*</label>
-                            <div class="input-group">
-                              <input id="password" :type="showPassword ? 'text' : 'password'" class="form-control" v-model="data.password" required>
-                              <span class="input-group-text" style="cursor:pointer" @click="showPassword = !showPassword">
-                                <i :class="showPassword ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
-                              </span>
-                            </div>
-                          </div>
-
-                          <!-- Phone -->
-                          <div class="col-md-6">
-                            <label class="form-label">Phone</label>
-                            <input type="text" id="phone" class="form-control" v-model="data.phone">
-                          </div>
-
-                          <!-- Address Fields -->
-                          <div class="col-md-6">
-                            <label class="form-label">Address</label>
-                            <input type="text" class="form-control" v-model="data.address">
-                          </div>
-
-                          <div class="col-md-6">
-                            <label class="form-label">City</label>
-                            <input type="text" class="form-control" v-model="data.city">
-                          </div>
-
-                          <div class="col-md-6">
-                            <label class="form-label">County</label>
-                            <input type="text" class="form-control" v-model="data.county">
-                          </div>
-
-                          <div class="col-md-6">
-                            <label class="form-label">Postal Code</label>
-                            <input type="text" class="form-control" v-model="data.postal_code">
-                          </div>
-
-                          <!-- DOB + Gender -->
-                          <div class="col-md-6">
-                            <label class="form-label">Date of Birth</label>
-                            <input type="date" class="form-control" v-model="data.dob">
-                          </div>
-
                           <div class="col-md-6">
                             <label class="form-label">Category</label>
-                            <select class="form-select" v-model="data.category">
-                              <option value="">Select</option>
-                              <option value="login">Login issues</option>
-                              <option value="data_retrieval">Data retrieval</option>
+                            <select class="form-select" v-model="data.category" id="category">
+                              <option value="" disabled selected>Select category</option>
+                              <option value="payment">Payment</option>
+                              <option value="property">Property</option>
+                              <option value="service">Service</option>
+                              <option value="agent">Agent</option>
+                              <option value="technical">Technical</option>
+                              <option value="fraud">Fraud</option>
                               <option value="other">Other</option>
                             </select>
                           </div>
 
                           <!-- Additional Fields -->
-                          <div class="col-md-6">
-                            <label class="form-label">Description</label>
-                            <textarea type="text" class="form-control" v-model="data.description" />
-                          </div>
-
-                          <!-- Status -->
-                          <div class="col-md-6">
-                            <label class="form-label">Status</label>
-                            <select class="form-select" v-model="data.status">
-                              <option value="active">Active</option>
-                              <option value="pending">Pending</option>
-                              <option value="suspended">Suspended</option>
-                            </select>
-                          </div>
-
-                          <!-- Profile Photo: allow File or URL -->
                           <div class="col-md-12">
-                            <label class="form-label">Profile Photo</label>
-
-                            <div class="mb-2">
-                              <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" id="photoFileOption" value="file" v-model="photoMode">
-                                <label class="form-check-label" for="photoFileOption">Upload file</label>
-                              </div>
-                              <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" id="photoUrlOption" value="url" v-model="photoMode">
-                                <label class="form-check-label" for="photoUrlOption">Use image URL</label>
-                              </div>
-                            </div>
-
-                            <!-- File input -->
-                            <div v-if="photoMode === 'file'">
-                              <input type="file" class="form-control" accept="image/*" @change="handlePhotoUpload">
-                            </div>
-
-                            <!-- URL input -->
-                            <div v-if="photoMode === 'url'">
-                              <input type="url" class="form-control" v-model="data.profile_photo_url" placeholder="https://example.com/photo.jpg" @input="updatePreviewFromUrl">
-                            </div>
-
-                            <!-- Preview -->
-                            <div v-if="data.profile_photo_preview" class="mt-2">
-                              <img :src="data.profile_photo_preview" class="img-thumbnail" style="max-height: 130px;">
-                              <div class="small text-muted mt-1">Preview</div>
-                            </div>
-
-                            <!-- Optionally show validation message -->
-                            <div v-if="errors.profile_photo" class="text-danger small mt-1">{{ errors.profile_photo }}</div>
+                            <label class="form-label">Description</label>
+                            <textarea type="text" id="description" class="form-control" v-model="data.description" />
                           </div>
 
+                        <!-- Media Upload -->
+                        <div class="col-md-6">
+                            <label class="form-label">Upload Screenshots</label>
+                            <input type="file" name="images[]" multiple @change="handleImages">
+                        </div>                          
+
+                        <!-- Image Previews in a NEW full-width row -->
+                        <div class="col-12 mt-3" v-if="images.length > 0">
+                            <label class="form-label fw-bold">Preview Screenshots</label>
+
+                            <div class="image-preview-container">
+                                <div class="preview-box" v-for="(img, index) in images" :key="index">
+                                    <img :src="img.preview" class="preview-img">
+                                    <button class="remove-btn" @click="removeImage(index)">×</button>
+                                </div>
+                            </div>
+                        </div>                          
 
                         </form>
                       </div>
@@ -328,7 +259,7 @@
                 </div>
 
 
-                <!-- EDIT Ticket MODAL -->
+                <!-- Edit Ticket Modal -->
                 <div class="modal fade" id="EditTicketModal" tabindex="-1" aria-labelledby="EditTicketModalLabel" aria-hidden="true">
                   <div class="modal-dialog modal-lg">
                     <div class="modal-content">
@@ -346,13 +277,14 @@
 
                           <div class="col-md-6">
                             <label class="form-label">Description</label>
-                            <textarea type="text" class="form-control" v-model="form.description" />
+                            <textarea type="text" id="description_edit" class="form-control" v-model="form.description" />
                           </div>
 
                           <div class="col-md-6">
                             <label class="form-label">Priority</label>
-                            <select class="form-select" v-model="form.priority">
+                            <select class="form-select" id="priority_edit" v-model="form.priority">
                               <option value="">Select</option>
+                              <option value="critical">Critical</option>
                               <option value="high">High</option>
                               <option value="medium">Medium</option>
                               <option value="low">Low</option>
@@ -361,53 +293,41 @@
 
                           <div class="col-md-6">
                             <label class="form-label">Category</label>
-                            <select class="form-select" v-model="form.category">
-                              <option value="">Select</option>
-                              <option value="login">Login issues</option>
-                              <option value="data_retrieval">Data retrieval</option>
+                            <select class="form-select" id="category_edit" v-model="form.category">
+                              <option value="">Select category</option>
+                              <option value="payment">Payment</option>
+                              <option value="property">Property</option>
+                              <option value="service">Service</option>
+                              <option value="agent">Agent</option>
+                              <option value="technical">Technical</option>
+                              <option value="fraud">Fraud</option>
                               <option value="other">Other</option>
                             </select>
                           </div>
 
-                          <!-- Status -->
-                          <div class="col-md-6">
-                            <label class="form-label">Status</label>
-                            <select class="form-select" v-model="form.status">
-                              <option value="open">Open</option>
-                              <option value="in progress">In Progress</option>
-                              <option value="resolved">Resolved</option>
-                              <option value="closed">Closed</option>
-                            </select>
+                          <!-- EXISTING IMAGES -->
+                          <div class="col-md-12">
+                            <label class="form-label">Existing Images</label>
+
+                            <div class="image-preview-container">
+                                <div class="preview-box" v-for="(img, index) in existingImages" :key="img.id">
+                                    <img :src="getPhoto(img.name)" class="preview-img">
+                                    <button class="remove-btn" @click="removeExistingImage(form.id, img.id, index)">×</button>
+                                </div>
+                            </div>
                           </div>
 
-                          <!-- Profile Photo (file or URL) -->
+                          <!-- NEW IMAGES -->
                           <div class="col-md-12">
-                            <label class="form-label">Profile Photo</label>
+                            <label class="form-label">Upload New Images</label>
+                            <input type="file" multiple @change="handleNewImages">
 
-                            <div class="mb-2">
-                              <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" value="file" v-model="photoMode">
-                                <label class="form-check-label">Upload file</label>
-                              </div>
-
-                              <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" value="url" v-model="photoMode">
-                                <label class="form-check-label">Use URL</label>
-                              </div>
+                            <div class="image-preview-container mt-2">
+                                <div class="preview-box" v-for="(img, index) in newImages" :key="index">
+                                    <img :src="img.preview" class="preview-img">
+                                    <button class="remove-btn" @click="newImages.splice(index,1)">×</button>
+                                </div>
                             </div>
-
-                            <div v-if="photoMode === 'file'">
-                              <input type="file" class="form-control" @change="handleEditPhotoUpload">
-                            </div>
-
-                            <div v-if="photoMode === 'url'">
-                              <input type="url" class="form-control" v-model="form.profile_photo_url" @input="updateEditPreviewFromUrl">
-                            </div>
-
-                            <div v-if="form.profile_photo_preview" class="mt-2">
-                              <img :src="form.profile_photo_preview" class="img-thumbnail" style="max-height: 130px;">
-                            </div>
-
                           </div>
 
                         </form>
@@ -458,7 +378,9 @@
           selectedTicket: {},
           showPassword: false,
           defaultProfile: DefaultProfile,
-          photoMode: 'file', // 'file' or 'url' — default to file
+          images: [],
+          existingImages: [],
+          newImages: [],
           errors: {},
           form: {
             id: "",
@@ -467,9 +389,6 @@
             description: "",
             status: "open",
 
-            profile_photo_file: null,
-            profile_photo_preview: null,
-            profile_photo_url: '' // for URL input
           },
           data: {
             id: "",
@@ -478,79 +397,46 @@
             description: "",
             status: "open",
 
-            profile_photo_file: null,
-            profile_photo_preview: null,
-            profile_photo_url: '' // for URL input
           },
           initializing: true
 
         }
-      },
-      watch: {
-        // When mode changes, clear the other input and reset preview
-        photoMode(newMode) {
-          if (newMode === 'file') {
-            this.data.profile_photo_url = '';
-            this.data.profile_photo_preview = this.data.profile_photo_file 
-              ? this.data.profile_photo_preview 
-              : '';
-          } else if (newMode === 'url') {
-            this.data.profile_photo_file = null;
-            this.data.profile_photo_preview = this.data.profile_photo_url || '';
-          }
-        }
       },      
       methods: {
-        handlePhotoUpload(event) {
-          const file = event.target.files[0];
-          if (!file) return;
+        handleImages(e) {
+            const files = e.target.files;
 
-          // Validate type & size
-          if (!file.type.startsWith('image/')) {
-            this.errors.profile_photo = 'Selected file is not an image';
-            return;
-          }
-          if (file.size > 5 * 1024 * 1024) { // 5MB limit
-            this.errors.profile_photo = 'Image must be <= 5 MB';
-            return;
-          }
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
 
-          this.errors.profile_photo = null;
-          this.data.profile_photo_file = file;
-
-          // Preview
-          const reader = new FileReader();
-          reader.onload = e => this.data.profile_photo_preview = e.target.result;
-          reader.readAsDataURL(file);
-          },
-          handleEditPhotoUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-              this.form.profile_photo_file = file;
-              this.form.profile_photo_preview = URL.createObjectURL(file);
+                this.images.push({
+                    file: file,                                   // ← real file!
+                    preview: URL.createObjectURL(file)           // ← preview
+                });
             }
-          },
-
-        updatePreviewFromUrl() {
-          const url = this.data.profile_photo_url?.trim();
-          if (!url) {
-            this.data.profile_photo_preview = '';
-            return;
-          }
-
-          // Optional: simple extension check
-          const lower = url.toLowerCase();
-          if (!lower.match(/\.(jpeg|jpg|png|gif|svg|webp)(\?.*)?$/)) {
-            // Could warn user if desired
-          }
-
-          this.data.profile_photo_preview = url;
-          this.errors.profile_photo = null;
-        }, 
-        updateEditPreviewFromUrl() {
-          this.form.profile_photo_preview = this.form.profile_photo_url;
         },
-          
+        removeImage(index) {
+            this.images.splice(index, 1);
+        },
+        handleNewImages(event) {
+          const files = event.target.files;
+          for (let i = 0; i < files.length; i++) {
+            this.newImages.push({
+              file: files[i],
+              preview: URL.createObjectURL(files[i])
+            });
+          }
+        },
+        async removeExistingImage(ticketId, imageId, index) {
+            try {
+                await axios.delete(`/api/support-tickets/${ticketId}/images/${imageId}`);
+                this.form.images.splice(index, 1); // remove from array
+                toast.fire('Success!', 'Image removed!', 'success');
+            } catch (error) {
+                console.error(error);
+                toast.fire('Error!', 'Could not remove image.', 'error');
+            }
+        },          
         viewTicket(ticket)
         {
           console.log(this.selectedTicket)
@@ -774,24 +660,14 @@
             console.log(error);
             toast.fire(
               'Error!',
-              error.response?.data?.message || 'An error occurred while adding the user.',
+              error.response?.data?.message || 'An error occurred while adding the ticket.',
               'error'
             );
           }
         },
 
-        getPhoto(user) {
-            // user can be an object containing profile_photo and profile_photo_url
-            if (user.profile_photo && user.profile_photo !== '') {
-                // file stored in local storage
-                return `/storage/${user.profile_photo}`;
-            } else if (user.profile_photo_url && user.profile_photo_url !== '') {
-                // external URL
-                return user.profile_photo_url;
-            } else {
-                // fallback placeholder
-                return '/images/default-profile.png';
-            }
+        getPhoto(name) {
+          return "/storage/tickets/" + name;
         },
 
 
@@ -838,7 +714,7 @@
               console.log(response)
 
               setTimeout(() => {
-                $("#PendingTicketsTable").DataTable();
+                $("#ClosedTicketsTable").DataTable();
               }, 10);
             })
             .catch((error) => {

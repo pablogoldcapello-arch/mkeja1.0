@@ -594,10 +594,11 @@
         editInvoice(statement)
         {
           this.selectedStatement = statement;
-          this.form.paid = this.selectedStatement.paid;
+          this.form.tenant_id = this.selectedStatement.tenant_id;
           this.form.balance = this.selectedStatement.balance;
           this.form.total = this.selectedStatement.total;
           this.tenant = this.selectedStatement.name;
+          console.log("omba", statement)
           // Show the modal after fetching data
             const modal = new bootstrap.Modal(document.getElementById('EditInvoiceModal'));
             modal.show();
@@ -623,14 +624,12 @@
                 let payload; // Define payload variable outside the if-else blocks
 
                   payload = {
-                      total: this.form.total,
-                      paid: this.form.paid,
-                      balance: this.form.balance,
-                      water_bill: this.form.water_bill,
+                      tenant_id: this.form.tenant_id,
+                      status: 'unpaid'
                   };
                
 
-                axios.put("/api/edit-statement/" + this.selectedStatement.id, payload)
+                axios.put("/api/invoices/" + this.selectedStatement.id, payload)
                     .then(response => {
                         console.log(response);
                          toast.fire(
@@ -669,22 +668,12 @@
           }).then((result) => {
             if (result.isConfirmed) { 
             //send request to the server
-            axios.delete('/api/pmsstatement/'+id).then(() => {
+            axios.delete('/api/invoices/'+id).then(() => {
             toast.fire(
               'Deleted!',
               'Invoice has been deleted.',
               'success'
             )
-
-            // Register activity after invoice deletion
-            const payload = {
-              description: `${this.current_user} deleted invoice ID ${id}`,
-              user_id: this.current_user_id,
-            };
-
-            axios.post('api/activity', payload).then((response) => {
-              console.log(response)
-            })
 
             this.loadLists();
             }).catch(() => {

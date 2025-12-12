@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use App\Models\Listing;
 use Illuminate\Support\Facades\Validator;
@@ -16,6 +17,13 @@ class ListingController extends Controller
     public function index()
     {
         $listings = Listing::all();
+
+        //record actvity log
+        $user = auth()->user(); // or JWTAuth::parseToken()->authenticate();
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'description' => $user->name.' viewed listings '
+        ]);
 
         return response()->json([
             "lists" => [
@@ -102,6 +110,13 @@ class ListingController extends Controller
             }
         }
 
+        //record actvity log
+        $user = auth()->user(); // or JWTAuth::parseToken()->authenticate();
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'description' => $user->name.' created listing ID '.$listing->id
+        ]);        
+
         return response()->json([
             'status' => true,
             'listing' => $listing,
@@ -124,6 +139,13 @@ class ListingController extends Controller
             ], 404);
         }
 
+        //record actvity log
+        $user = auth()->user(); // or JWTAuth::parseToken()->authenticate();
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'description' => $user->name.' viewed listing ID '.$id
+        ]);        
+
         return response()->json([
             'status' => true,
             'listing' => $listing
@@ -133,49 +155,56 @@ class ListingController extends Controller
     /**
      * Update the specified resource in storage.
      */
-public function update(Request $request, $id)
-{
-    $listing = Listing::find($id);
+    public function update(Request $request, $id)
+    {
+        $listing = Listing::find($id);
 
-    if (!$listing) {
-        return response()->json([
-            'status' => false,
-            'message' => 'Listing not found.'
-        ], 404);
-    }
-
-    $validator = Validator::make($request->all(), [
-        'title' => 'required|string|max:100',
-        'type' => 'required|in:apartment,house,bedsitter,studio,office,land',
-        'status' => 'required|in:for_sale,for_rent,sold,occupied',
-        'images.*' => 'nullable|image|max:5120',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json($validator->errors(), 422);
-    }
-
-    // Update normal fields
-    $listing->update($request->except('images'));
-
-    // Handle new images
-    if ($request->hasFile('images')) {
-        foreach ($request->file('images') as $imageFile) {
-            $filename = uniqid() . '_' . $imageFile->getClientOriginalName();
-            Storage::disk('public')->putFileAs('listings', $imageFile, $filename);
-
-            $listing->images()->create([
-                'name' => $filename
-            ]);
+        if (!$listing) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Listing not found.'
+            ], 404);
         }
-    }
 
-    return response()->json([
-        'status' => true,
-        'listing' => $listing->load('images'),
-        'message' => 'Listing updated successfully.'
-    ]);
-}
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:100',
+            'type' => 'required|in:apartment,house,bedsitter,studio,office,land',
+            'status' => 'required|in:for_sale,for_rent,sold,occupied',
+            'images.*' => 'nullable|image|max:5120',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        // Update normal fields
+        $listing->update($request->except('images'));
+
+        // Handle new images
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $imageFile) {
+                $filename = uniqid() . '_' . $imageFile->getClientOriginalName();
+                Storage::disk('public')->putFileAs('listings', $imageFile, $filename);
+
+                $listing->images()->create([
+                    'name' => $filename
+                ]);
+            }
+        }
+
+        //record actvity log
+        $user = auth()->user(); // or JWTAuth::parseToken()->authenticate();
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'description' => $user->name.' updated listing ID '.$id
+        ]);        
+
+        return response()->json([
+            'status' => true,
+            'listing' => $listing->load('images'),
+            'message' => 'Listing updated successfully.'
+        ]);
+    }
 
 
     /**
@@ -194,29 +223,36 @@ public function update(Request $request, $id)
 
         $listing->delete();
 
+        //record actvity log
+        $user = auth()->user(); // or JWTAuth::parseToken()->authenticate();
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'description' => $user->name.' deleted listing ID '.$id
+        ]);        
+
         return response()->json([
             'status' => true,
             'message' => 'Listing deleted successfully.'
         ]);
     }
 
-        public function deleteImage($listingId, $imageId)
-        {
-            $listing = Listing::findOrFail($listingId);
-            $image = $listing->images()->findOrFail($imageId);
+    public function deleteImage($listingId, $imageId)
+    {
+        $listing = Listing::findOrFail($listingId);
+        $image = $listing->images()->findOrFail($imageId);
 
-            // Delete the file from storage
-            if (\Storage::exists('public/listings/'.$image->name)) {
-                \Storage::delete('public/listings/'.$image->name);
-            }
-
-            // Delete the DB record
-            $image->delete();
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Image deleted successfully.'
-            ]);
+        // Delete the file from storage
+        if (\Storage::exists('public/listings/'.$image->name)) {
+            \Storage::delete('public/listings/'.$image->name);
         }
+
+        // Delete the DB record
+        $image->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Image deleted successfully.'
+        ]);
+    }
 
 }

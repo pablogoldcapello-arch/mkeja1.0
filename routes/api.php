@@ -46,6 +46,9 @@ Route::middleware(['auth:api'])->group(function () {
     //Delete listing old image when editing
     Route::delete('listings/{listing}/images/{image}', [ListingController::class, 'deleteImage']);
 
+    //Delete ticket old image when editing
+    Route::delete('support-tickets/{ticket}/images/{image}', [SupportTicketController::class, 'deleteTicketImage']);
+
     Route::get('/properties/{id}/units', [PropertyController::class, 'units'])->name('propertyunits');
 
 });

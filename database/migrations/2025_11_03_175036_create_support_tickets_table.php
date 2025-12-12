@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('support_tickets', function (Blueprint $table) {
             $table->bigIncrements('id'); // Primary key
             $table->unsignedBigInteger('user_id');       // FK → users.id
-            $table->unsignedBigInteger('assigned_to');       // FK → users.id
-            $table->enum('category', ['payment', 'property', 'service','agent','technical','fraud'])->default('payment');             
+            $table->unsignedBigInteger('assigned_to')->nullable();       // FK → users.id
+            $table->enum('category', ['payment', 'property', 'service','agent','technical','fraud', 'other'])->default('payment');             
             $table->enum('priority', ['low', 'medium', 'high','critical'])->default('medium');             
             $table->enum('status', ['open', 'in progress', 'resolved','closed'])->default('open');             
             $table->longText('description')->nullable();

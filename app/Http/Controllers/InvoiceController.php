@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
 
@@ -34,6 +35,14 @@ class InvoiceController extends Controller
         $invoice->rent_month = $request->rent_month;
         $invoice->status = 'unpaid';
         $invoice->save();
+
+        //record actvity log
+        $user = auth()->user(); // or JWTAuth::parseToken()->authenticate();
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'description' => $user->name.' created invoice '.$refno. ' for tenant ID '.$request->tenant_id
+        ]);
+
         return response()->json($invoice);         
     }
 
@@ -52,12 +61,20 @@ class InvoiceController extends Controller
     public function update(Request $request, string $id)
     {
         $invoice = Invoice::find($id);
-        $invoice->tenancy_id = $request->tenancy_id;
+        $invoice->tenant_id = $request->tenant_id;
         $invoice->invoice_number = $request->invoice_number;
         $invoice->amount_due = $request->amount_due;
         $invoice->due_date = $request->due_date;
         $invoice->status = $request->status;
         $invoice->save();
+
+        //record actvity log
+        $user = auth()->user(); // or JWTAuth::parseToken()->authenticate();
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'description' => $user->name.' updated invoice '.$invoice->invoice_number. ' for tenant ID '.$request->tenant_id
+        ]);
+
         return response()->json($invoice);        
     }
 
@@ -67,6 +84,14 @@ class InvoiceController extends Controller
     public function destroy(string $id)
     {
         Invoice::destroy($id);
+
+            //record actvity log
+        $user = auth()->user(); // or JWTAuth::parseToken()->authenticate();
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'description' => $user->name.' deleted invoice '
+        ]);
+
         return response()->json(['message' => 'Deleted']);          
     }
 }
