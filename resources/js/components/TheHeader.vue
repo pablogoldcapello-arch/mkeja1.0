@@ -199,21 +199,31 @@ import axios from 'axios';
         this.searchResults = [];
       }
     },
-    logout() {
-      // Make the logout request
-      axios.get('api/logout')
-        .then((response) => {
-          // Remove user from localStorage after logging out
-          localStorage.removeItem('user');
-          console.log(response);
+async logout() {
+  try {
+    await axios.post('/api/logout', {}, {
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    });
 
-          // Redirect to login page
-          this.$router.push('/login');
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
+    // Clear auth data
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+
+    // Redirect to login
+    this.$router.replace('/login');
+
+  } catch (error) {
+    console.error('Logout error:', error);
+
+    // Even if API fails, force logout locally
+    localStorage.removeItem('token');
+    this.$router.push('/login');
+  }
+}
+
   
       // loadLists(){
       //   axios.get('api/lists').then((response) => {

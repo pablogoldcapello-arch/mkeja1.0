@@ -83,23 +83,37 @@ class AuthController extends Controller
     /**
      * Logout user (invalidate token)
      */
-    public function logout()
-    {
-        try {
-            auth('api')->logout();
+public function logout()
+{
+    try {
+        $user = auth('api')->user();
 
-            //record actvity log
-            $user = auth()->user(); // or JWTAuth::parseToken()->authenticate();
-            ActivityLog::create([
-                'user_id' => auth('api')->user()->id,
-                'description' => auth('api')->user()->name.' logged out'
-            ]);
-                        
-            return response()->json(['status' => 'success', 'message' => 'User logged out successfully.']);
-        } catch (JWTException $e) {
-            return response()->json(['status' => 'error', 'message' => 'Failed to logout, please try again.'], 500);
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthenticated'
+            ], 401);
         }
+
+        auth('api')->logout();
+
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'description' => $user->name . ' logged out'
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'User logged out successfully.'
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Logout failed'
+        ], 500);
     }
+}
 
     /**
      * Get authenticated user
