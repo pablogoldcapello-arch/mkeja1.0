@@ -15,7 +15,6 @@ class Property extends Model
         'type',
         'location',
         'coordinates',
-        'rent_amount',
         'status'
     ];  
     

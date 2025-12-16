@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Tenancy;
 
 class TenancyController extends Controller
 {
@@ -12,7 +13,7 @@ class TenancyController extends Controller
      */
     public function index()
     {
-        $tenants = User::with('user','unit')->where('role', 'tenant')->get();
+        $tenants = Tenancy::with('user','unit')->where('role', 'tenant')->get();
         return response()->json($tenants);         
     }
 
@@ -21,7 +22,7 @@ class TenancyController extends Controller
      */
     public function store(Request $request)
     {
-        $tenant = new User();
+        $tenant = new Tenancy();
         $tenant->tenant_id = $request->tenant_id;
         $tenant->unit_id = $request->unit_id;
         $tenant->start_date = $request->start_date;
@@ -37,7 +38,7 @@ class TenancyController extends Controller
      */
     public function show(string $id)
     {
-        $tenant = User::find($id);
+        $tenant = Tenancy::find($id);
         return response()->json($tenant);         
     }
 
@@ -46,7 +47,7 @@ class TenancyController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $tenant = User::find($id);
+        $tenant = Tenancy::find($id);
         $tenant->tenant_id = $request->tenant_id;
         $tenant->unit_id = $request->unit_id;
         $tenant->start_date = $request->start_date;
@@ -62,7 +63,44 @@ class TenancyController extends Controller
      */
     public function destroy(string $id)
     {
-        User::destroy($id);
+        Tenancy::destroy($id);
         return response()->json(['message' => 'Deleted']);        
     }
+
+    public function assignTenant(Request $request)
+    {
+        $request->validate([
+            'tenant_id' => 'required|exists:users,id',
+            'property_id' => 'required|exists:properties,id',
+            'unit_id' => 'nullable|exists:units,id',
+            'start_date' => 'required|date',
+        ]);
+
+        // Optional: Check if unit is already assigned
+        if ($request->unit_id) {
+            $existing = Tenancy::where('unit_id', $request->unit_id)
+                            ->where('status', 'active')->first();
+            if ($existing) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Unit is already assigned to another tenant.'
+                ], 400);
+            }
+        }
+
+        $tenancy = Tenancy::create([
+            'tenant_id' => $request->tenant_id,
+            'property_id' => $request->property_id,
+            'unit_id' => $request->unit_id,
+            'start_date' => $request->start_date,
+            'status' => 'active',
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Tenant assigned successfully',
+            'data' => $tenancy
+        ]);
+    }
+
 }

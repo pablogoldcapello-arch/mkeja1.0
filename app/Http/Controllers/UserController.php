@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Tenancy;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -119,6 +120,17 @@ class UserController extends Controller
 
         // Create user with mass assignment using fillable attributes
         $user = User::create($data);
+
+        // ✅ Create tenancy if role is tenant and property selected
+        if ($user->role === 'tenant' && $request->property_id) {
+            Tenancy::create([
+                'tenant_id'   => $user->id,
+                'property_id' => $request->property_id,
+                'unit_id'     => $request->unit_id ?? null,
+                'start_date'  => $request->start_date ?? now(),
+                'status'      => 'active',
+            ]);
+        }        
 
         return response()->json([
             'message' => 'User created successfully',

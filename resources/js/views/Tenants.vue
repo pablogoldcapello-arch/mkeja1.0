@@ -252,7 +252,7 @@
               </div>
 
 
-                <!-- Add Landlord Modal -->
+                <!-- Add Tenant Modal -->
                 <div class="modal fade" id="AddLandlordModal" tabindex="-1" aria-labelledby="AddLandlordModalLabel" aria-hidden="true">
                   <div class="modal-dialog modal-lg">
                     <div class="modal-content">
@@ -294,27 +294,27 @@
 
                           </div>
 
-<!-- Property Selection -->
-<div class="col-md-6" v-if="data.role?.toLowerCase() === 'tenant'">
-  <label class="form-label">Select Property*</label>
-  <select class="form-select" v-model.number="data.property_id" @change="loadUnits">
-    <option value="">-- Select Property --</option>
-    <option v-for="p in properties" :key="p.id" :value="p.id">
-      {{ p.title }} - {{ p.location }}
-    </option>
-  </select>
-</div>
+                          <!-- Property Selection -->
+                          <div class="col-md-6" v-if="data.role?.toLowerCase() === 'tenant'">
+                            <label class="form-label">Select Property*</label>
+                            <select class="form-select" v-model.number="data.property_id" @change="loadUnits">
+                              <option value="">-- Select Property --</option>
+                              <option v-for="p in properties" :key="p.id" :value="p.id">
+                                {{ p.title }} - {{ p.location }}
+                              </option>
+                            </select>
+                          </div>
 
-<!-- Units -->
-<div class="col-md-6" v-if="data.role?.toLowerCase() === 'tenant' && units.length > 0">
-  <label class="form-label">Select Unit*</label>
-  <select class="form-select" v-model="data.unit_id">
-    <option value="">-- Select Unit --</option>
-    <option v-for="u in units" :key="u.id" :value="u.id">
-      {{ u.unit_number }} (Ksh {{ u.monthly_rent }})
-    </option>
-  </select>
-</div>
+                          <!-- Units -->
+                          <div class="col-md-6" v-if="data.role?.toLowerCase() === 'tenant' && units.length > 0">
+                            <label class="form-label">Select Unit*</label>
+                            <select class="form-select" v-model="data.unit_id">
+                              <option value="">-- Select Unit --</option>
+                              <option v-for="u in units" :key="u.id" :value="u.id">
+                                {{ u.unit_number }} (Ksh {{ u.monthly_rent }})
+                              </option>
+                            </select>
+                          </div>
 
 
                           <!-- Password -->
@@ -462,7 +462,7 @@
                 </div>
 
 
-                <!-- EDIT LANDLORD MODAL -->
+                <!-- Edit Tenant Modal -->
                 <div class="modal fade" id="EditLandlordModal" tabindex="-1" aria-labelledby="EditLandlordModalLabel" aria-hidden="true">
                   <div class="modal-dialog modal-lg">
                     <div class="modal-content">

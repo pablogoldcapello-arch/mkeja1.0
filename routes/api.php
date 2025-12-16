@@ -52,4 +52,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/properties/{id}/units', [PropertyController::class, 'units'])->name('propertyunits');
     Route::get('/landlords/{id}/properties', [PropertyController::class, 'landlordProperties'])->name('landlordproperties');
 
+    Route::post('/tenancies/assign', [TenancyController::class, 'assignTenant'])
+    ->middleware(['auth:api', 'role:admin,landlord']);
+
 });

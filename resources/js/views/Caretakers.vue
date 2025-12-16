@@ -241,7 +241,7 @@
               </div>
 
 
-                <!-- Add Landlord Modal -->
+                <!-- Add Caretaker Modal -->
                 <div class="modal fade" id="AddLandlordModal" tabindex="-1" aria-labelledby="AddLandlordModalLabel" aria-hidden="true">
                   <div class="modal-dialog modal-lg">
                     <div class="modal-content">
@@ -428,7 +428,7 @@
                 </div>
 
 
-                <!-- EDIT LANDLORD MODAL -->
+                <!-- Edit Caretaker Modal -->
                 <div class="modal fade" id="EditLandlordModal" tabindex="-1" aria-labelledby="EditLandlordModalLabel" aria-hidden="true">
                   <div class="modal-dialog modal-lg">
                     <div class="modal-content">

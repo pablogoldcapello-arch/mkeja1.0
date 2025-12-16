@@ -139,6 +139,7 @@
                         <thead>
                           <tr>
                             <th scope="col">Title</th>
+                            <th scope="col">Location</th>
                             <th scope="col">Type</th>
                             <th scope="col">Action</th>
                           </tr>
@@ -156,6 +157,7 @@
                         <tbody v-else>
                           <tr v-for="item in landlordproperties" :key="item.id">
                             <td>{{item.title ?? "N/A"}}</td>
+                            <td>{{item.location ?? "N/A"}}</td>
                             <td>{{item.type ?? "N/A"}}</td>
                             <td>
                               <div class="btn-group" role="group">
@@ -295,7 +297,7 @@
                                     </div>
                                     <div class="row mb-3"></div>
                                     <div class="form-group row">
-                                      <div class="col-sm-12">
+                                      <div v-if="userRole !== 'landlord'" class="col-sm-12">
                                           <label for="landlord" class="form-label">Landlord*<p>in case landlord is not listed, click <strong @click="addLandlord">here</strong> to add</p></label>
                                           <div class="col-sm-12">
                                             <input
@@ -318,6 +320,11 @@
                                           <div class="invalid-feedback" v-if="!form.landlord_id">Please select a landlord</div>
                                           </div>
                                       </div>  
+                                      <div v-if="userRole === 'landlord'" class="mb-3">
+                                        <label class="form-label">Landlord</label>
+                                        <input type="text" class="form-control" :value="user.name" disabled>
+                                      </div>
+
                                       <div class="row mb-3"></div>
                                       <!-- Description -->
                                       <div class="col-md-12">
@@ -352,13 +359,6 @@
                                         <label for="coordinates" class="form-label">Coordinates</label>
                                         <input type="text" id="coordinates" v-model="form.coordinates" placeholder="Latitude, Longitude" class="form-control">
                                       </div>
-
-                                      <!-- Rent Amount -->
-                                      <div class="col-md-6">
-                                        <label for="rent_amount" class="form-label">Rent Amount</label>
-                                        <input type="number" id="rent_amount" v-model="form.rent_amount" placeholder="e.g 15000" class="form-control">
-                                      </div>
-                                      <div class="row mb-3"></div>
 
                                       <!-- Status -->
                                       <div class="col-md-6">
@@ -1096,6 +1096,8 @@
         if(this.userRole == 'landlord')
         {
           this.getLandlordProperties(this.userId);
+          // Automatically set landlord_id to logged-in user
+          this.form.landlord_id = this.userId;          
         }
         console.log(this.user)
         this.currentUser = JSON.parse(localStorage.getItem('user')) || {};

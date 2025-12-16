@@ -107,7 +107,6 @@ class PropertyController extends Controller
         $property->type = $request->type;
         $property->location = $request->location;
         $property->coordinates = $request->coordinates;
-        $property->rent_amount = $request->rent_amount;
         $property->status = $request->status;
         $property->save();
 

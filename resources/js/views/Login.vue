@@ -84,11 +84,11 @@
                   <div class="mt-4 text-center">
                     <p class="small mb-2" style="color: darkgreen;">Quick Auto-Login</p>
                     <div class="d-grid gap-2">
-                      <button class="btn btn-outline-success rounded-pill" @click="autoLogin('admin')">Admin</button>
-                      <button class="btn btn-outline-primary rounded-pill" @click="autoLogin('caretaker')">Caretaker / Agent</button>
-                      <button class="btn btn-outline-warning rounded-pill" @click="autoLogin('landlord')">Landlord</button>
-                      <button class="btn btn-outline-info rounded-pill" @click="autoLogin('tenant')">Tenant</button>
-                      <button class="btn btn-outline-secondary rounded-pill" @click="autoLogin('service_provider')">Service Provider</button>
+                      <button type="button" class="btn btn-outline-success rounded-pill" @click="autoLogin('admin')">Admin</button>
+                      <button type="button" class="btn btn-outline-primary rounded-pill" @click="autoLogin('caretaker')">Caretaker</button>
+                      <button type="button" class="btn btn-outline-warning rounded-pill" @click="autoLogin('landlord')">Landlord</button>
+                      <button type="button" class="btn btn-outline-info rounded-pill" @click="autoLogin('tenant')">Tenant</button>
+                      <button type="button" class="btn btn-outline-secondary rounded-pill" @click="autoLogin('service_provider')">Service Provider</button>
                     </div>
                   </div>
 
