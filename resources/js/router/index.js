@@ -14,6 +14,7 @@ import Units from '../views/Units.vue'
 import AwaitingInvoicing from '../views/AwaitingInvoicing.vue'
 import PendingTickets from '../views/PendingTickets.vue'
 import ClosedTickets from '../views/ClosedTickets.vue'
+import ActivityLogs from '../views/ActivityLogs.vue'
 
 const routes = [
     { path: '/', name: 'index', component: Login },
@@ -31,6 +32,7 @@ const routes = [
     { path: '/awaitinginvoicing', name: 'awaitinginvoicing', component: AwaitingInvoicing },
     { path: '/pendingtickets', name: 'pendingtickets', component: PendingTickets },
     { path: '/closedtickets', name: 'closedtickets', component: ClosedTickets },
+    { path: '/activitylogs', name: 'activitylogs', component: ActivityLogs },
 ];
 
 const router = createRouter({

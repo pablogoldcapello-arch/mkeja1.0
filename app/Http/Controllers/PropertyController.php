@@ -148,5 +148,15 @@ class PropertyController extends Controller
         ]);
     }
 
+    public function landlordProperties($id)
+    {
+        $landlordproperties = Property::where('landlord_id', $id)->with('landlord')->get();
+
+        return response()->json([
+            'success' => true,
+            'landlordproperties' => $landlordproperties
+        ]);
+    }    
+
 
 }

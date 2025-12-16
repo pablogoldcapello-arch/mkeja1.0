@@ -12,7 +12,7 @@
         </router-link>
       </li>
 
-      <li class="nav-item">
+      <li v-show="userRole == 'admin' || 'landlord' " class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#listing-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-building"></i><span>Manage Listings</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
@@ -33,7 +33,7 @@
         </ul>
       </li>       
 
-      <li class="nav-item">
+      <li v-show="userRole == 'admin'" class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#users-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-people"></i><span>Manage Users</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
@@ -102,7 +102,7 @@
         </ul>
       </li>
 
-      <li class="nav-item">
+      <li v-show="userRole == 'admin' || 'landlord' || 'caretaker' " class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#build-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-building"></i><span>Manage Properties</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
@@ -123,7 +123,7 @@
         </ul>
       </li>      
       
-      <li v-show="user.role == 'admin'" class="nav-item">
+      <li v-show="userRole == 'admin' || 'landlord' || 'tenant' || 'service_provider' " class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#invoice-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-receipt"></i><span>Manage Invoices</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
@@ -180,7 +180,7 @@
         </ul>
       </li> 
       
-      <li v-show="user.role == 'admin'" class="nav-item">
+      <li v-show="userRole == 'admin' || 'landlord' || 'tenant' || 'caretaker' || 'service_provider' " class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#support-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-receipt"></i><span>Manage Tickets</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
@@ -213,7 +213,7 @@
         </ul>
       </li> 
       
-      <li v-show="user.role == 'admin'" class="nav-item">
+      <li v-show="userRole == 'admin'" class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#logs-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-receipt"></i><span>System Logs</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
@@ -265,14 +265,15 @@ export default {
   name: 'TheSidebar',
   data() {
     return {
-      user: {}
+      user: {},
+      userRole: ''
     };
   },
   mounted() {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      this.user = JSON.parse(storedUser);
-    }
+    this.user = localStorage.getItem('user');
+    this.user = JSON.parse(this.user);
+    this.userId = this.user.id;
+    this.userRole = this.user.role;
   }
 };
 </script>

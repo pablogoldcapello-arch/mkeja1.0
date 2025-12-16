@@ -20,7 +20,7 @@
                       </ul> -->
                     </div>
     
-                    <div class="card-body pb-0">
+                    <div v-show="userRole == 'admin'" class="card-body pb-0">
                       <h5 class="card-title">All Properties <span>| Properties of M-Keja</span></h5>
                       <p class="card-text">
                         <div class="row">
@@ -99,6 +99,84 @@
                       </table>
     
                     </div>
+
+                    <div v-show="userRole == 'landlord'" class="card-body pb-0">
+                      <h5 class="card-title">My Properties <span>| Properties of M-Keja</span></h5>
+                      <p class="card-text">
+                        <div class="row">
+                          <div class="col d-flex">
+                   
+                   
+                            <!-- <router-link v-if="addLandlordPermission" to="/add-pmslandlord" custom v-slot="{ href, navigate, isActive }"> -->
+                                <a
+                                  :href="href"
+                                  :class="{ active: isActive }"
+                                  class="btn btn-sm btn-primary rounded-pill"
+                                  style="background-color: darkgreen; border-color: darkgreen;"
+                                  @click="addProperty()"
+                                >
+                                  Add Property
+                                </a>
+                            <!-- </router-link> -->
+                          </div>
+                          <div class="col-auto d-flex justify-content-end">
+                          <div class="btn-group" role="group">
+                              <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="ri-add-line"></i>
+                              </button>
+                              <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                     <a @click="navigateTo('/clients' )" class="dropdown-item" href="#"><i class="ri-user-fill mr-2"></i>Clients</a>
+                                    <a @click="navigateTo('/savings' )" class="dropdown-item" href="#"><i class="ri-user-fill mr-2"></i>Savings</a>
+                                    <a @click="navigateTo('/loans' )" class="dropdown-item" href="#"><i class="ri-user-fill mr-2"></i>Loans</a>
+                                </div>
+                              </div>
+                            </div>
+                        </div>   
+            
+                      </p>
+    
+                      <table id="LandlordPropertiesTable" class="table table-borderless">
+                        <thead>
+                          <tr>
+                            <th scope="col">Title</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Action</th>
+                          </tr>
+                        </thead>
+                        <!-- Spinner shown while data is initializing -->
+                        <tbody v-if="initializing">
+                          <tr>
+                            <td colspan="7" class="text-center">
+                              <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                        <tbody v-else>
+                          <tr v-for="item in landlordproperties" :key="item.id">
+                            <td>{{item.title ?? "N/A"}}</td>
+                            <td>{{item.type ?? "N/A"}}</td>
+                            <td>
+                              <div class="btn-group" role="group">
+                                  <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                  Action
+                                  </button>
+                                  <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
+                                  <a @click="viewProperty(item)" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a> 
+                                  <a @click.prevent="navigateTo('/units/' + item.id)" class="dropdown-item">
+                                      <i class="ri-eye-fill mr-2"></i>View Units
+                                  </a>
+                                  <a @click="editProperty(item)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
+                                  <a @click="deleteProperty(item.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
+                                  </div>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+    
+                    </div>                    
     
                   </div>
                 </div><!-- End Top Selling -->
@@ -115,7 +193,7 @@
                             <p v-if="selectedProperty">
                               <strong>Title:</strong> {{ selectedProperty.title }} 
                             </p>
-                            <p v-if="selectedProperty.landlord_id">
+                            <p v-show="userRole == 'admin'" v-if="selectedProperty.landlord_id">
                               <strong>Landlord:</strong> {{ selectedProperty.landlord.name }}
                             </p>
                             <p v-else>
@@ -588,7 +666,9 @@
     export default {
       data(){
         return {
+          userRole: '',
           properties: [],
+          landlordproperties: [],
           landlords: [],
           propertytypes: [],
           user: [],         
@@ -603,7 +683,7 @@
               location: '',          // property location
               coordinates: '',       // lat,long coordinates
               rent_amount: '',       // rent amount
-              status: 'active',       // default status
+              status: 'available',       // default status
               units_no: ""
               // agent_id will be added on backend using logged-in user ID
           },
@@ -765,96 +845,106 @@
             }
             return isValid;
         },
-        addProperty()
-        {
-          // Show the modal after fetching data
-          const modal = new bootstrap.Modal(document.getElementById('AddPropertyModal'));
-          modal.show();
+        addProperty() {
+          // Show the modal
+          const modalEl = document.getElementById('AddPropertyModal');
+          this.propertyModal = new bootstrap.Modal(modalEl); // store the instance
+          this.propertyModal.show();
         },
+
         async submit() {
-            console.log("Submit triggered!", this.form);
+          console.log("Submit triggered!", this.form);
+          this.submitting = true;
 
-            // Start submitting process
-            this.submitting = true;
-
-            try {
-                // Directly call submitForm() without validation
-                await this.submitForm();
-
-                // Submission successful
-                this.submitted = true;
-            } catch (error) {
-                // Handle submission error
-                console.error("Submission error:", error);
-                toast.fire(
-                    'Error!',
-                    error.response?.data?.message || 'An error occurred while adding the property.',
-                    'error'
-                );
-            } finally {
-                // End submitting process
-                this.submitting = false;
-            }
+          try {
+            await this.submitForm();
+            this.submitted = true;
+          } catch (error) {
+            console.error("Submission error:", error);
+            toast.fire(
+              'Error!',
+              error.response?.data?.message || 'An error occurred while adding the property.',
+              'error'
+            );
+          } finally {
+            this.submitting = false;
+          }
         },
 
         validateForm() {
           let isValid = true;
+
           if (!this.form.title) {
-              isValid = false;
-              document.getElementById('title').classList.add('is-invalid');
+            isValid = false;
+            document.getElementById('title').classList.add('is-invalid');
           } else {
-              document.getElementById('title').classList.remove('is-invalid');
+            document.getElementById('title').classList.remove('is-invalid');
           }
+
           if (!this.form.units_no) {
-              isValid = false;
-              document.getElementById('units_no').classList.add('is-invalid');
+            isValid = false;
+            document.getElementById('units_no').classList.add('is-invalid');
           } else {
-              document.getElementById('units_no').classList.remove('is-invalid');
+            document.getElementById('units_no').classList.remove('is-invalid');
           }
+
           if (!this.form.landlord_id) {
-              isValid = false;
-              document.getElementById('landlord').classList.add('is-invalid');
+            isValid = false;
+            document.getElementById('landlord').classList.add('is-invalid');
           } else {
-              document.getElementById('landlord').classList.remove('is-invalid');
+            document.getElementById('landlord').classList.remove('is-invalid');
           }
+
           return isValid;
-      },        
-      async submitForm() {
-            if (this.validateForm()) {
-                this.submitting = true;
-                try {
-                    // Create the property and wait for the response
-                    const response = await axios.post("api/properties", this.form);
-                    console.log(response);
+        },
 
-                    // Retrieve property ID
-                    this.propertyId = response.data.id;
-                    console.log("property", this.propertyId);
+        async submitForm() {
+          if (!this.validateForm()) return;
 
-                    // Display success notification
-                    toast.fire(
-                        'Success!',
-                        'Property added!',
-                        'success'
-                    );
+          this.submitting = true;
 
-                    // Navigate to the units page of the newly created property
-                    this.$router.push('/units/' + this.propertyId);
-                } catch (error) {
-                    console.error("Submission error:", error);
+          try {
+            // Create property
+            const response = await axios.post("api/properties", this.form);
+            this.propertyId = response.data.id;
 
-                    // Handle the error appropriately with a notification
-                    toast.fire(
-                        'Error!',
-                        error.response?.data?.message || 'An error occurred while adding the property.',
-                        'error'
-                    );
-                } finally {
-                    // Reset the submitting state
-                    this.submitting = false;
-                }
+            // Success notification
+            toast.fire('Success!', 'Property added!', 'success');
+
+            // Hide the currently open modal
+            if (this.propertyModal) {
+              this.propertyModal.hide();
             }
-       },
+
+            // Ask user if they want to configure units
+            const result = await Swal.fire({
+              title: 'Configure Units?',
+              text: 'Do you want to configure units for this property now?',
+              icon: 'question',
+              showCancelButton: true,
+              confirmButtonText: 'Yes, configure',
+              cancelButtonText: 'Not now'
+            });
+
+            if (result.isConfirmed) {
+              // User chose to configure units
+              this.$router.push('/units/' + this.propertyId);
+            } else {
+              // User canceled, reload the property list
+              this.loadLists();
+            }
+
+          } catch (error) {
+            console.error("Submission error:", error);
+            toast.fire(
+              'Error!',
+              error.response?.data?.message || 'An error occurred while adding the property.',
+              'error'
+            );
+          } finally {
+            this.submitting = false;
+          }
+        },
         getPhoto()
         {
             return "/storage/properties/";
@@ -954,6 +1044,26 @@
                                    
                 })
         },
+        getLandlordProperties(id) {
+            axios
+                .get(`/api/landlords/${id}/properties`)
+                .then((response) => {
+
+                    // If your controller returns raw collection:
+                    this.landlordproperties = response.data.landlordproperties;
+
+                    console.log("Properties list:", response.data);
+
+                    setTimeout(() => {
+                        $("#LandlordPropertiesTable").DataTable();
+                    }, 10);
+
+                })
+                .catch((error) => {
+                    console.error("Error loading properties:", error);
+                    toast.fire('Error', 'Failed to load properties', 'error');
+                });
+        },
         loadLists() {
           this.initializing = true; // Start spinner
           axios.get('/api/lists')
@@ -982,6 +1092,11 @@
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
         this.userId = this.user.id;
+        this.userRole = this.user.role;
+        if(this.userRole == 'landlord')
+        {
+          this.getLandlordProperties(this.userId);
+        }
         console.log(this.user)
         this.currentUser = JSON.parse(localStorage.getItem('user')) || {};
         this.current_user_id = this.currentUser.id;

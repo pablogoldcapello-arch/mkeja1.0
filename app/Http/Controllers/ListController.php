@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\SupportTicket;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -20,6 +21,7 @@ class ListController extends Controller
         $serviceproviders = User::latest()->where('role','service_provider')->get();
         $tenants = User::latest()->where('role','tenant')->get();
         $properties = Property::with('landlord')->latest()->get();
+        $activitylogs = ActivityLog::with('user')->latest()->get();
         $listings = Listing::with('images')->latest()->get();
         $awaitinginvoicing = Invoice::latest()
         ->with(['tenant'])
@@ -46,7 +48,8 @@ class ListController extends Controller
                 'awaitinginvoicing' => $awaitinginvoicing,
                 'listings' => $listings,
                 'pendingtickets' => $pendingtickets,
-                'closedtickets' => $closedtickets
+                'closedtickets' => $closedtickets,
+                'activitylogs' => $activitylogs
                 
             ]
         ]);

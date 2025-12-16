@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -38,6 +39,13 @@ class AuthController extends Controller
 
         $token = auth('api')->login($user); // use api guard explicitly
 
+        //record actvity log
+        $user = auth()->user(); // or JWTAuth::parseToken()->authenticate();
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'description' => $user->name.' created account'
+        ]);        
+
         return response()->json([
             'status' => 'success',
             'message' => 'User registered successfully.',
@@ -57,6 +65,12 @@ class AuthController extends Controller
             return response()->json(['error' => 'Invalid credentials'], 401);
         }
 
+        //record actvity log
+        ActivityLog::create([
+            'user_id' => auth('api')->user()->id,
+            'description' => auth('api')->user()->name.' logged in'
+        ]);        
+
         return response()->json([
             'status' => 'success',
             'user' => auth('api')->user(),
@@ -73,6 +87,14 @@ class AuthController extends Controller
     {
         try {
             auth('api')->logout();
+
+            //record actvity log
+            $user = auth()->user(); // or JWTAuth::parseToken()->authenticate();
+            ActivityLog::create([
+                'user_id' => auth('api')->user()->id,
+                'description' => auth('api')->user()->name.' logged out'
+            ]);
+                        
             return response()->json(['status' => 'success', 'message' => 'User logged out successfully.']);
         } catch (JWTException $e) {
             return response()->json(['status' => 'error', 'message' => 'Failed to logout, please try again.'], 500);

@@ -71,22 +71,22 @@
                             <td>{{item.type ?? 'N/A'}}</td>
                             <td>{{item.deposit ?? 'N/A'}}</td>
                             <td>{{item.monthly_rent ?? 'N/A'}}</td>
-<td>
-  <!-- VACANT -->
-  <span v-if="item.status == 'vacant'" class="badge bg-success">
-    <i class="bi bi-door-open me-1"></i> Vacant
-  </span>
+                            <td>
+                              <!-- VACANT -->
+                              <span v-if="item.status == 'vacant'" class="badge bg-success">
+                                <i class="bi bi-door-open me-1"></i> Vacant
+                              </span>
 
-  <!-- RENTED -->
-  <span v-else-if="item.status == 'rented'" class="badge bg-primary">
-    <i class="bi bi-house-check me-1"></i> Rented
-  </span>
+                              <!-- RENTED -->
+                              <span v-else-if="item.status == 'rented'" class="badge bg-primary">
+                                <i class="bi bi-house-check me-1"></i> Rented
+                              </span>
 
-  <!-- MAINTENANCE -->
-  <span v-else-if="item.status == 'maintenance'" class="badge bg-danger">
-    <i class="bi bi-tools me-1"></i> Maintenance
-  </span>
-</td>
+                              <!-- MAINTENANCE -->
+                              <span v-else-if="item.status == 'maintenance'" class="badge bg-danger">
+                                <i class="bi bi-tools me-1"></i> Maintenance
+                              </span>
+                            </td>
 
                             <td>
                               <div class="btn-group" role="group">

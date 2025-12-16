@@ -50,5 +50,6 @@ Route::middleware(['auth:api'])->group(function () {
     Route::delete('support-tickets/{ticket}/images/{image}', [SupportTicketController::class, 'deleteTicketImage']);
 
     Route::get('/properties/{id}/units', [PropertyController::class, 'units'])->name('propertyunits');
+    Route::get('/landlords/{id}/properties', [PropertyController::class, 'landlordProperties'])->name('landlordproperties');
 
 });
