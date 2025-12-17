@@ -79,13 +79,14 @@
       </li>
 
       <!-- Manage Properties -->
-      <li v-show="['admin', 'landlord', 'caretaker'].includes(userRole)" class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#build-nav" data-bs-toggle="collapse" href="#">
+      <li v-show="['admin', 'landlord'].includes(userRole)" class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#build-nav" data-bs-toggle="collapse">
           <i class="bi bi-building"></i>
           <span>Manage Properties</span>
           <i class="bi bi-chevron-down ms-auto"></i>
         </a>
-        <ul id="build-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+
+        <ul id="build-nav" class="nav-content collapse">
           <li>
             <router-link to="/properties" custom v-slot="{ href, navigate, isActive }">
               <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
@@ -94,8 +95,18 @@
               </a>
             </router-link>
           </li>
+
+          <li v-show="userRole === 'landlord'">
+            <router-link to="/caretakers" custom v-slot="{ href, navigate, isActive }">
+              <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
+                <i class="bi bi-circle"></i>
+                <span>Caretakers</span>
+              </a>
+            </router-link>
+          </li>
         </ul>
       </li>
+
 
       <!-- Manage Invoices -->
       <li v-show="['admin', 'landlord', 'tenant', 'service_provider'].includes(userRole)" class="nav-item">

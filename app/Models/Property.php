@@ -39,5 +39,16 @@ class Property extends Model
     {
         return $this->hasMany(Unit::class);
     }
+
+    public function caretakers()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'caretaker_property',
+            'property_id',
+            'caretaker_id'
+        )->withTimestamps();
+    }
+
     
 }

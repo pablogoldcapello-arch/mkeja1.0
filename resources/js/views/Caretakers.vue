@@ -338,15 +338,41 @@
                           </div>
 
                           <!-- Additional Fields -->
-                          <div v-if="data.role == 'landlord'" class="col-md-6">
-                            <label class="form-label">Property Count</label>
-                            <input type="number" class="form-control" v-model="data.property_count">
+                          <!-- Assign Properties to Caretaker (Landlord only) -->
+                          <div
+                            v-if="userRole === 'landlord'"
+                            class="col-md-12"
+                          >
+                            <label class="form-label">
+                              Assign Properties
+                              <small class="text-muted">(optional)</small>
+                            </label>
+
+                            <select
+                              class="form-select"
+                              multiple
+                              v-model="data.assigned_properties"
+                              size="6"
+                            >
+                              <option
+                                v-for="property in landlordProperties"
+                                :key="property.id"
+                                :value="property.id"
+                              >
+                                {{ property.title }} – {{ property.location }}
+                              </option>
+                            </select>
+
+                            <small class="text-muted">
+                              Caretaker will only access selected properties
+                            </small>
                           </div>
 
-                          <div v-if="data.role == 'landlord'" class="col-md-6">
-                            <label class="form-label">Assigned Properties (JSON)</label>
-                            <input type="text" class="form-control" v-model="data.assigned_properties" placeholder='e.g. [1,2,3]'>
-                          </div>
+                          <p v-if="userRole === 'landlord' && landlordProperties.length === 0"
+                            class="text-warning">
+                            You have no properties to assign yet.
+                          </p>
+
 
                           <!-- Skills -->
                           <div v-if="data.role == 'service_provider'" class="col-md-6">
@@ -507,30 +533,35 @@
                             </select>
                           </div>
 
-                          <!-- Property Count -->
-                          <div class="col-md-6">
-                            <label class="form-label">Property Count</label>
-                            <input type="number" class="form-control" v-model="form.property_count">
-                          </div>
+                          <div
+                            v-if="user.role === 'landlord'"
+                            class="col-md-12"
+                          >
+                            <label class="form-label">
+                              Assign Properties
+                              <small class="text-muted">(optional)</small>
+                            </label>
 
-                          <!-- Assigned Properties (multi-select) -->
-                          <div class="col-md-6">
-                            <label class="form-label">Assigned Properties</label>
-                            <select 
+                            <select
                               class="form-select"
                               multiple
                               v-model="form.assigned_properties"
+                              size="6"
                             >
                               <option
-                                v-for="property in userProperties"
+                                v-for="property in landlordProperties"
                                 :key="property.id"
                                 :value="property.id"
                               >
-                                {{ property.title }} ({{ property.location }})
+                                {{ property.title }} – {{ property.location }}
                               </option>
                             </select>
-                            <small class="text-muted">Hold CTRL to select multiple</small>
+
+                            <small class="text-muted">
+                              Caretaker will only access selected properties
+                            </small>
                           </div>
+
 
                           <!-- Status -->
                           <div class="col-md-6">
@@ -617,6 +648,7 @@
         return {
           caretakers: [],
           user: [],
+          userRole: '',
           selectedLandlord: {},
           showPassword: false,
           defaultProfile: DefaultProfile,
@@ -636,7 +668,7 @@
             dob: "",
             gender: "",
             property_count: 0,
-            assigned_properties: "",
+            assigned_properties: [],
             skills: [],
             status: "active",
 
@@ -659,7 +691,7 @@
             dob: "",
             gender: "",
             property_count: 0,
-            assigned_properties: "",
+            assigned_properties: [],
             skills: [],
             status: "active",
 
@@ -667,6 +699,7 @@
             profile_photo_preview: null,
             profile_photo_url: '' // for URL input
           },
+          landlordProperties: [],
           availableSkills: [
             'Plumbing',
             'Electrical',
@@ -780,7 +813,9 @@
             status: landlord.status ?? "",
 
             property_count: landlord.property_count ?? "",
-            assigned_properties: landlord.assigned_properties ?? "",
+            assigned_properties: landlord.assigned_properties
+            ? landlord.assigned_properties.map(p => p.id ?? p)
+            : [],
             skills: landlord.skills ?? [],
             profile_photo_url: landlord.profile_photo_url || null,
             profile_photo_preview: landlord.profile_photo 
@@ -841,7 +876,7 @@
             const fields = [
               "name", "email", "role", "phone", "address", "city",
               "county", "postal_code", "dob", "gender",
-              "status", "property_count", "assigned_properties"
+              "status", "property_count"
             ];
 
             fields.forEach(field => {
@@ -849,6 +884,13 @@
                 formData.append(field, this.form[field]);
               }
             });
+
+            // ✅ Handle assigned_properties array
+            if (Array.isArray(this.form.assigned_properties)) {
+              this.form.assigned_properties.forEach(id => {
+                formData.append('assigned_properties[]', id);
+              });
+            }
 
             // Handle Skills (array)
             if (Array.isArray(this.form.skills)) {
@@ -944,39 +986,44 @@
        
         async submitForm() {
           try {
-            // Prepare FormData for file upload + other fields
             const formData = new FormData();
 
-            // Append all fields
             for (const key in this.data) {
+
+              // Handle profile photo
               if (key === 'profile_photo_file' && this.data.profile_photo_file) {
-                // append the actual file
                 formData.append('profile_photo', this.data.profile_photo_file);
-              } else if (key !== 'profile_photo_file') {
+                continue;
+              }
+
+              // ✅ Handle assigned_properties array
+              if (key === 'assigned_properties' && Array.isArray(this.data.assigned_properties)) {
+                this.data.assigned_properties.forEach(id => {
+                  formData.append('assigned_properties[]', id);
+                });
+                continue;
+              }
+
+              // Default behavior
+              if (this.data[key] !== null && this.data[key] !== undefined) {
                 formData.append(key, this.data[key]);
               }
             }
 
-            // Send POST request as multipart/form-data
             const response = await axios.post("api/users", formData, {
               headers: {
                 'Content-Type': 'multipart/form-data'
               }
             });
 
-            console.log(response);
+            toast.fire('Success!', 'Caretaker added!', 'success');
 
-            toast.fire(
-              'Success!',
-              'Caretaker added!',
-              'success'
+            const modal = bootstrap.Modal.getInstance(
+              document.getElementById('AddLandlordModal')
             );
-
-            // Close the modal after submit
-            const modal = bootstrap.Modal.getInstance(document.getElementById('AddLandlordModal'));
             modal.hide();
 
-            // Reset form properly (avoid assigning '')
+            // Reset form
             this.data = {
               id: "",
               first_name: "",
@@ -992,7 +1039,7 @@
               dob: "",
               gender: "",
               property_count: 0,
-              assigned_properties: "",
+              assigned_properties: [],
               skills: "",
               status: "active",
               profile_photo_file: null,
@@ -1003,7 +1050,7 @@
             this.loadLists();
 
           } catch (error) {
-            console.log(error);
+            console.error(error);
             toast.fire(
               'Error!',
               error.response?.data?.message || 'An error occurred while adding the user.',
@@ -1011,6 +1058,7 @@
             );
           }
         },
+
 
         getPhoto(user) {
             // user can be an object containing profile_photo and profile_photo_url
@@ -1086,9 +1134,28 @@
       },
       mounted(){
         this.loadLists();
-        // this.user = localStorage.getItem('user');
+        this.user = localStorage.getItem('user');
+        this.user = JSON.parse(this.user);
+        this.userId = this.user.id;
+        this.userRole = this.user.role;
         // this.user = JSON.parse(this.user);
-        // this.userId = this.user.id;
+        this.userId = this.user.id;
+        if (this.user.role === 'landlord') {
+            axios
+                .get(`/api/landlords/${this.user.id}/properties`)
+                .then((response) => {
+
+                    // If your controller returns raw collection:
+                    this.landlordProperties = response.data.landlordproperties;
+
+                    console.log("Properties list:", response.data);
+
+                })
+                .catch((error) => {
+                    console.error("Error loading properties:", error);
+                    toast.fire('Error', 'Failed to load properties', 'error');
+                });
+        }        
         // this.currentUser = JSON.parse(localStorage.getItem('user')) || {};
         // this.current_user_id = this.currentUser.id;
         // this.current_user = this.currentUser.first_name + " " + this.currentUser.last_name;

@@ -69,6 +69,8 @@ class UserController extends Controller
             'postal_code'         => $request->input('postal_code'),
             'status'              => $request->input('status', 'active'),
             'property_count'      => $request->input('property_count', 0),
+            'assigned_properties'   => 'nullable|array',
+            'assigned_properties.*' => 'exists:properties,id',
             'is_email_verified'   => $request->boolean('is_email_verified', false),
             // '2fa_enabled' is a column name starting with number — ensure your DB column exists exactly like this
             '2fa_enabled'         => $request->boolean('2fa_enabled', false),
@@ -103,20 +105,20 @@ class UserController extends Controller
             $data['skills'] = null;
         }
 
-    // Handle profile photo or URL
-    if ($request->hasFile('profile_photo')) {
-        $file = $request->file('profile_photo');
-        $filename = 'profile_' . Str::random(8) . '_' . time() . '.' . $file->getClientOriginalExtension();
-        $path = $file->storeAs('profiles', $filename, 'public');
-        $data['profile_photo'] = $path;
-        $data['profile_photo_url'] = null; // clear URL if file uploaded
-    } elseif ($request->filled('profile_photo_url')) {
-        $data['profile_photo'] = null;
-        $data['profile_photo_url'] = $request->input('profile_photo_url'); // store URL directly
-    } else {
-        $data['profile_photo'] = null;
-        $data['profile_photo_url'] = null;
-    }
+        // Handle profile photo or URL
+        if ($request->hasFile('profile_photo')) {
+            $file = $request->file('profile_photo');
+            $filename = 'profile_' . Str::random(8) . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('profiles', $filename, 'public');
+            $data['profile_photo'] = $path;
+            $data['profile_photo_url'] = null; // clear URL if file uploaded
+        } elseif ($request->filled('profile_photo_url')) {
+            $data['profile_photo'] = null;
+            $data['profile_photo_url'] = $request->input('profile_photo_url'); // store URL directly
+        } else {
+            $data['profile_photo'] = null;
+            $data['profile_photo_url'] = null;
+        }
 
         // Create user with mass assignment using fillable attributes
         $user = User::create($data);
@@ -130,7 +132,12 @@ class UserController extends Controller
                 'start_date'  => $request->start_date ?? now(),
                 'status'      => 'active',
             ]);
-        }        
+        }  
+        
+        if ($request->filled('assigned_properties')) {
+            $user->properties()->sync($request->assigned_properties);
+        }
+   
 
         return response()->json([
             'message' => 'User created successfully',
@@ -188,13 +195,7 @@ class UserController extends Controller
 
         // Handle assigned_properties
         if ($request->has('assigned_properties')) {
-            $ap = $request->input('assigned_properties');
-            if (is_array($ap)) {
-                $validated['assigned_properties'] = json_encode($ap);
-            } else {
-                json_decode($ap);
-                $validated['assigned_properties'] = json_last_error() === JSON_ERROR_NONE ? $ap : null;
-            }
+            $user->properties()->sync($request->assigned_properties);
         }
 
         // Handle skills

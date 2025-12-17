@@ -89,4 +89,16 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }    
+
+    public function properties()
+    {
+        return $this->belongsToMany(
+            Property::class,
+            'caretaker_property', // pivot table name
+            'caretaker_id',       // foreign key on pivot for User
+            'property_id'         // foreign key on pivot for Property
+        )->withTimestamps();
+    }
+
+
 }
