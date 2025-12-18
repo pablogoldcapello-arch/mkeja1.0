@@ -12,24 +12,41 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('invoices', function (Blueprint $table) {
-            $table->bigIncrements('id'); // Primary key
+            $table->bigIncrements('id');
             
-            // Which tenant is this invoice for
-            $table->unsignedBigInteger('tenant_id')->nullable();
-            $table->foreign('tenant_id')->references('id')->on('users')->onDelete('cascade');
+            // Recipient
+            $table->enum('type', ['tenant', 'service_provider'])->default('tenant');
 
-            // Optional reference to property or service
+            // Tenant
+            $table->unsignedBigInteger('tenant_id')->nullable();
+            $table->foreign('tenant_id')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
+
+            // Property (optional)
             $table->unsignedBigInteger('property_id')->nullable();
+            $table->foreign('property_id')
+                ->references('id')
+                ->on('properties')
+                ->onDelete('set null');
+
+            // Service (optional)
             $table->unsignedBigInteger('service_id')->nullable();
+            $table->foreign('service_id')
+                ->references('id')
+                ->on('services')
+                ->onDelete('set null');
 
             // Invoice fields
-            $table->string('invoice_number')->nullable();
-            $table->decimal('amount_due', 12, 2)->nullable();
-            $table->string('rent_month')->nullable();
+            $table->string('invoice_number')->unique()->nullable();
+            $table->decimal('amount_due', 12, 2);
+            $table->string('rent_month')->nullable(); //for tenants
             $table->date('due_date')->nullable();
 
-            // Status: matches frontend logic
-            $table->enum('status', ['draft','sent','unpaid','paid','overdue'])->default('draft');
+            $table->enum('status', [
+                'draft', 'sent', 'unpaid', 'paid', 'overdue'
+            ])->default('draft');
 
             $table->timestamps();
         });

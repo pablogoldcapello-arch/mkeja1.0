@@ -190,10 +190,23 @@
                                 <td>{{ statement.rent_month }}</td>
                                 <td>{{ format_date(statement.created_at) }}</td>
                                 <td>
-                                  <span v-if="statement.status == 'unpaid'" class="badge bg-info text-dark"><i class="bi bi-clipboard2-x"></i> Unpaid</span>
-                                  <span v-else-if="statement.status == 'paid'" class="badge bg-success"><i class="bi bi-clipboard2-check"></i> Paid</span>
-                                  <span v-else-if="statement.status == 'overdue'" class="badge bg-warning text-dark"><i class="bi bi-clipboard2-x"></i> Overdue</span>
+                                  <span v-if="statement.status === 'draft'" class="badge bg-secondary">
+                                    <i class="bi bi-file-earmark-text"></i> Draft
+                                  </span>
+                                  <span v-else-if="statement.status === 'sent'" class="badge bg-primary">
+                                    <i class="bi bi-envelope"></i> Sent
+                                  </span>
+                                  <span v-else-if="statement.status === 'unpaid'" class="badge bg-info text-dark">
+                                    <i class="bi bi-clipboard2-x"></i> Unpaid
+                                  </span>
+                                  <span v-else-if="statement.status === 'paid'" class="badge bg-success">
+                                    <i class="bi bi-clipboard2-check"></i> Paid
+                                  </span>
+                                  <span v-else-if="statement.status === 'overdue'" class="badge bg-warning text-dark">
+                                    <i class="bi bi-clipboard2-x"></i> Overdue
+                                  </span>
                                 </td>
+
                                 <td>
                                   <div class="btn-group" role="group">
                                     <button
@@ -299,18 +312,13 @@
                             </div>
                             <div class="modal-body">          
 
-                              <p><strong>Invoice Number:</strong> {{refNo}}
-                                <span v-if="selectedStatement.status == 0" class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Not Invoiced </span>
-                              </p>   
-                              <p><strong>Rent Month:</strong> {{rentMonth}} </p>
-                              <p><strong>Creation Date:</strong> {{format_date(selectedStatement.created_at)}} </p>
-                              <p><strong>Property:</strong> {{propertyName}} </p>
-                              <p><strong>Unit:</strong> {{unitName}} </p>
-                              <p><strong>Tenant:</strong> {{tenantName}} </p>
-                              <p><strong>Phone:</strong> {{phoneNumber}} </p>
-                              <p><strong>Details:</strong> {{details}} </p>
-                              <p>(*all charges in KES.)</p>
-
+                              <p><strong>Invoice Number:</strong> {{refNo}}</p>
+                              <p><strong>Rent Month:</strong> {{rentMonth}}</p>
+                              <p><strong>Creation Date:</strong> {{format_date(selectedStatement.created_at)}}</p>
+                              <p><strong>Property:</strong> {{propertyName}}</p>
+                              <p><strong>Unit:</strong> {{unitName}}</p>
+                              <p><strong>Tenant:</strong> {{tenantName}}</p>
+                              <p><strong>Phone:</strong> {{phoneNumber}}</p>
                                             
                             </div>
                             <div class="modal-footer">
@@ -320,70 +328,125 @@
                         </div>
                     </div>
 
-                    <!-- Add InvoiceModal -->
-                    <div class="modal fade" id="addInvoiceModal" tabindex="-1" role="dialog" aria-labelledby="addInvoiceModalLabel" aria-hidden="true">
-                      <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h5 class="modal-title" id="addInvoiceModalLabel">Create Invoice</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="closeModal">
-                              <span aria-hidden="true">&times;</span>
-                            </button>
-                          </div>
-                          <div class="modal-body">
-                            <!-- Modal body content -->
-                            <div class="modal-body">
-                              <p>
-                                <strong>Tenant Name:*</strong>
-                                <input
-                                  type="text"
-                                  v-model="searchQuery"
-                                  @input="filterTenants"
-                                  placeholder="Search tenant..."
-                                  class="form-control"
-                                />
-                                <select v-model="form.tenant_id" class="form-control" size="5">
-                                  <option
-                                    v-for="tenant in filteredTenants"
-                                    :key="tenant.id"
-                                    :value="tenant.id"
-                                  >
-                                    {{ tenant.name }} 
-                                  </option>
-                                </select>
-                                <div v-if="errors.tenant" class="text-danger">{{ errors.tenant }}</div>
-                              </p>
+<!-- Add Invoice Modal -->
+<div class="modal fade" id="addInvoiceModal" tabindex="-1" role="dialog" aria-labelledby="addInvoiceModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h5 class="modal-title" id="addInvoiceModalLabel">
+          Create {{ form.type === 'tenant' ? 'Tenant' : 'Service Provider' }} Invoice
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="closeModal">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
 
-                               <!-- Display selected tenant details -->
-                              <div v-if="selectedTenant">
-                                <p><strong>Selected Tenant:</strong></p>
-                                <p><strong></strong> {{ selectedTenant.name }} - {{ selectedTenant.phone }}</p>
-                                <!-- <p><strong></strong> {{ selectedTenant.property.name }} - {{ selectedTenant.unit.unit_number }}</p> -->
-                                <!-- Display other details as needed -->  
-                              </div>
-                              <p>
-                                <strong>Rent Month:*</strong>
-                                <select v-model="form.rent_month" class="form-control">
-                                  <option v-for="month in months" :key="month" :value="month">{{ month }}</option>
-                                </select>
-                                <div v-if="errors.rentmonth" class="text-danger">{{ errors.rentmonth }}</div>
-                              </p>
-                              <!-- <p>
-                                <strong>Water Bill:</strong>(optional)
-                                <input type="number" name="water_bill" v-model="form.water_bill" class="form-control">
-                                <div v-if="errors.water_bill" class="text-danger">{{ errors.water_bill }}</div>
-                              </p> -->
-                            </div>
-                          </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="closeModal">Close</button>
-                            <!-- Additional buttons or actions -->
-                            <button type="button" @click="createAddInvoice" class="btn btn-primary" style="background-color: forestgreen; border-color: darkgreen;">Save and add another</button>
-                            <button type="button" @click="createInvoice" class="btn btn-primary" style="background-color: darkgreen; border-color: darkgreen;">Save</button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+      <!-- Modal Body -->
+      <div class="modal-body">
+
+        <!-- Invoice Type -->
+        <p>
+          <strong>Invoice Type:*</strong>
+          <select v-model="form.type" class="form-control">
+            <option value="tenant">Tenant</option>
+            <option value="service_provider">Service Provider</option>
+          </select>
+          <div v-if="errors.type" class="text-danger">{{ errors.type }}</div>
+        </p>
+
+        <!-- Tenant Invoice Fields -->
+        <div v-if="form.type === 'tenant'">
+          <p>
+            <strong>Tenant Name:*</strong>
+            <input
+              type="text"
+              v-model="searchQuery"
+              @input="filterTenants"
+              placeholder="Search tenant..."
+              class="form-control"
+            />
+            <select v-model="form.tenant_id" class="form-control" size="5">
+              <option v-for="tenant in filteredTenants" :key="tenant.id" :value="tenant.id">
+                {{ tenant.name }}
+              </option>
+            </select>
+            <div v-if="errors.tenant_id" class="text-danger">{{ errors.tenant_id }}</div>
+          </p>
+
+          <div v-if="selectedTenant">
+            <p><strong>Selected Tenant:</strong></p>
+            <p>{{ selectedTenant.name }} - {{ selectedTenant.phone }}</p>
+          </div>
+
+          <p>
+            <strong>Rent Month:*</strong>
+            <select v-model="form.rent_month" class="form-control">
+              <option v-for="month in months" :key="month" :value="month">{{ month }}</option>
+            </select>
+            <div v-if="errors.rent_month" class="text-danger">{{ errors.rent_month }}</div>
+          </p>
+        </div>
+
+        <!-- Service Provider Invoice Fields -->
+        <div v-if="form.type === 'service_provider'">
+          <p>
+            <strong>Service Provider:*</strong>
+            <input
+              type="text"
+              v-model="searchProviderQuery"
+              @input="filterProviders"
+              placeholder="Search provider..."
+              class="form-control"
+            />
+            <select v-model="form.provider_id" class="form-control" size="5">
+              <option v-for="provider in filteredProviders" :key="provider.id" :value="provider.id">
+                {{ provider.name }}
+              </option>
+            </select>
+            <div v-if="errors.provider_id" class="text-danger">{{ errors.provider_id }}</div>
+          </p>
+
+          <p>
+            <strong>Service:*</strong>
+            <select v-model="form.service_id" class="form-control">
+              <option v-for="service in services" :key="service.id" :value="service.id">{{ service.name }}</option>
+            </select>
+            <div v-if="errors.service_id" class="text-danger">{{ errors.service_id }}</div>
+          </p>
+
+          <p>
+            <strong>Due Date:*</strong>
+            <input type="date" v-model="form.due_date" class="form-control" />
+            <div v-if="errors.due_date" class="text-danger">{{ errors.due_date }}</div>
+          </p>
+        </div>
+
+        <!-- Amount Due -->
+        <p v-if="form.type === 'service_provider'">
+          <strong>Amount Due:*</strong>
+          <input type="number" v-model="form.amount_due" class="form-control" placeholder="Enter amount" />
+          <div v-if="errors.amount_due" class="text-danger">{{ errors.amount_due }}</div>
+        </p>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="closeModal">Close</button>
+        <button type="button" @click="createAddInvoice" class="btn btn-primary" style="background-color: forestgreen; border-color: darkgreen;">
+          Save and add another
+        </button>
+        <button type="button" @click="createInvoice" class="btn btn-primary" style="background-color: darkgreen; border-color: darkgreen;">
+          Save
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 
                     <!--Edit Invoice Modal -->
                     <div class="modal fade" id="EditInvoiceModal" tabindex="-1" aria-labelledby="EditInvoiceModalLabel" aria-hidden="true">
@@ -454,6 +517,8 @@
         return {
           awaitinginvoicing: [],
           tenants: [],
+          serviceproviders: [],
+          services: [],
           months: [],
           collectedTotal: 0,
           expensesTotal: 0,
@@ -461,13 +526,24 @@
           rentMonth: '',
           
           selectedStatement: {}, // Initialize as an empty object
+          refNo: '',
+          rentMonth: '',
+          propertyName: '',
+          unitName: '',
+          tenantName: '',
+          phoneNumber: '',
+          details: '',
           currentMonth: '',
           logoBase64: '',
 
           form: {
-            water_bill : '',
-            rent_month: '',
-            tenant_id: ''
+            type: 'tenant',
+            tenant_id: null,
+            provider_id: null,
+            service_id: null,
+            rent_month: null,
+            due_date: null,
+            amount_due: null,
           },
           errors: {
             water_bill: '',
@@ -476,6 +552,10 @@
           },
           searchQuery: '',
           filteredTenants: [],
+          selectedTenant: null,
+          searchProviderQuery: '',
+          filteredProviders: [],
+          services: [],
           loading: true,
           invoicing: false,
           generating: false,
@@ -491,14 +571,12 @@
         viewInvoice(invoice)
         {
           this.selectedStatement = invoice;
-          this.refNo = this.selectedStatement.ref_no;
-          this.rentMonth = this.selectedStatement.rent_month;
-          this.invoiceDate = this.selectedStatement.created_at;
-          this.propertyName = this.selectedStatement.property.name;
-          this.unitName = this.selectedStatement.unit.unit_number;
-          this.tenantName = this.selectedStatement.tenant.first_name +' '+ this.selectedStatement.tenant.first_name;
-          this.phoneNumber = this.selectedStatement.tenant.phone_number;
-          this.details = this.selectedStatement.details;
+          this.refNo = invoice.invoice_number;
+          this.rentMonth = invoice.rent_month;
+          this.propertyName = invoice.property ? invoice.property.name : 'N/A';
+          this.unitName = invoice.unit ? invoice.unit.name : 'N/A';
+          this.tenantName = invoice.tenant ? invoice.tenant.name : 'N/A';
+          this.phoneNumber = invoice.tenant ? invoice.tenant.phone : 'N/A';
           this.emailCount = this.selectedStatement.email_count;
           this.whatsappCount = this.selectedStatement.whatsapp_count;
           this.smsCount = this.selectedStatement.sms_count;
@@ -712,6 +790,17 @@
         },
         closeModal() {
           // $('#addInvoiceModal').modal('hide'); // Hide the modal using jQuery
+            this.form = {
+            type: 'tenant',
+            tenant_id: null,
+            provider_id: null,
+            service_id: null,
+            rent_month: null,
+            due_date: null,
+            amount_due: null,
+          };
+          this.errors = {};
+          this.selectedTenant = null;
           const modal = bootstrap.Modal.getInstance(document.getElementById('addInvoiceModal'));
           modal.hide();
         },
@@ -1581,8 +1670,11 @@
             .then((response) => {
               this.awaitinginvoicing = response.data.lists.awaitinginvoicing;
 
+              this.services = response.data.lists.services;
               this.tenants = response.data.lists.tenants;
               this.filteredTenants = this.tenants;
+              this.serviceproviders = response.data.lists.serviceproviders;
+              this.filteredProviders = this.serviceproviders;              
               this.expenses = response.data.lists.pmsexpenses;
               // Calculate the total amount paid
               this.totalAmountPaid = this.calculateTotalAmountPaid();
@@ -1597,7 +1689,7 @@
               this.initializing = false; // Stop spinner
             });
         },
-      calculateDueDate(rentMonth) {
+        calculateDueDate(rentMonth) {
           let dueDate = new Date(rentMonth);
           dueDate.setDate(5);
 
@@ -1614,6 +1706,13 @@
             return fullName.includes(query);
           });
         },
+         filterProviders() {
+          const query = this.searchProviderQuery.toLowerCase();
+          this.filteredProviders = this.serviceproviders.filter(provider => {
+            const fullName = `${provider.name}`.toLowerCase();
+            return fullName.includes(query);
+          });
+        },        
         calculateTotalAmountPaid() {
         if (!this.expenses || this.expenses.length === 0) {
               return 0; // If expenses data is empty or undefined, return 0

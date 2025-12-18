@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Property;
 use App\Models\Listing;
 use App\Models\Invoice;
+use App\Models\Service;
 use Carbon\Carbon;
 
 class ListController extends Controller
@@ -16,6 +17,7 @@ class ListController extends Controller
     public function index()
     {
         $users = User::latest()->get();
+        $services = Service::latest()->get();
         $landlords = User::latest()->where('role','landlord')->get();
         $caretakers = User::latest()->where('role','caretaker')->get();
         $serviceproviders = User::latest()->where('role','service_provider')->get();
@@ -25,7 +27,7 @@ class ListController extends Controller
         $listings = Listing::with('images')->latest()->get();
         $awaitinginvoicing = Invoice::latest()
         ->with(['tenant'])
-        ->where('status', 'unpaid')
+        ->where('status', 'draft')
         ->get();
         $pendingtickets = SupportTicket::with(['images','user'])
         ->where('status', 'open')
@@ -40,6 +42,7 @@ class ListController extends Controller
         return response()->json([
             "lists" => [
                 'users' => $users,
+                'services' => $services,
                 'landlords' => $landlords,
                 'caretakers' => $caretakers,
                 'serviceproviders' => $serviceproviders,

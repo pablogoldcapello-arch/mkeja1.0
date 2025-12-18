@@ -10,6 +10,7 @@ use App\Models\Service;
 class Invoice extends Model
 {
     protected $fillable = [
+        'type',
         'tenant_id',       // FK → users.id
         'property_id',     // FK → properties.id (nullable)
         'service_id',      // FK → services.id (nullable)
@@ -45,4 +46,16 @@ class Invoice extends Model
     {
         return $this->property ? $this->property->name : ($this->service ? $this->service->name : 'N/A');
     }
+
+    public static function generateInvoiceNumber()
+    {
+        $lastId = self::max('id') ?? 0;
+
+        return 'INV-' . date('Y') . '-' . str_pad(
+            $lastId + 1,
+            6,
+            '0',
+            STR_PAD_LEFT
+        );
+    }    
 }

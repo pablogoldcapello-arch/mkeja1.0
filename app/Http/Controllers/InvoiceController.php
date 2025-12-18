@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
+use App\Models\Tenancy;
+use App\Services\InvoiceService;
+use Carbon\Carbon;
 
 class InvoiceController extends Controller
 {
@@ -22,28 +25,40 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
-
-    // Get the current date and format it for reference number
-        $orgDate = now();
-        $newDate = $orgDate->format('YmdHis'); // Using Carbon formatting
-        $refno = "INV" . $newDate . " " . $request->tenant_id; // Proper string concatenation
-            
-        $invoice = new Invoice();
-        $invoice->tenant_id = $request->tenant_id;
-        $invoice->invoice_number = $refno;
-        $invoice->amount_due = $request->amount_due;
-        $invoice->rent_month = $request->rent_month;
-        $invoice->status = 'unpaid';
-        $invoice->save();
-
-        //record actvity log
-        $user = auth()->user(); // or JWTAuth::parseToken()->authenticate();
-        ActivityLog::create([
-            'user_id' => $user->id,
-            'description' => $user->name.' created invoice '.$refno. ' for tenant ID '.$request->tenant_id
+        $request->validate([
+            'tenant_id' => 'required|exists:users,id',
+            'rent_month' => 'nullable|string'
         ]);
 
-        return response()->json($invoice);         
+        // ✅ Normalize rent_month
+        $rentMonth = Carbon::parse('01 ' . $request->rent_month)
+        ->format('Y-m');
+
+        $tenancy = Tenancy::with('unit')
+            ->where('tenant_id', $request->tenant_id)
+            ->where('status', 'active')
+            ->firstOrFail();
+
+        $invoice = InvoiceService::createRentInvoice(
+            $tenancy,
+            $rentMonth
+        );
+
+        if (!$invoice) {
+            return response()->json([
+                'message' => 'Invoice already exists for this tenant and month'
+            ], 409);
+        }
+
+        // Activity log
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'description' => auth()->user()->name .
+                ' created invoice ' . $invoice->invoice_number .
+                ' for tenant ID ' . $tenancy->tenant_id
+        ]);
+
+        return response()->json($invoice, 201);
     }
 
     /**
