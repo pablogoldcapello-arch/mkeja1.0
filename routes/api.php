@@ -55,4 +55,6 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/tenancies/assign', [TenancyController::class, 'assignTenant'])
     ->middleware(['auth:api', 'role:admin,landlord']);
 
+    Route::put('profile/{id}',[UserController::class, 'updateProfile']);
+    Route::put('changepassword/{id}',[UserController::class, 'changePassword']);
 });

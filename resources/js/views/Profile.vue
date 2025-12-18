@@ -61,7 +61,7 @@
 
                   <div class="row">
                     <div class="col-lg-3 col-md-4 label">Phone</div>
-                    <div class="col-lg-9 col-md-8">(254) {{form.phone}}</div>
+                    <div class="col-lg-9 col-md-8">{{form.phone}}</div>
                   </div>
 
                   <div class="row">
@@ -109,6 +109,27 @@
                       <label for="Email" class="col-md-4 col-lg-3 col-form-label">Email</label>
                       <div class="col-md-8 col-lg-9">
                         <input name="email" type="email" class="form-control" id="Email" v-model="form.email">
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="County" class="col-md-4 col-lg-3 col-form-label">County</label>
+                      <div class="col-md-8 col-lg-9">
+                        <input name="county" type="text" class="form-control" id="county" v-model="form.county">
+                      </div>
+                    </div>                    
+
+                    <div class="row mb-3">
+                      <label for="City" class="col-md-4 col-lg-3 col-form-label">City/Town</label>
+                      <div class="col-md-8 col-lg-9">
+                        <input name="city" type="text" class="form-control" id="city" v-model="form.city">
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="Address" class="col-md-4 col-lg-3 col-form-label">Address</label>
+                      <div class="col-md-8 col-lg-9">
+                        <input name="address" type="text" class="form-control" id="Address" v-model="form.address">
                       </div>
                     </div>
 
@@ -175,6 +196,9 @@
                     last_name: '',
                     email: '',
                     phone: '',
+                    city: '',
+                    county: '',
+                    address: '',
                     new_password: '',
                     conf_password: ''
                 }
