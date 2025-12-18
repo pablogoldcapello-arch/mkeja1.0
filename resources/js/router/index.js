@@ -15,6 +15,7 @@ import AwaitingInvoicing from '../views/AwaitingInvoicing.vue';
 import PendingTickets from '../views/PendingTickets.vue';
 import ClosedTickets from '../views/ClosedTickets.vue';
 import ActivityLogs from '../views/ActivityLogs.vue';
+import Profile from '../views/Profile.vue';
 
 const routes = [
   // Public routes
@@ -36,6 +37,7 @@ const routes = [
   { path: '/pendingtickets', name: 'pendingtickets', component: PendingTickets, meta: { requiresAuth: true } },
   { path: '/closedtickets', name: 'closedtickets', component: ClosedTickets, meta: { requiresAuth: true } },
   { path: '/activitylogs', name: 'activitylogs', component: ActivityLogs, meta: { requiresAuth: true } },
+  { path: '/profile', name: 'profile', component: Profile, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({
