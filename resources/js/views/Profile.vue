@@ -146,15 +146,35 @@
 
                     <div class="row mb-3">
                       <label for="newPassword" class="col-md-4 col-lg-3 col-form-label">New Password</label>
-                      <div class="col-md-8 col-lg-9">
-                        <input name="newpassword" v-model="form.new_password" type="password" class="form-control">
+                      <div class="input-group">
+                        <input
+                          :type="isPasswordVisible ? 'text' : 'password'"
+                          name="password"
+                          class="form-control"
+                          id="yourPassword"
+                          v-model="form.new_password"
+                          required
+                        />
+                        <span class="input-group-text" @click="togglePasswordVisibility" style="cursor: pointer;">
+                          <i :class="isPasswordVisible ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
+                        </span>
                       </div>
                     </div>
 
                     <div class="row mb-3">
-                      <label for="renewPassword" class="col-md-4 col-lg-3 col-form-label">Re-enter New Password</label>
-                      <div class="col-md-8 col-lg-9">
-                        <input name="renewpassword" v-model="form.conf_password" type="password" class="form-control">
+                      <label for="renewPassword" class="col-md-4 col-lg-6 col-form-label">Re-enter New Password</label>
+                      <div class="input-group">
+                        <input
+                          :type="isPasswordVisible ? 'text' : 'password'"
+                          name="password"
+                          class="form-control"
+                          id="yourPassword"
+                          v-model="form.conf_password"
+                          required
+                        />
+                        <span class="input-group-text" @click="togglePasswordVisibility" style="cursor: pointer;">
+                          <i :class="isPasswordVisible ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
+                        </span>
                       </div>
                     </div>
 
@@ -191,6 +211,7 @@
     export default{
         data(){
             return {
+                isPasswordVisible: false,
                 form: {
                     first_name: '',
                     last_name: '',
@@ -208,6 +229,9 @@
         Master,
       },
       methods: {
+        togglePasswordVisibility() {
+        this.isPasswordVisible = !this.isPasswordVisible
+        },        
         editProfile(){
             axios.put('api/profile/'+this.form.id, this.form).then(()=> {
                 toast.fire(
