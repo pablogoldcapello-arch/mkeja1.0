@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->bigIncrements('id');
-            
+
             // Recipient
             $table->enum('type', ['tenant', 'service_provider'])->default('tenant');
 
@@ -32,11 +32,16 @@ return new class extends Migration
                 ->onDelete('set null');
 
             // Service (optional)
-            $table->unsignedBigInteger('service_id')->nullable();
-            $table->foreign('service_id')
+            $table->json('services')->nullable(); // stores array of service names (skills)
+
+
+            // Service Provider
+            $table->unsignedBigInteger('provider_id')->nullable();
+            $table->foreign('provider_id')
                 ->references('id')
-                ->on('services')
+                ->on('users')  
                 ->onDelete('set null');
+    
 
             // Invoice fields
             $table->string('invoice_number')->unique()->nullable();

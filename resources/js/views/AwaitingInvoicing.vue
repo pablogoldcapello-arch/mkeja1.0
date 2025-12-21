@@ -112,6 +112,15 @@
                                   Create Invoice
                                 </a>
                               </router-link>
+                                <!-- Auto-generate Invoices -->
+  <button
+    v-if="awaitinginvoicing.length !== 0"
+    class="btn btn-sm btn-warning rounded-pill me-2"
+    style="background-color: darkorange; border-color: darkorange;"
+    @click="autoGenerateInvoices"
+  >
+    Auto-Generate
+  </button>
                               <router-link v-if="awaitinginvoicing.length !== 0" to="#" custom v-slot="{ href, navigate, isActive }">
                                 <a
                                   :href="href"
@@ -167,14 +176,16 @@
                           <table id="AllStatementsTable" class="table table-borderless">
                             <thead>
                               <tr>
-                                <th scope="col">Tenant</th>
-                                <th scope="col">Rent Month</th>
-                                <th scope="col">Generated</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Rent Month / Services</th>
+                                <th scope="col">Amount Due</th>
+                                <th scope="col">Due Date</th>
                                 <th scope="col">Status</th>
                                 <th scope="col">Action</th>
                               </tr>
                             </thead>
-                            <!-- Spinner shown while data is initializing -->
+
+                            <!-- Spinner while initializing -->
                             <tbody v-if="initializing">
                               <tr>
                                 <td colspan="7" class="text-center">
@@ -184,11 +195,35 @@
                                 </td>
                               </tr>
                             </tbody>
+
+                            <!-- Invoice rows -->
                             <tbody v-else>
                               <tr v-for="statement in awaitinginvoicing" :key="statement.id">
-                                <td>{{ statement.tenant ? statement.tenant.name : 'N/A' }}</td>
-                                <td>{{ statement.rent_month }}</td>
-                                <td>{{ format_date(statement.created_at) }}</td>
+                                <!-- Name -->
+                                <td>
+                                  {{ statement.type === 'tenant' ? (statement.tenant ? statement.tenant.name : 'N/A') : (statement.provider ? statement.provider.name : 'N/A') }}
+                                </td>
+
+                                <!-- Rent month or services -->
+                                <td>
+                                  <span v-if="statement.type === 'tenant'">{{ statement.rent_month }}</span>
+                                  <span v-else-if="statement.type === 'service_provider'">
+                                    <span v-for="(service, idx) in JSON.parse(statement.services)" :key="idx" class="badge bg-primary me-1 mb-1">{{ service }}</span>
+                                  </span>
+                                </td>
+
+                                <!-- Amount Due -->
+                                <td>
+                                  {{ statement.amount_due ? 'KES ' + statement.amount_due.toLocaleString() : '-' }}
+                                </td>
+
+
+                                <!-- Due date -->
+                                <td :class="{'text-danger': isOverdue(statement.due_date)}">
+                                  {{ format_date(statement.due_date) }}
+                                </td>
+
+                                <!-- Status -->
                                 <td>
                                   <span v-if="statement.status === 'draft'" class="badge bg-secondary">
                                     <i class="bi bi-file-earmark-text"></i> Draft
@@ -207,25 +242,35 @@
                                   </span>
                                 </td>
 
+                                <!-- Action buttons -->
                                 <td>
                                   <div class="btn-group" role="group">
                                     <button
-                                      id="btnGroupDrop1"
                                       type="button"
-                                      style="background-color: darkgreen; border-color: darkgreen;"
                                       class="btn btn-sm btn-primary rounded-pill dropdown-toggle"
-                                      data-toggle="dropdown"
                                       data-bs-toggle="dropdown"
                                       aria-haspopup="true"
                                       aria-expanded="false"
+                                      style="background-color: darkgreen; border-color: darkgreen;"
                                     >
                                       Action
                                     </button>
-                                    <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                    <div class="dropdown-menu">
                                       <a @click="viewInvoice(statement)" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>
-                                      <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Invoice</a>
-                                      <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement.id, statement.tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
-                                      <a @click="editInvoice(statement)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a> 
+
+                                      <!-- Tenant-specific actions -->
+                                      <template v-if="statement.type === 'tenant'">
+                                        <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Invoice</a>
+                                        <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement.id, statement.tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
+                                      </template>
+
+                                      <!-- Service provider-specific actions -->
+                                      <template v-else-if="statement.type === 'service_provider'">
+                                        <a v-if="statement.status == 'draft'" @click="invoiceProvider(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Invoice</a>
+                                      </template>
+
+                                      <!-- Common actions -->
+                                      <a @click="editInvoice(statement)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
                                       <a @click="deleteInvoice(statement.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
                                     </div>
                                   </div>
@@ -233,6 +278,8 @@
                               </tr>
                             </tbody>
                           </table>
+
+
                           <div>
                             <strong>Total: 
                               Due: {{ formatNumber(calculateTotal('total')) }},
@@ -328,124 +375,137 @@
                         </div>
                     </div>
 
-<!-- Add Invoice Modal -->
-<div class="modal fade" id="addInvoiceModal" tabindex="-1" role="dialog" aria-labelledby="addInvoiceModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      
-      <!-- Modal Header -->
-      <div class="modal-header">
-        <h5 class="modal-title" id="addInvoiceModalLabel">
-          Create {{ form.type === 'tenant' ? 'Tenant' : 'Service Provider' }} Invoice
-        </h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="closeModal">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
+                    <!-- Add Invoice Modal -->
+                    <div class="modal fade" id="addInvoiceModal" tabindex="-1" role="dialog" aria-labelledby="addInvoiceModalLabel" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          
+                          <!-- Modal Header -->
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="addInvoiceModalLabel">
+                              Create {{ form.type === 'tenant' ? 'Tenant' : 'Service Provider' }} Invoice
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="closeModal">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
 
-      <!-- Modal Body -->
-      <div class="modal-body">
+                          <!-- Modal Body -->
+                          <div class="modal-body">
 
-        <!-- Invoice Type -->
-        <p>
-          <strong>Invoice Type:*</strong>
-          <select v-model="form.type" class="form-control">
-            <option value="tenant">Tenant</option>
-            <option value="service_provider">Service Provider</option>
-          </select>
-          <div v-if="errors.type" class="text-danger">{{ errors.type }}</div>
-        </p>
+                            <!-- Invoice Type -->
+                            <p>
+                              <strong>Invoice Type:*</strong>
+                              <select v-model="form.type" class="form-control">
+                                <option value="tenant">Tenant</option>
+                                <option value="service_provider">Service Provider</option>
+                              </select>
+                              <div v-if="errors.type" class="text-danger">{{ errors.type }}</div>
+                            </p>
 
-        <!-- Tenant Invoice Fields -->
-        <div v-if="form.type === 'tenant'">
-          <p>
-            <strong>Tenant Name:*</strong>
-            <input
-              type="text"
-              v-model="searchQuery"
-              @input="filterTenants"
-              placeholder="Search tenant..."
-              class="form-control"
-            />
-            <select v-model="form.tenant_id" class="form-control" size="5">
-              <option v-for="tenant in filteredTenants" :key="tenant.id" :value="tenant.id">
-                {{ tenant.name }}
-              </option>
-            </select>
-            <div v-if="errors.tenant_id" class="text-danger">{{ errors.tenant_id }}</div>
-          </p>
+                            <!-- Tenant Invoice Fields -->
+                            <div v-if="form.type === 'tenant'">
+                              <p>
+                                <strong>Tenant Name:*</strong>
+                                <input
+                                  type="text"
+                                  v-model="searchQuery"
+                                  @input="filterTenants"
+                                  placeholder="Search tenant..."
+                                  class="form-control"
+                                />
+                                <select v-model="form.tenant_id" class="form-control" size="5">
+                                  <option v-for="tenant in filteredTenants" :key="tenant.id" :value="tenant.id">
+                                    {{ tenant.name }}
+                                  </option>
+                                </select>
+                                <div v-if="errors.tenant_id" class="text-danger">{{ errors.tenant_id }}</div>
+                              </p>
 
-          <div v-if="selectedTenant">
-            <p><strong>Selected Tenant:</strong></p>
-            <p>{{ selectedTenant.name }} - {{ selectedTenant.phone }}</p>
-          </div>
+                              <div v-if="selectedTenant">
+                                <p><strong>Selected Tenant:</strong></p>
+                                <p>{{ selectedTenant.name }} - {{ selectedTenant.phone }}</p>
+                              </div>
 
-          <p>
-            <strong>Rent Month:*</strong>
-            <select v-model="form.rent_month" class="form-control">
-              <option v-for="month in months" :key="month" :value="month">{{ month }}</option>
-            </select>
-            <div v-if="errors.rent_month" class="text-danger">{{ errors.rent_month }}</div>
-          </p>
-        </div>
+                              <p>
+                                <strong>Rent Month:*</strong>
+                                <select v-model="form.rent_month" class="form-control">
+                                  <option v-for="month in months" :key="month" :value="month">{{ month }}</option>
+                                </select>
+                                <div v-if="errors.rent_month" class="text-danger">{{ errors.rent_month }}</div>
+                              </p>
+                            </div>
 
-        <!-- Service Provider Invoice Fields -->
-        <div v-if="form.type === 'service_provider'">
-          <p>
-            <strong>Service Provider:*</strong>
-            <input
-              type="text"
-              v-model="searchProviderQuery"
-              @input="filterProviders"
-              placeholder="Search provider..."
-              class="form-control"
-            />
-            <select v-model="form.provider_id" class="form-control" size="5">
-              <option v-for="provider in filteredProviders" :key="provider.id" :value="provider.id">
-                {{ provider.name }}
-              </option>
-            </select>
-            <div v-if="errors.provider_id" class="text-danger">{{ errors.provider_id }}</div>
-          </p>
+                            <!-- Service Provider Invoice Fields -->
+                            <div v-if="form.type === 'service_provider'">
+                              <p>
+                                <strong>Service Provider:*</strong>
+                                <input
+                                  type="text"
+                                  v-model="searchProviderQuery"
+                                  @input="filterProviders"
+                                  placeholder="Search provider..."
+                                  class="form-control"
+                                />
+                                <select v-model="form.provider_id" class="form-control" size="5">
+                                  <option v-for="provider in filteredProviders" :key="provider.id" :value="provider.id">
+                                    {{ provider.name }}
+                                  </option>
+                                </select>
+                                <div v-if="errors.provider_id" class="text-danger">{{ errors.provider_id }}</div>
+                              </p>
 
-          <p>
-            <strong>Service:*</strong>
-            <select v-model="form.service_id" class="form-control">
-              <option v-for="service in services" :key="service.id" :value="service.id">{{ service.name }}</option>
-            </select>
-            <div v-if="errors.service_id" class="text-danger">{{ errors.service_id }}</div>
-          </p>
+                              <p>
+                                <strong>Services:*</strong>
+                              </p>
+                              <div class="mb-2">
+                                <span
+                                  v-for="(service, index) in providerServices"
+                                  :key="service"
+                                  @click="toggleService(service)"
+                                  :class="['badge', form.services.includes(service) ? 'bg-success' : 'bg-secondary', 'me-1', 'mb-1']"
+                                  style="cursor: pointer;"
+                                >
+                                  {{ service }}
+                                </span>
+                              </div>
+                              <small class="text-muted d-block mb-2">
+                                Hold <kbd>Ctrl</kbd> (or <kbd>Cmd</kbd> on Mac) and click to select multiple services
+                              </small>
+                              <div v-if="errors.services" class="text-danger">{{ errors.services }}</div>
 
-          <p>
-            <strong>Due Date:*</strong>
-            <input type="date" v-model="form.due_date" class="form-control" />
-            <div v-if="errors.due_date" class="text-danger">{{ errors.due_date }}</div>
-          </p>
-        </div>
 
-        <!-- Amount Due -->
-        <p v-if="form.type === 'service_provider'">
-          <strong>Amount Due:*</strong>
-          <input type="number" v-model="form.amount_due" class="form-control" placeholder="Enter amount" />
-          <div v-if="errors.amount_due" class="text-danger">{{ errors.amount_due }}</div>
-        </p>
 
-      </div>
+                              <p>
+                                <strong>Due Date:*</strong>
+                                <input type="date" v-model="form.due_date" class="form-control" />
+                                <div v-if="errors.due_date" class="text-danger">{{ errors.due_date }}</div>
+                              </p>
+                            </div>
 
-      <!-- Modal Footer -->
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="closeModal">Close</button>
-        <button type="button" @click="createAddInvoice" class="btn btn-primary" style="background-color: forestgreen; border-color: darkgreen;">
-          Save and add another
-        </button>
-        <button type="button" @click="createInvoice" class="btn btn-primary" style="background-color: darkgreen; border-color: darkgreen;">
-          Save
-        </button>
-      </div>
+                            <!-- Amount Due -->
+                            <p v-if="form.type === 'service_provider'">
+                              <strong>Amount Due:*</strong>
+                              <input type="number" v-model="form.amount_due" class="form-control" placeholder="Enter amount" />
+                              <div v-if="errors.amount_due" class="text-danger">{{ errors.amount_due }}</div>
+                            </p>
 
-    </div>
-  </div>
-</div>
+                          </div>
+
+                          <!-- Modal Footer -->
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="closeModal">Close</button>
+                            <button type="button" @click="createAddInvoice" class="btn btn-primary" style="background-color: forestgreen; border-color: darkgreen;">
+                              Save and add another
+                            </button>
+                            <button type="button" @click="createInvoice" class="btn btn-primary" style="background-color: darkgreen; border-color: darkgreen;">
+                              Save
+                            </button>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
 
 
                     <!--Edit Invoice Modal -->
@@ -540,7 +600,7 @@
             type: 'tenant',
             tenant_id: null,
             provider_id: null,
-            service_id: null,
+            services: [],
             rent_month: null,
             due_date: null,
             amount_due: null,
@@ -555,6 +615,7 @@
           selectedTenant: null,
           searchProviderQuery: '',
           filteredProviders: [],
+          providerServices: [], // dynamically loaded skills
           services: [],
           loading: true,
           invoicing: false,
@@ -567,7 +628,72 @@
           prevArrears: ''
         }
       },
+      watch: {
+        'form.provider_id'(newVal) {
+          this.selectedProvider = this.filteredProviders.find(p => p.id === newVal);
+          if (this.selectedProvider) {
+            // Parse the skills JSON into an array
+            this.providerServices = JSON.parse(this.selectedProvider.skills || '[]');
+          } else {
+            this.providerServices = [];
+          }
+          // Reset selected service if provider changes
+          this.form.service_id = null;
+        }
+      },
       methods: {
+        async autoGenerateInvoices() {
+          // Show confirmation using SweetAlert2
+          const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'This will auto-generate invoices for all tenants for this month.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, generate invoices!',
+            cancelButtonText: 'Cancel'
+          });
+
+          if (!result.isConfirmed) {
+            return; // User cancelled
+          }
+
+          this.loading = true;
+
+          try {
+            const response = await axios.post('/api/invoices/auto-generate');
+            toast.fire('Success!', 'Invoices auto-generated successfully!', 'success');
+
+            // Reload your lists to reflect new invoices
+            await this.loadLists();
+          } catch (error) {
+            console.error(error);
+            Swal.fire('Error!', error.response?.data?.message || 'An error occurred while auto-generating invoices', 'error');
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        isOverdue(date) {
+          if (!date) return false;
+          const due = new Date(date);
+          const today = new Date();
+
+          // Compare only date part, ignore time
+          due.setHours(0,0,0,0);
+          today.setHours(0,0,0,0);
+
+          return due < today;
+        },
+        toggleService(service) {
+          const index = this.form.services.indexOf(service);
+          if (index === -1) {
+            this.form.services.push(service); // add if not selected
+          } else {
+            this.form.services.splice(index, 1); // remove if already selected
+          }
+        },
         viewInvoice(invoice)
         {
           this.selectedStatement = invoice;
@@ -589,23 +715,40 @@
             this.$router.push(location)
         },
         async createInvoice() {
-          // Validate tenant
-          if (!this.form.tenant_id) {
-            this.errors.tenant = 'Tenant name is required.';
-            return;
+          this.errors = {}; // reset errors
+
+          if (this.form.type === 'tenant') {
+            // Tenant validation
+            if (!this.form.tenant_id) {
+              this.errors.tenant_id = 'Tenant name is required.';
+            }
+            if (!this.form.rent_month) {
+              this.errors.rent_month = 'Rent month is required.';
+            }
+          } else if (this.form.type === 'service_provider') {
+            // Service provider validation
+            if (!this.form.provider_id) {
+              this.errors.provider_id = 'Service provider is required.';
+            }
+            if (!this.form.services || !this.form.services.length) {
+              this.errors.services = 'Please select at least one service.';
+            }
+            if (!this.form.amount_due) {
+              this.errors.amount_due = 'Amount due is required.';
+            }
+            if (!this.form.due_date) {
+              this.errors.due_date = 'Due date is required.';
+            }
           }
 
-          // Validate rent month
-          if (!this.form.rent_month) {
-            this.errors.rentmonth = 'Rent month is required.';
+          // Stop if there are any errors
+          if (Object.keys(this.errors).length) {
             return;
           }
 
           try {
-            // Proceed to create the invoice
             const response = await axios.post("/api/invoices", this.form);
-            console.log("samantha", response);
-            this.successMessage = 'Tenant invoice created!';
+            console.log("Invoice created", response);
             toast.fire('Success!', 'Invoice created!', 'success');
           } catch (error) {
             console.log(error);
@@ -613,61 +756,90 @@
           } finally {
             this.loading = false;
 
-            // Close the modal after invoicing
+            // Close the modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('addInvoiceModal'));
             modal.hide();
 
-            // Reset form fields
-            this.form.tenant_id = '';
-            this.form.rent_month = '';
-            this.form.water_bill = '';
+            // Reset form
+            this.form = {
+              type: 'tenant',
+              tenant_id: null,
+              provider_id: null,
+              services: [],
+              rent_month: null,
+              due_date: null,
+              amount_due: null,
+            };
 
-            // Load fresh data and ensure it completes
+            this.selectedTenant = null;
+            this.searchQuery = '';
+            this.searchProviderQuery = '';
             await this.loadLists();
-
           }
         },
-
         
-        async createAddInvoice() {
-          // Validate tenant
+      async createAddInvoice() {
+        this.errors = {}; // reset errors
+
+        // Validate based on invoice type
+        if (this.form.type === 'tenant') {
           if (!this.form.tenant_id) {
-            this.errors.tenant = 'Tenant name is required.';
-            return;
+            this.errors.tenant_id = 'Tenant name is required.';
           }
-
-          // Validate rent month
           if (!this.form.rent_month) {
-            this.errors.rentmonth = 'Rent month is required.';
-            return;
+            this.errors.rent_month = 'Rent month is required.';
           }
-
-          try {
-            // Proceed to create the invoice
-            const response = await axios.post("/api/invoices", this.form);
-            console.log("samantha", response);
-            this.successMessage = 'Tenant invoice created!';
-            toast.fire('Success!', 'Invoice created!', 'success');
-          } catch (error) {
-            console.log(error);
-            Swal.fire('Error!', error.response?.data?.message || 'An error occurred', 'error');
-          } finally {
-            this.loading = false;
-
-            // Close the modal after invoicing
-
-
-            // Reset form fields
-            this.form.tenant_id = '';
-            this.form.rent_month = '';
-            this.form.water_bill = '';
-
-            // Load fresh data and ensure it completes
-            await this.loadLists();
-
+        } else if (this.form.type === 'service_provider') {
+          if (!this.form.provider_id) {
+            this.errors.provider_id = 'Service provider is required.';
           }
-        },
+          if (!this.form.services || !this.form.services.length) {
+            this.errors.services = 'Please select at least one service.';
+          }
+          if (!this.form.amount_due) {
+            this.errors.amount_due = 'Amount due is required.';
+          }
+          if (!this.form.due_date) {
+            this.errors.due_date = 'Due date is required.';
+          }
+        }
 
+        // Stop if there are any errors
+        if (Object.keys(this.errors).length) {
+          return;
+        }
+
+        try {
+          const response = await axios.post("/api/invoices", this.form);
+          console.log("Invoice created", response);
+          toast.fire('Success!', 'Invoice created!', 'success');
+        } catch (error) {
+          console.log(error);
+          Swal.fire('Error!', error.response?.data?.message || 'An error occurred', 'error');
+        } finally {
+          this.loading = false;
+
+          // Keep modal open for adding another invoice
+
+          // Reset form fields for next entry
+          this.form = {
+            type: this.form.type, // keep current type
+            tenant_id: null,
+            provider_id: null,
+            services: [],
+            rent_month: null,
+            due_date: null,
+            amount_due: null,
+          };
+
+          this.selectedTenant = null;
+          this.searchQuery = '';
+          this.searchProviderQuery = '';
+
+          // Reload the list so new invoice shows immediately
+          await this.loadLists();
+        }
+      },
 
         editInvoice(statement)
         {
@@ -789,21 +961,27 @@
           modal.show();
         },
         closeModal() {
-          // $('#addInvoiceModal').modal('hide'); // Hide the modal using jQuery
-            this.form = {
+          this.form = {
             type: 'tenant',
             tenant_id: null,
             provider_id: null,
-            service_id: null,
+            services: [],      // for service selection
             rent_month: null,
             due_date: null,
             amount_due: null,
           };
           this.errors = {};
           this.selectedTenant = null;
-          const modal = bootstrap.Modal.getInstance(document.getElementById('addInvoiceModal'));
-          modal.hide();
+          this.searchQuery = '';
+          this.filteredTenants = [];
+          this.searchProviderQuery = '';
+          this.filteredProviders = [];
+
+          const modalEl = document.getElementById('addInvoiceModal');
+          const modal = bootstrap.Modal.getInstance(modalEl);
+          if (modal) modal.hide();
         },
+
         async generateInvoices() {
           this.generating = true; // Set loading to true
           try {

@@ -227,17 +227,21 @@
 
                         <div class="col-md-6" 
                             v-if="parsedSkills.length && selectedLandlord.role === 'service_provider'">
-                        <strong>Skills:</strong>
-                        <div class="mt-2">
-                            <span 
-                            v-for="(skill, index) in parsedSkills" 
-                            :key="index"
-                            class="badge bg-primary me-1 mb-1"
-                            >
-                            {{ skill }}
-                            </span>
+                            <strong>Skills:</strong>
+                            <div class="mt-2">
+                                <span 
+                                    v-for="(skill, index) in parsedSkills" 
+                                    :key="index"
+                                    class="badge bg-primary me-1 mb-1"
+                                >
+                                    {{ skill }}
+                                </span>
+                            </div>
+                            <small class="text-muted d-block mt-1">
+                                Hold <kbd>Ctrl</kbd> (or <kbd>Cmd</kbd> on Mac) and click to select multiple skills
+                            </small>
                         </div>
-                        </div>
+
 
 
                       </div>

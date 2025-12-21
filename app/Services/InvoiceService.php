@@ -42,4 +42,61 @@ class InvoiceService
             'status'         => 'draft',
         ]);
     }
+
+    public static function createProviderInvoice(array $data): Invoice
+    {
+        // $data = [
+        //   'provider_id' => 6,
+        //   'services'    => ['plumbing','cleaning'],
+        //   'amount_due'  => 5000,
+        //   'due_date'    => '2025-12-30',
+        // ];
+
+        // Optional: prevent duplicate invoices for same provider + due date
+        $exists = Invoice::where('provider_id', $data['provider_id'])
+            ->where('due_date', $data['due_date'])
+            ->exists();
+
+        if ($exists) {
+            throw new \Exception('Invoice already exists for this provider and date');
+        }
+
+        return Invoice::create([
+            'provider_id'    => $data['provider_id'],
+            'services'       => json_encode($data['services']), // store multiple services
+            'amount_due'     => $data['amount_due'],
+            'due_date'       => $data['due_date'],
+            'type'           => 'service_provider',
+            'status'         => 'draft',
+            'invoice_number' => Invoice::generateInvoiceNumber(),
+        ]);
+    }
+
+    public static function autoGenerateInvoices()
+    {
+        $invoices = [];
+
+        // Generate invoices for all tenants with active tenancies and no invoice for current month
+        $tenants = Tenancy::with('tenant')
+                    ->where('status', 'active')
+                    ->get();
+
+        foreach ($tenants as $tenancy) {
+            try {
+                $invoice = self::createRentInvoice($tenancy, now()->format('Y-m'));
+                if ($invoice) {
+                    $invoices[] = $invoice;
+                }
+            } catch (\Exception $e) {
+                // skip duplicates or errors
+                continue;
+            }
+        }
+
+        // Optionally: do same for service providers if needed
+
+        return $invoices;
+    }
+
+
 }

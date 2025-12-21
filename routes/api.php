@@ -57,4 +57,7 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::put('profile/{id}',[UserController::class, 'updateProfile']);
     Route::put('changepassword/{id}',[UserController::class, 'changePassword']);
+
+    Route::post('/invoices/auto-generate', [InvoiceController::class, 'autoGenerate']);
+
 });

@@ -12,9 +12,10 @@ class Invoice extends Model
     protected $fillable = [
         'type',
         'tenant_id',       // FK → users.id
+        'provider_id',       // FK → users.id
         'property_id',     // FK → properties.id (nullable)
-        'service_id',      // FK → services.id (nullable)
         'invoice_number',
+        'services',
         'rent_month',
         'amount_due',
         'due_date',
@@ -29,16 +30,15 @@ class Invoice extends Model
         return $this->belongsTo(User::class, 'tenant_id');
     }
 
+    public function provider()
+    {
+        return $this->belongsTo(User::class, 'provider_id');
+    }
+
     // Property tied to the invoice (if any)
     public function property()
     {
         return $this->belongsTo(Property::class, 'property_id');
-    }
-
-    // Service tied to the invoice (if any)
-    public function service()
-    {
-        return $this->belongsTo(Service::class, 'service_id');
     }
 
     // Optional: convenience attribute for frontend

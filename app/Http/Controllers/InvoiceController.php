@@ -25,41 +25,56 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'tenant_id' => 'required|exists:users,id',
-            'rent_month' => 'nullable|string'
-        ]);
+        if ($request->type === 'tenant') {
+            $request->validate([
+                'tenant_id' => 'required|exists:users,id',
+                'rent_month' => 'nullable|string',
+            ]);
 
-        // ✅ Normalize rent_month
-        $rentMonth = Carbon::parse('01 ' . $request->rent_month)
-        ->format('Y-m');
+            try {
+                $rentMonth = Carbon::parse('01 ' . $request->rent_month)->format('Y-m');
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Invalid rent month'], 422);
+            }
 
-        $tenancy = Tenancy::with('unit')
-            ->where('tenant_id', $request->tenant_id)
-            ->where('status', 'active')
-            ->firstOrFail();
+            $tenancy = Tenancy::with('unit')
+                ->where('tenant_id', $request->tenant_id)
+                ->where('status', 'active')
+                ->firstOrFail();
 
-        $invoice = InvoiceService::createRentInvoice(
-            $tenancy,
-            $rentMonth
-        );
+            $invoice = InvoiceService::createRentInvoice($tenancy, $rentMonth);
 
-        if (!$invoice) {
-            return response()->json([
-                'message' => 'Invoice already exists for this tenant and month'
-            ], 409);
+            if (!$invoice) {
+                return response()->json(['message' => 'Invoice already exists for this tenant and month'], 409);
+            }
+        } elseif ($request->type === 'service_provider') {
+            $request->validate([
+                'provider_id' => 'required|exists:users,id',
+                'services'    => 'required|array|min:1',
+                'amount_due'  => 'required|numeric|min:0',
+                'due_date'    => 'required|date',
+            ]);
+
+            $invoice = InvoiceService::createProviderInvoice([
+                'provider_id' => $request->provider_id,
+                'services'    => $request->services,
+                'amount_due'  => $request->amount_due,
+                'due_date'    => $request->due_date,
+            ]);
+        } else {
+            return response()->json(['message' => 'Invalid invoice type'], 422);
         }
 
-        // Activity log
-        ActivityLog::create([
-            'user_id' => auth()->id(),
-            'description' => auth()->user()->name .
-                ' created invoice ' . $invoice->invoice_number .
-                ' for tenant ID ' . $tenancy->tenant_id
-        ]);
+        if ($invoice) {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'description' => auth()->user()->name . ' created invoice ' . $invoice->invoice_number
+            ]);
+        }
 
         return response()->json($invoice, 201);
     }
+
 
     /**
      * Display the specified resource.
@@ -109,4 +124,22 @@ class InvoiceController extends Controller
 
         return response()->json(['message' => 'Deleted']);          
     }
+
+    public function autoGenerate(Request $request)
+    {
+        try {
+            // Call a service or logic to generate invoices for all pending tenants/providers
+            $invoices = InvoiceService::autoGenerateInvoices();
+
+            return response()->json([
+                'message' => 'Invoices generated successfully',
+                'data' => $invoices
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }
