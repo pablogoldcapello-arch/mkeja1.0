@@ -2,10 +2,14 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\Property;
+use App\Models\Unit;
+use App\Models\Tenancy;
 use Illuminate\Support\Facades\Hash;
+use Faker\Factory as Faker;
+use Carbon\Carbon;
 
 class UserSeeder extends Seeder
 {
@@ -14,17 +18,16 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-        // Admin user
-        User::create([
+        $faker = Faker::create();
+
+        // 1️⃣ Admin user
+        $admin = User::create([
             'name' => 'Super Admin',
             'email' => 'admin@mk.com',
             'password' => Hash::make('admin123'),
             'role' => 'admin',
             'profile_photo' => null,
             'phone' => '+254700000001',
-            'property_count' => 0,
-            'assigned_properties' => null,
-            'skills' => null,
             'is_email_verified' => true,
             '2fa_enabled' => false,
             'status' => 'active',
@@ -38,19 +41,15 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
-        // Landlord
-        User::create([
+        // 2️⃣ Landlord
+        $landlord = User::create([
             'name' => 'John Landlord',
             'email' => 'john.landlord@mk.com',
             'password' => Hash::make('landlord123'),
             'role' => 'landlord',
-            'profile_photo' => null,
             'phone' => '+254700000002',
-            'property_count' => 5,
-            'assigned_properties' => null,
-            'skills' => null,
+            'property_count' => 0, // will update later
             'is_email_verified' => true,
-            '2fa_enabled' => false,
             'status' => 'active',
             'dob' => '1985-05-10',
             'gender' => 'male',
@@ -62,17 +61,14 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
-        // Caretaker / Agent
-        User::create([
+        // 3️⃣ Caretaker / Agent
+        $agent = User::create([
             'name' => 'Jane Agent',
             'email' => 'jane.agent@mk.com',
             'password' => Hash::make('agent123'),
             'role' => 'caretaker',
-            'profile_photo' => null,
             'phone' => '+254700000003',
-            'property_count' => 0,
-            'assigned_properties' => json_encode([1,2,3]),
-            'skills' => null,
+            'assigned_properties' => null,
             'is_email_verified' => true,
             '2fa_enabled' => true,
             'status' => 'active',
@@ -86,19 +82,14 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
-        // Tenant
-        User::create([
+        // 4️⃣ Tenant (predefined)
+        $tenant = User::create([
             'name' => 'Harry Tenant',
             'email' => 'harry.tenant@mk.com',
             'password' => Hash::make('tenant123'),
             'role' => 'tenant',
-            'profile_photo' => null,
             'phone' => '+254700000004',
-            'property_count' => 0,
-            'assigned_properties' => null,
-            'skills' => null,
             'is_email_verified' => true,
-            '2fa_enabled' => false,
             'status' => 'active',
             'dob' => '1998-03-15',
             'gender' => 'male',
@@ -110,52 +101,86 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
-        // Tech Support
-        User::create([
-            'name' => 'Tech Support',
-            'email' => 'tech.support@mk.com',
-            'password' => Hash::make('tech123'),
-            'role' => 'techsupport',
-            'profile_photo' => null,
-            'phone' => '+254700000005',
-            'property_count' => 0,
-            'assigned_properties' => null,
-            'skills' => json_encode(['networking','software','hardware']),
-            'is_email_verified' => true,
-            '2fa_enabled' => true,
-            'status' => 'active',
-            'dob' => '1990-07-07',
-            'gender' => 'other',
-            'address' => '101 Tech Lane',
-            'city' => 'Nairobi',
-            'county' => 'Nairobi County',
-            'postal_code' => '00100',
-            'last_login' => now(),
-            'email_verified_at' => now(),
+        // 5️⃣ Optional: other tenants
+        $otherTenants = User::factory(10)->create(['role' => 'tenant']);
+
+        $allTenants = collect([$tenant])->merge($otherTenants);
+
+        // 6️⃣ Create properties for the landlord
+        $properties = collect();
+        $units = collect();
+        $numProperties = rand(2, 4);
+        for ($p = 1; $p <= $numProperties; $p++) {
+            $property = Property::create([
+                'landlord_id' => $landlord->id,
+                'agent_id' => $agent->id,
+                'title' => $faker->word,
+                'description' => $faker->sentence,
+                'type' => $faker->randomElement(['apartment','house','bedsitter','studio','office','land']),
+                'location' => $faker->city,
+                'coordinates' => $faker->latitude . ',' . $faker->longitude,
+                'units_no' => rand(1,5),
+                'status' => 'available'
+            ]);
+            $properties->push($property);
+
+            // Create units for property
+            for ($u = 1; $u <= $property->units_no; $u++) {
+                $unit = Unit::create([
+                    'property_id' => $property->id,
+                    'unit_number' => "Unit-$u",
+                    'type' => $faker->randomElement(['apartment','studio','bedsitter']),
+                    'deposit' => $faker->numberBetween(1000,5000),
+                    'monthly_rent' => $faker->numberBetween(5000,20000),
+                    'garbage_fee' => $faker->numberBetween(100,500),
+                    'security_fee' => $faker->numberBetween(200,800),
+                    'status' => 'vacant',
+                    'water_meter' => $faker->ean8,
+                    'electricity_meter' => $faker->ean8
+                ]);
+                $units->push($unit);
+            }
+        }
+
+        // Update landlord property count
+        $landlord->update(['property_count' => $properties->count()]);
+
+        // 7️⃣ Assign tenants to units/properties via tenancies
+        // Ensure Harry Tenant is assigned to a unit in one of landlord's properties
+        $firstProperty = $properties->first();
+        $unitForHarry = $firstProperty->units()->inRandomOrder()->first();
+
+        Tenancy::create([
+            'tenant_id' => $tenant->id,
+            'property_id' => $firstProperty->id,
+            'unit_id' => $unitForHarry->id,
+            'start_date' => Carbon::now()->subDays(rand(0,30))->toDateString(),
+            'end_date' => Carbon::now()->addMonths(rand(6,12))->toDateString(),
+            'status' => 'active'
         ]);
 
-        // Service Provider
-        User::create([
-            'name' => 'Service Pro',
-            'email' => 'service.pro@mk.com',
-            'password' => Hash::make('service123'),
-            'role' => 'service_provider',
-            'profile_photo' => null,
-            'phone' => '+254700000006',
-            'property_count' => 0,
-            'assigned_properties' => null,
-            'skills' => json_encode(['plumbing','cleaning','electrical']),
-            'is_email_verified' => true,
-            '2fa_enabled' => false,
-            'status' => 'active',
-            'dob' => '1988-12-05',
-            'gender' => 'female',
-            'address' => '202 Service Street',
-            'city' => 'Eldoret',
-            'county' => 'Uasin Gishu',
-            'postal_code' => '30100',
-            'last_login' => now(),
-            'email_verified_at' => now(),
-        ]);
+        $unitForHarry->update(['status' => 'rented']);
+
+        // Assign other tenants randomly
+        foreach ($otherTenants as $otherTenant) {
+            $property = $properties->random();
+            $assignUnit = rand(0,1) === 1;
+            $unit = $assignUnit && $property->units()->count() > 0
+                ? $property->units()->where('status','vacant')->inRandomOrder()->first()
+                : null;
+
+            Tenancy::create([
+                'tenant_id' => $otherTenant->id,
+                'property_id' => $property->id,
+                'unit_id' => $unit ? $unit->id : null,
+                'start_date' => Carbon::now()->subDays(rand(0,60))->toDateString(),
+                'end_date' => Carbon::now()->addMonths(rand(6,18))->toDateString(),
+                'status' => rand(0,4) === 0 ? 'terminated' : 'active'
+            ]);
+
+            if ($unit) {
+                $unit->update(['status' => 'rented']);
+            }
+        }
     }
 }

@@ -23,7 +23,7 @@ return new class extends Migration
                 'apartment', 'house', 'bedsitter', 'studio', 'office', 'land'
             ])->default('house');
             $table->string('location', 20)->nullable(); //  rarely exceed 20 chars
-            $table->string('coordinates', 20)->nullable(); //  rarely exceed 20 chars
+            $table->string('coordinates', 50)->nullable(); //  rarely exceed 20 chars
             $table->integer('units_no')->default(0); //  rarely exceed 20 chars
             $table->enum('status', ['available', 'occupied', 'under_maintenance'])->default('available'); // controlled roles            
             $table->timestamps();

@@ -6,6 +6,7 @@ use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use App\Models\Property;
 use App\Models\Unit;
+use App\Models\Tenancy;
 
 class PropertyController extends Controller
 {
@@ -155,7 +156,27 @@ class PropertyController extends Controller
             'success' => true,
             'landlordproperties' => $landlordproperties
         ]);
-    }    
+    } 
+    
+    // PropertyController.php
+    public function tenants($propertyId)
+    {
+        // Optional: load property info if needed
+        $property = Property::find($propertyId);
+        $properties = Property::latest()->get();
+
+        // Get tenants directly from the tenancies table
+        $tenants = Tenancy::where('property_id', $propertyId)
+    ->with(['tenant', 'unit'])
+    ->get();
+
+        return response()->json([
+            'property' => $property, // optional, remove if you don't need property info
+            'tenants' => $tenants,
+            'properties' => $properties
+        ]);
+    }
+
 
 
 }

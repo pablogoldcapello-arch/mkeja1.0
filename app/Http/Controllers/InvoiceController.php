@@ -91,8 +91,6 @@ class InvoiceController extends Controller
     public function update(Request $request, string $id)
     {
         $invoice = Invoice::find($id);
-        $invoice->tenant_id = $request->tenant_id;
-        $invoice->invoice_number = $request->invoice_number;
         $invoice->amount_due = $request->amount_due;
         $invoice->due_date = $request->due_date;
         $invoice->status = $request->status;

@@ -10,6 +10,7 @@ import Landlords from '../views/Landlords.vue';
 import Caretakers from '../views/Caretakers.vue';
 import ServiceProviders from '../views/ServiceProviders.vue';
 import Tenants from '../views/Tenants.vue';
+import PropertyTenants from '../views/PropertyTenants.vue';
 import Units from '../views/Units.vue';
 import AwaitingInvoicing from '../views/AwaitingInvoicing.vue';
 import PendingTickets from '../views/PendingTickets.vue';
@@ -33,6 +34,7 @@ const routes = [
   { path: '/service-providers', name: 'serviceproviders', component: ServiceProviders, meta: { requiresAuth: true } },
   { path: '/tenants', name: 'tenants', component: Tenants, meta: { requiresAuth: true } },
   { path: '/units/:id', name: 'units', component: Units, meta: { requiresAuth: true } },
+  { path: '/tenants/:id', name: 'tenants', component: PropertyTenants, meta: { requiresAuth: true } },
   { path: '/awaitinginvoicing', name: 'awaitinginvoicing', component: AwaitingInvoicing, meta: { requiresAuth: true } },
   { path: '/pendingtickets', name: 'pendingtickets', component: PendingTickets, meta: { requiresAuth: true } },
   { path: '/closedtickets', name: 'closedtickets', component: ClosedTickets, meta: { requiresAuth: true } },

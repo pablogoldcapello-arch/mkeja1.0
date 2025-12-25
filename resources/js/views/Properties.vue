@@ -89,6 +89,12 @@
                                   <a @click.prevent="navigateTo('/units/' + item.id)" class="dropdown-item">
                                       <i class="ri-eye-fill mr-2"></i>View Units
                                   </a>
+                                  <router-link 
+                                      :to="`/tenants/${item.id}`" 
+                                      class="dropdown-item">
+                                      <i class="ri-eye-fill mr-2"></i>View Tenants
+                                  </router-link>
+                                  
                                   <a @click="editProperty(item)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
                                   <a @click="deleteProperty(item.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
                                   </div>
@@ -698,8 +704,8 @@
       },
       methods: {
 
-        navigateTo(location) {
-            this.$router.push({ path: location, query: { t: Date.now() } });
+        navigateTo(url) {
+            this.$router.push(url); // Vue Router navigation
         },
 
         filterLandlords() {
@@ -949,9 +955,7 @@
         {
             return "/storage/properties/";
         },
-        navigateTo(location){
-            this.$router.push(location)
-        },
+
         featureProperty(id){
           axios.put('api/featureproperty/'+ id).then(() => {
             toast.fire(
