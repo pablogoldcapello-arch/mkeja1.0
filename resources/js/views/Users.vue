@@ -1076,9 +1076,9 @@
         },
         loadLists() {
           this.initializing = true; // Start spinner
-          axios.get('api/lists')
+          axios.get('api/lists/users')
             .then((response) => {
-              this.users = response.data.lists.users;
+              this.users = response.data.users;
               console.log(response)
 
               setTimeout(() => {

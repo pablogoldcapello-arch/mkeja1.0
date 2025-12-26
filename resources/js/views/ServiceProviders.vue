@@ -1096,9 +1096,9 @@
         },
         loadLists() {
           this.initializing = true; // Start spinner
-          axios.get('api/lists')
+          axios.get('api/lists/service-providers')
             .then((response) => {
-              this.serviceproviders = response.data.lists.serviceproviders;
+              this.serviceproviders = response.data.serviceproviders;
               console.log(response)
 
               setTimeout(() => {

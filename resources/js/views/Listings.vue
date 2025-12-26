@@ -1204,8 +1204,8 @@
                 })
         },
         loadLists() {
-            axios.get('api/lists').then((response) => {
-            this.listings = response.data.lists.listings;
+            axios.get('api/lists/listings').then((response) => {
+            this.listings = response.data.listings;
             console.log("props", response)
             setTimeout(() => {
                 $("#AllPropertiesTable").DataTable();

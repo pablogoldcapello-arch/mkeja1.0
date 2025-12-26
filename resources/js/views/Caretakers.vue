@@ -1112,9 +1112,9 @@
         },
         loadLists() {
           this.initializing = true; // Start spinner
-          axios.get('api/lists')
+          axios.get('api/lists/caretakers')
             .then((response) => {
-              this.caretakers = response.data.lists.caretakers;
+              this.caretakers = response.data.caretakers;
               console.log(response)
 
               setTimeout(() => {

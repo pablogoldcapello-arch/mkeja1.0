@@ -34,7 +34,7 @@ const routes = [
   { path: '/service-providers', name: 'serviceproviders', component: ServiceProviders, meta: { requiresAuth: true } },
   { path: '/tenants', name: 'tenants', component: Tenants, meta: { requiresAuth: true } },
   { path: '/units/:id', name: 'units', component: Units, meta: { requiresAuth: true } },
-  { path: '/tenants/:id', name: 'tenants', component: PropertyTenants, meta: { requiresAuth: true } },
+  { path: '/tenants/:id', name: 'proptenants', component: PropertyTenants, meta: { requiresAuth: true } },
   { path: '/awaitinginvoicing', name: 'awaitinginvoicing', component: AwaitingInvoicing, meta: { requiresAuth: true } },
   { path: '/pendingtickets', name: 'pendingtickets', component: PendingTickets, meta: { requiresAuth: true } },
   { path: '/closedtickets', name: 'closedtickets', component: ClosedTickets, meta: { requiresAuth: true } },

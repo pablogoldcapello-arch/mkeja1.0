@@ -43,6 +43,15 @@ Route::middleware(['auth:api'])->group(function () {
 
     // List route
     Route::get('lists', [ListController::class, 'index']);
+    Route::get('lists/listings', [ListController::class, 'listings']);
+    Route::get('lists/users', [ListController::class, 'users']);
+    Route::get('lists/landlords', [ListController::class, 'landlords']);
+    Route::get('lists/caretakers', [ListController::class, 'caretakers']);
+    Route::get('lists/service-providers', [ListController::class, 'serviceProviders']);
+    Route::get('lists/tenants', [ListController::class, 'tenants']);
+    Route::get('lists/properties', [ListController::class, 'properties']);
+
+
     //Delete listing old image when editing
     Route::delete('listings/{listing}/images/{image}', [ListingController::class, 'deleteImage']);
 

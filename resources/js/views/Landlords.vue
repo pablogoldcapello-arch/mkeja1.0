@@ -1065,9 +1065,9 @@
         },
         loadLists() {
           this.initializing = true; // Start spinner
-          axios.get('api/lists')
+          axios.get('api/lists/landlords')
             .then((response) => {
-              this.landlords = response.data.lists.landlords;
+              this.landlords = response.data.landlords;
               console.log(response)
 
               setTimeout(() => {

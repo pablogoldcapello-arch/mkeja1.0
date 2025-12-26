@@ -57,5 +57,79 @@ class ListController extends Controller
             ]
         ]);
 
-    }      
+    }  
+    
+    public function listings()
+    {
+        $listings = Listing::with('images')->latest()->get();
+
+        // Return as JSON
+        return response()->json([
+            'listings' => $listings,
+        ]);
+    }
+
+    public function users()
+    {
+        $users = User::latest()->get();
+
+        // Return as JSON
+        return response()->json([
+            'users' => $users,
+        ]);
+    }
+    
+    public function landlords()
+    {
+        $landlords = User::latest()->where('role','landlord')->get();
+
+        // Return as JSON
+        return response()->json([
+            'landlords' => $landlords,
+        ]);
+    }
+    
+    public function caretakers()
+    {
+        $caretakers = User::latest()->where('role','caretaker')->get();
+
+        // Return as JSON
+        return response()->json([
+            'caretakers' => $caretakers,
+        ]);
+    } 
+    
+    public function serviceProviders()
+    {
+        $serviceproviders = User::latest()->where('role','service_provider')->get();
+
+        // Return as JSON
+        return response()->json([
+            'serviceproviders' => $serviceproviders,
+        ]);
+    } 
+    
+    public function tenants()
+    {
+        $tenants = User::latest()->where('role','tenant')->get();
+        $properties = Property::with('landlord')->latest()->get();
+
+        // Return as JSON
+        return response()->json([
+            'tenants' => $tenants,
+            'properties' => $properties,
+        ]);
+    }
+    
+    public function properties()
+    {
+        $landlords = User::latest()->where('role','landlord')->get();
+        $properties = Property::with('landlord')->latest()->get();
+
+        // Return as JSON
+        return response()->json([
+            'landlords' => $landlords,
+            'properties' => $properties,
+        ]);
+    }    
 }

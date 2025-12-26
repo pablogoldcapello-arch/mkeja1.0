@@ -933,68 +933,68 @@
           }
         },
         
-      async createAddInvoice() {
-        this.errors = {}; // reset errors
+        async createAddInvoice() {
+          this.errors = {}; // reset errors
 
-        // Validate based on invoice type
-        if (this.form.type === 'tenant') {
-          if (!this.form.tenant_id) {
-            this.errors.tenant_id = 'Tenant name is required.';
+          // Validate based on invoice type
+          if (this.form.type === 'tenant') {
+            if (!this.form.tenant_id) {
+              this.errors.tenant_id = 'Tenant name is required.';
+            }
+            if (!this.form.rent_month) {
+              this.errors.rent_month = 'Rent month is required.';
+            }
+          } else if (this.form.type === 'service_provider') {
+            if (!this.form.provider_id) {
+              this.errors.provider_id = 'Service provider is required.';
+            }
+            if (!this.form.services || !this.form.services.length) {
+              this.errors.services = 'Please select at least one service.';
+            }
+            if (!this.form.amount_due) {
+              this.errors.amount_due = 'Amount due is required.';
+            }
+            if (!this.form.due_date) {
+              this.errors.due_date = 'Due date is required.';
+            }
           }
-          if (!this.form.rent_month) {
-            this.errors.rent_month = 'Rent month is required.';
+
+          // Stop if there are any errors
+          if (Object.keys(this.errors).length) {
+            return;
           }
-        } else if (this.form.type === 'service_provider') {
-          if (!this.form.provider_id) {
-            this.errors.provider_id = 'Service provider is required.';
+
+          try {
+            const response = await axios.post("/api/invoices", this.form);
+            console.log("Invoice created", response);
+            toast.fire('Success!', 'Invoice created!', 'success');
+          } catch (error) {
+            console.log(error);
+            Swal.fire('Error!', error.response?.data?.message || 'An error occurred', 'error');
+          } finally {
+            this.loading = false;
+
+            // Keep modal open for adding another invoice
+
+            // Reset form fields for next entry
+            this.form = {
+              type: this.form.type, // keep current type
+              tenant_id: null,
+              provider_id: null,
+              services: [],
+              rent_month: null,
+              due_date: null,
+              amount_due: null,
+            };
+
+            this.selectedTenant = null;
+            this.searchQuery = '';
+            this.searchProviderQuery = '';
+
+            // Reload the list so new invoice shows immediately
+            await this.loadLists();
           }
-          if (!this.form.services || !this.form.services.length) {
-            this.errors.services = 'Please select at least one service.';
-          }
-          if (!this.form.amount_due) {
-            this.errors.amount_due = 'Amount due is required.';
-          }
-          if (!this.form.due_date) {
-            this.errors.due_date = 'Due date is required.';
-          }
-        }
-
-        // Stop if there are any errors
-        if (Object.keys(this.errors).length) {
-          return;
-        }
-
-        try {
-          const response = await axios.post("/api/invoices", this.form);
-          console.log("Invoice created", response);
-          toast.fire('Success!', 'Invoice created!', 'success');
-        } catch (error) {
-          console.log(error);
-          Swal.fire('Error!', error.response?.data?.message || 'An error occurred', 'error');
-        } finally {
-          this.loading = false;
-
-          // Keep modal open for adding another invoice
-
-          // Reset form fields for next entry
-          this.form = {
-            type: this.form.type, // keep current type
-            tenant_id: null,
-            provider_id: null,
-            services: [],
-            rent_month: null,
-            due_date: null,
-            amount_due: null,
-          };
-
-          this.selectedTenant = null;
-          this.searchQuery = '';
-          this.searchProviderQuery = '';
-
-          // Reload the list so new invoice shows immediately
-          await this.loadLists();
-        }
-      },
+        },
 
         editInvoice(statement)
         {
