@@ -109,40 +109,8 @@
             </div>
             <!-- End Tenants Card -->
 
-            <!-- Reports -->
-            <div class="col-8">
-              <div class="card">
-
-                <div class="filter">
-                  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                    <li><a class="dropdown-item" href="#">Last Year</a></li>
-                    <li><a class="dropdown-item" href="#">All Time</a></li>
-                  </ul>
-                </div>
-
-                <div class="card-body">
-                  <h5 class="card-title">Activity Report <span> | This Year ({{currentYear}})</span></h5>
-
-                  <!-- Line Chart -->
-                  <div>
-                    <!-- Line Chart -->
-
-
-                  </div>
-
-                </div>
-
-              </div>
-            </div>
-
             <!-- Right side columns -->
-            <div class="col-lg-4">
+            <div class="col-lg-12">
               <!-- Recent Activity -->
               <div class="card">
                 <div class="filter">
@@ -208,7 +176,7 @@
 
                   <div class="activity">
 
-                   <!-- <div v-for="item in dashboardactivities" :key="item.id" class="activity-item d-flex">
+                   <div v-for="item in dashboardactivities" :key="item.id" class="activity-item d-flex">
                     <div class="activite-label">{{ getRelativeTime(item.created_at) }}</div>
                     <i
                       class="bi bi-circle-fill activity-badge align-self-start"
@@ -217,7 +185,7 @@
                     <div class="activity-content">
                       {{ item.description }}
                     </div>
-                  </div> -->
+                  </div>
 
                   </div>
 

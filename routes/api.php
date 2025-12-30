@@ -43,13 +43,16 @@ Route::middleware(['auth:api'])->group(function () {
 
     // List route
     Route::get('lists', [ListController::class, 'index']);
+    Route::get('dashboard', [ListController::class, 'dashboard']);
     Route::get('lists/listings', [ListController::class, 'listings']);
+    Route::get('landlord-listings', [ListingController::class, 'single']);
     Route::get('lists/users', [ListController::class, 'users']);
     Route::get('lists/landlords', [ListController::class, 'landlords']);
     Route::get('lists/caretakers', [ListController::class, 'caretakers']);
     Route::get('lists/service-providers', [ListController::class, 'serviceProviders']);
     Route::get('lists/tenants', [ListController::class, 'tenants']);
     Route::get('lists/properties', [ListController::class, 'properties']);
+    Route::get('lists/activity-logs', [ListController::class, 'activityLogs']);
 
 
     //Delete listing old image when editing

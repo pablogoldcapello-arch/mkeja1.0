@@ -6,6 +6,7 @@ import Home from '../views/Home.vue';
 import Users from '../views/Users.vue';
 import Properties from '../views/Properties.vue';
 import Listings from '../views/Listings.vue';
+import LandlordListings from '../views/LandlordListings.vue';
 import Landlords from '../views/Landlords.vue';
 import Caretakers from '../views/Caretakers.vue';
 import ServiceProviders from '../views/ServiceProviders.vue';
@@ -29,6 +30,7 @@ const routes = [
   { path: '/users', name: 'users', component: Users, meta: { requiresAuth: true } },
   { path: '/properties', name: 'properties', component: Properties, meta: { requiresAuth: true } },
   { path: '/property-listings', name: 'listings', component: Listings, meta: { requiresAuth: true } },
+  { path: '/landlord-listings', name: 'landlordlistings', component: LandlordListings, meta: { requiresAuth: true } },
   { path: '/landlords', name: 'landlords', component: Landlords, meta: { requiresAuth: true } },
   { path: '/caretakers', name: 'caretakers', component: Caretakers, meta: { requiresAuth: true } },
   { path: '/service-providers', name: 'serviceproviders', component: ServiceProviders, meta: { requiresAuth: true } },

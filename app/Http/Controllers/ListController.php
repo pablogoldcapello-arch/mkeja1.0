@@ -131,5 +131,25 @@ class ListController extends Controller
             'landlords' => $landlords,
             'properties' => $properties,
         ]);
-    }    
+    }
+    
+    public function activityLogs()
+    {
+        $activitylogs = ActivityLog::with('user')->orderByDesc('id')->get();
+
+        // Return as JSON
+        return response()->json([
+            'activitylogs' => $activitylogs,
+        ]);
+    } 
+    
+    public function dashboard()
+    {
+        $activitylogs = ActivityLog::with('user')->orderByDesc('id')->get();
+
+        // Return as JSON
+        return response()->json([
+            'activitylogs' => $activitylogs,
+        ]);
+    }     
 }

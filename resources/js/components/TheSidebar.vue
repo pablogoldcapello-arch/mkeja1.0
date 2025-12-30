@@ -21,7 +21,7 @@
           <i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="listing-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-          <li>
+          <li v-show="userRole === 'admin'">
             <router-link to="/property-listings" custom v-slot="{ href, navigate, isActive }">
               <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
                 <i class="bi bi-circle"></i>
@@ -29,6 +29,14 @@
               </a>
             </router-link>
           </li>
+          <li v-show="userRole === 'landlord'">
+            <router-link to="/landlord-listings" custom v-slot="{ href, navigate, isActive }">
+              <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
+                <i class="bi bi-circle"></i>
+                <span>My Listings</span>
+              </a>
+            </router-link>
+          </li>          
         </ul>
       </li>
 
@@ -119,7 +127,7 @@
           <li>
             <router-link to="/awaitinginvoicing" custom v-slot="{ href, navigate, isActive }">
               <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
-                <i class="bi bi-circle"></i><span>Awaiting Invoicing</span>
+                <i class="bi bi-circle"></i><span>Draft Invoices</span>
               </a>
             </router-link>
           </li>

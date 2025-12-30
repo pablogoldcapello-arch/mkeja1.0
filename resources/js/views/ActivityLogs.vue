@@ -299,9 +299,9 @@
         },
         loadLists() {
           this.initializing = true; // Start spinner
-          axios.get('/api/lists')
+          axios.get('/api/lists/activity-logs')
             .then((response) => {
-              this.activitylogs = response.data.lists.activitylogs;
+              this.activitylogs = response.data.activitylogs;
 
               setTimeout(() => {
                 $("#AllActivitiesTable").DataTable();
