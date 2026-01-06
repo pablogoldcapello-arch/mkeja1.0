@@ -39,7 +39,7 @@ class InvoiceService
             'amount_due'     => $unit->monthly_rent,
             'rent_month'     => $month,
             'due_date'       => Carbon::now()->addDays(5),
-            'status'         => 'draft',
+            'status'         => 'unpaid',
         ]);
     }
 
@@ -67,7 +67,7 @@ class InvoiceService
             'amount_due'     => $data['amount_due'],
             'due_date'       => $data['due_date'],
             'type'           => 'service_provider',
-            'status'         => 'draft',
+            'status'         => 'unpaid',
             'invoice_number' => Invoice::generateInvoiceNumber(),
         ]);
     }

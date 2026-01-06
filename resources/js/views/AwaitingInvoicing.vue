@@ -96,7 +96,7 @@
                     </div>
     
                       <div class="card-body pb-0">
-                        <h5 class="card-title">Awaiting Invoicing <span>| {{ awaitinginvoicing.length }} awaiting invoicing</span></h5>
+                        <h5 class="card-title">Unpaid Invoices <span>| {{ awaitinginvoicing.length }} unpaid invoices</span></h5>
                         <p class="card-text">
                           <div class="row">
                             <div class="col d-flex">
@@ -259,13 +259,13 @@
 
                                       <!-- Tenant-specific actions -->
                                       <template v-if="statement.type === 'tenant'">
-                                        <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Invoice</a>
-                                        <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement.id, statement.tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
+                                        <a v-if="statement.status == 'unpaid'" @click="invoiceTenant(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Pay</a>
+                                        <!-- <a v-if="statement.status == 'unpaid'" @click="settleTenant(statement.id, statement.tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a> -->
                                       </template>
 
                                       <!-- Service provider-specific actions -->
                                       <template v-else-if="statement.type === 'service_provider'">
-                                        <a v-if="statement.status == 'draft'" @click="invoiceProvider(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Invoice</a>
+                                        <a v-if="statement.status == 'unpaid'" @click="invoiceProvider(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Pay</a>
                                       </template>
 
                                       <!-- Common actions -->
@@ -296,11 +296,11 @@
                       <div class="modal-dialog">
                         <div class="modal-content">
                           <div class="modal-header">
-                            <h5 class="modal-title" id="invoiceTenantModalLabel">Invoice Tenant</h5>
+                            <h5 class="modal-title" id="invoiceTenantModalLabel">Pay Invoice</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                           </div>
                           <div class="modal-body">
-                            <p>#{{selectedStatement.ref_no}}</p>
+                            <p>#{{selectedStatement.invoice_number}}</p>
                             <p v-if="selectedStatement && selectedStatement.tenant">
                               <strong>Tenant Name:</strong> {{ selectedStatement.tenant.name }}
                             </p>
@@ -314,33 +314,28 @@
                               <strong>Rent Month:</strong> N/A
                             </p>
                             <p v-if="selectedStatement">
-                              <strong>Amount Due:</strong> {{ formatNumber(selectedStatement.total) }}
+                              <strong>Amount Due:</strong> {{ formatNumber(selectedStatement.amount_due) }}
                             </p>
                             <p v-else>
                               <strong>Amount Due:</strong> N/A
                             </p>
-                            <p>
-                              <strong>Water Bill:</strong>
-                              <input type="number" name="water_bill" v-model="form.water_bill" class="form-control">
-                              <div v-if="errors.water_bill" class="text-danger">{{ errors.water_bill }}</div>
-                            </p>
-                            <p v-if="selectedStatement.pms_property_id == 11">
-                              <strong>Electricity Bill:</strong>
-                              <input type="number" name="electricity_bill" v-model="form.electricity_bill" class="form-control">
-                              <div v-if="errors.electricity_bill" class="text-danger">{{ errors.electricity_bill }}</div>
-                            </p>
+                            <!-- <p>
+                              <strong>Phone Number:</strong>
+                              <input type="tel" name="phone" v-model="form.phone" class="form-control">
+                              <div v-if="errors.phone" class="text-danger">{{ errors.phone }}</div>
+                            </p> -->
                           </div>
                           <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                               <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click="confirmInvoiceTenant">
                               <span v-if="invoicing">
-                                <i class="fa fa-spinner fa-spin"></i> Invoicing...
+                                <i class="fa fa-spinner fa-spin"></i> Sending STK Push...
                               </span>
                      <!--          <span v-else-if="mailing">
                                 <i class="fa fa-spinner fa-spin"></i> Mailing...
                               </span> -->
                               <span v-else>
-                                Invoice
+                                Send STK Push
                               </span>
                             </button>
                           </div>
@@ -384,7 +379,7 @@
                                     <span
                                       class="badge"
                                       :class="{
-                                        'bg-secondary': selectedStatement.status === 'draft',
+                                        'bg-secondary': selectedStatement.status === 'unpaid',
                                         'bg-success': selectedStatement.status === 'paid',
                                         'bg-warning': selectedStatement.status === 'pending'
                                       }"
@@ -759,9 +754,11 @@
             rent_month: null,
             due_date: null,
             amount_due: null,
+            phone: ''
           },
           errors: {
             water_bill: '',
+            phone: '',
             tenant: '',
             rentmonth: ''
           },
@@ -1032,7 +1029,7 @@
 
                   payload = {
                       tenant_id: this.form.tenant_id,
-                      status: 'draft',
+                      status: 'unpaid',
                       amount_due: this.form.amount_due
                   };
                
@@ -2095,6 +2092,7 @@
         this.currentUser = JSON.parse(localStorage.getItem('user')) || {};
         this.current_user_id = this.currentUser.id;
         this.current_user = this.currentUser.first_name + " " + this.currentUser.last_name;
+        this.form.phone = this.currentUser.phone;
 
       }
     }

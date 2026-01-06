@@ -127,28 +127,14 @@
           <li>
             <router-link to="/awaitinginvoicing" custom v-slot="{ href, navigate, isActive }">
               <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
-                <i class="bi bi-circle"></i><span>Draft Invoices</span>
+                <i class="bi bi-circle"></i><span>Unpaid Invoices</span>
               </a>
             </router-link>
           </li>
           <li>
-            <router-link to="/invoicestosettle" custom v-slot="{ href, navigate, isActive }">
+            <router-link to="/paid-invoices" custom v-slot="{ href, navigate, isActive }">
               <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
-                <i class="bi bi-circle"></i><span>Invoices to Settle</span>
-              </a>
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/settledinvoices" custom v-slot="{ href, navigate, isActive }">
-              <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
-                <i class="bi bi-circle"></i><span>Settled Invoices</span>
-              </a>
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/payments" custom v-slot="{ href, navigate, isActive }">
-              <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
-                <i class="bi bi-circle"></i><span>Payments</span>
+                <i class="bi bi-circle"></i><span>Paid Invoices</span>
               </a>
             </router-link>
           </li>

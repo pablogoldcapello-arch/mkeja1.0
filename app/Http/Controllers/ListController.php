@@ -27,7 +27,7 @@ class ListController extends Controller
         $listings = Listing::with('images')->latest()->get();
         $awaitinginvoicing = Invoice::latest()
         ->with(['tenant','provider','property'])
-        ->where('status', 'draft')
+        ->where('status', 'unpaid')
         ->get();
         $pendingtickets = SupportTicket::with(['images','user'])
         ->where('status', 'open')
