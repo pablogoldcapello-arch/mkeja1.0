@@ -319,15 +319,27 @@
                             <p v-else>
                               <strong>Amount Due:</strong> N/A
                             </p>
-                            <!-- <p>
+                            <p v-if="selectedStatement && selectedStatement.tenant">
                               <strong>Phone Number:</strong>
-                              <input type="tel" name="phone" v-model="form.phone" class="form-control">
-                              <div v-if="errors.phone" class="text-danger">{{ errors.phone }}</div>
-                            </p> -->
+                              <input
+                                type="tel"
+                                class="form-control"
+                                v-model="selectedStatement.tenant.phone"
+                                placeholder="Enter phone number"
+                              >
+                            </p>
+                            <small class="text-muted">
+                              Tenant will receive an M-Pesa prompt on this number
+                            </small>
+                            <div v-if="errors.phone" class="text-danger">
+                              {{ errors.phone }}
+                            </div>
+
+
                           </div>
                           <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                              <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click="confirmInvoiceTenant">
+                              <button type="button" style="background-color: darkgreen; border-color: darkgreen;" :disabled="invoicing" class="btn btn-primary" @click="confirmInvoiceTenant">
                               <span v-if="invoicing">
                                 <i class="fa fa-spinner fa-spin"></i> Sending STK Push...
                               </span>
@@ -337,6 +349,7 @@
                               <span v-else>
                                 Send STK Push
                               </span>
+
                             </button>
                           </div>
                         </div>
@@ -734,8 +747,11 @@
           expensesTotal: 0,
           user: [],
           rentMonth: '',
-          
-          selectedStatement: {}, // Initialize as an empty object
+          selectedStatement: {
+            tenant: {
+              phone: ''
+            }
+          },          
           refNo: '',
           rentMonth: '',
           propertyName: '',
@@ -858,7 +874,10 @@
           this.emailCount = this.selectedStatement.email_count;
           this.whatsappCount = this.selectedStatement.whatsapp_count;
           this.smsCount = this.selectedStatement.sms_count;
-          console.log("pussy",this.selectedInvoice)
+          console.log("pussy", invoice)
+          if (!invoice.tenant.phone) {
+            invoice.tenant.phone = ''
+          }
           // Show the modal after fetching data
           const modal = new bootstrap.Modal(document.getElementById('viewInvoiceModal'));
           modal.show();
@@ -1153,76 +1172,57 @@
           modal.show();
         },
         confirmInvoiceTenant() {
-          if (this.selectedStatement && this.selectedStatement.id) {
-            // Show loading spinner
-            this.invoicing = true;
-            this.successMessage = '';
-
-            // Logging the invoicing process
-            console.log("Invoicing tenant with statement ID:", this.selectedStatement.id);
-
-            // Axios PUT request to invoice the tenant
-            axios.put(`/api/pmsinvoicestatement/${this.selectedStatement.id}`, this.form)
-              .then(response => {
-                // Store the invoiced statement in the component's data
-                this.invoiceStatement = response.data.statement;
-
-                // Optionally send SMS with invoice
-                // this.sendSms(this.invoiceStatement);
-
-                // Share invoice via email
-                // this.sendMail(this.invoiceStatement);
-
-                console.log("Invoiced statement:", this.invoiceStatement);
-
-                // Display success message and toast notification
-                this.successMessage = 'Tenant invoiced!';
-                toast.fire(
-                  'Success!',
-                  'Tenant invoiced!',
-                  'success'
-                );
-
-                // Register activity after property deletion
-                  const payload = {
-                    description: `${this.current_user} added water bill to invoice ID ${this.selectedStatement.id}`,
-                    user_id: this.current_user_id,
-                  };
-
-                  axios.post('api/activity', payload).then((response) => {
-                    console.log(response)
-                  })
-
-              })
-              .catch(error => {
-                console.error(error);
-
-                // Display error toast notification
-                toast.fire(
-                  'Error!',
-                  'An error occurred while invoicing the tenant.',
-                  'error'
-                );
-              })
-              .finally(() => {
-                // Hide loading spinner
-                this.invoicing = false;
-
-                // // Close the modal after invoicing
-                const modal = bootstrap.Modal.getInstance(document.getElementById('invoiceTenantModal'));
-                modal.hide();
-
-                // Reset form fields
-                this.form.water_bill = '';
-                this.form.cash = '';
-
-                // Reload the lists (loadLists ensures updated data is fetched)
-                this.loadLists();
-              });
-          } else {
-            // Handle case where selectedStatement is not set
-            console.log("No statement selected for invoicing.");
+          if (!this.selectedStatement || !this.selectedStatement.id) {
+            console.log("No statement selected.");
+            return;
           }
+
+          if (!this.selectedStatement.tenant?.phone) {
+            this.errors.phone = 'Phone number is required';
+            return;
+          }
+
+          this.invoicing = true;
+          this.errors = {};
+          this.successMessage = '';
+
+          const payload = {
+            statement_id: this.selectedStatement.id,
+            phone: this.selectedStatement.tenant.phone,
+            amount: this.selectedStatement.amount_due,
+            account_reference: this.selectedStatement.invoice_number,
+            description: `Rent payment for ${this.selectedStatement.rent_month}`
+          };
+
+          console.log('Sending STK Push:', payload);
+
+          axios.post('/api/mpesa/stk-push', payload)
+            .then(response => {
+              toast.fire(
+                'STK Sent!',
+                'Please complete payment on your phone.',
+                'success'
+              );
+            })
+            .catch(error => {
+              console.error(error);
+
+              toast.fire(
+                'Error!',
+                error.response?.data?.message || 'Failed to send STK Push.',
+                'error'
+              );
+            })
+            .finally(() => {
+              this.invoicing = false;
+
+              const modal = bootstrap.Modal.getInstance(
+                document.getElementById('invoiceTenantModal')
+              );
+              modal.hide();
+
+              this.loadLists();
+            });
         },
                 
         settleTenant(id, tenantId){

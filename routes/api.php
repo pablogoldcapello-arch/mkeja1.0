@@ -15,6 +15,7 @@ use App\Http\Controllers\SystemConfigController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\ListController;
 use App\Http\Controllers\ListingController;
+use App\Http\Controllers\MpesaController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register'])->name('register');
@@ -72,5 +73,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::put('changepassword/{id}',[UserController::class, 'changePassword']);
 
     Route::post('/invoices/auto-generate', [InvoiceController::class, 'autoGenerate']);
+
+    Route::post('/mpesa/stk-push', [MpesaController::class, 'stkPush']);
+
 
 });
