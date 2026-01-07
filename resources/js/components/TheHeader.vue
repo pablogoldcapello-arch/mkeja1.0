@@ -75,8 +75,10 @@
               <li class="dropdown-header">
                 <h6>{{current_user.name}}</h6>
                 <span v-if="current_user.role == 'admin'">Admin</span>
-                <span v-else-if="current_user.role == 'loan_officer'">Loan Officer</span>
-                <span v-else>User</span>
+                <span v-else-if="current_user.role == 'landlord'">Landlord</span>
+                <span v-else-if="current_user.role == 'caretaker'">Caretaker</span>
+                <span v-else-if="current_user.role == 'tenant'">Tenant</span>
+                <span v-else-if="current_user.role == 'service_provider'">Service Provider</span>
               </li>
               <li>
                 <hr class="dropdown-divider">

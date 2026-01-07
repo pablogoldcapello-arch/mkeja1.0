@@ -66,6 +66,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/landlords/{id}/properties', [PropertyController::class, 'landlordProperties'])->name('landlordproperties');
     Route::get('/properties/{id}/tenants', [PropertyController::class, 'tenants']);
 
+    Route::get('/tenant-invoices/{id}', [InvoiceController::class, 'tenantInvoices']);
+    Route::get('/provider-invoices/{id}', [InvoiceController::class, 'providerInvoices']);
+    Route::get('/property-invoices/{id}', [InvoiceController::class, 'propertyInvoices']);
+
     Route::post('/tenancies/assign', [TenancyController::class, 'assignTenant'])
     ->middleware(['auth:api', 'role:admin,landlord']);
 

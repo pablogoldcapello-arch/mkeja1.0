@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
+use App\Models\Property;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -141,6 +142,44 @@ class InvoiceController extends Controller
             ], 500);
         }
     }
+
+    public function tenantInvoices(Request $request, string $id)
+    {
+        $tenantinvoices = Invoice::latest()
+        ->with(['tenant','provider','property'])
+        ->where('tenant_id', $id)
+        ->get();
+        // Return as JSON
+        return response()->json([
+            'tenantinvoices' => $tenantinvoices,
+        ]);       
+    }
+
+    public function providerInvoices(Request $request, string $id)
+    {
+        $providerinvoices = Invoice::latest()
+        ->with(['tenant','provider','property'])
+        ->where('provider_id', $id)
+        ->get();
+        // Return as JSON
+        return response()->json([
+            'providerinvoices' => $providerinvoices,
+        ]);       
+    } 
+    
+    public function propertyInvoices(Request $request, string $id)
+    {
+        $propertyinvoices = Invoice::latest()
+        ->with(['tenant','provider','property'])
+        ->where('property_id', $id)
+        ->get();
+        $property = Property::where('id', $id)->first();
+        // Return as JSON
+        return response()->json([
+            'propertyinvoices' => $propertyinvoices,
+            'property' => $property,
+        ]);       
+    }     
 
 
 }

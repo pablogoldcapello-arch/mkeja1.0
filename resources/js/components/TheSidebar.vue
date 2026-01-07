@@ -117,27 +117,41 @@
 
 
       <!-- Manage Invoices -->
-      <li v-show="['admin', 'landlord', 'tenant', 'service_provider'].includes(userRole)" class="nav-item">
+      <li v-show="['admin', 'tenant', 'service_provider'].includes(userRole)" class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#invoice-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-receipt"></i>
           <span>Manage Invoices</span>
           <i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="invoice-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-          <li>
+          <li v-show="userRole === 'admin'">
             <router-link to="/awaitinginvoicing" custom v-slot="{ href, navigate, isActive }">
               <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
                 <i class="bi bi-circle"></i><span>Unpaid Invoices</span>
               </a>
             </router-link>
           </li>
-          <li>
+          <li v-show="userRole === 'admin'">
             <router-link to="/paid-invoices" custom v-slot="{ href, navigate, isActive }">
               <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
                 <i class="bi bi-circle"></i><span>Paid Invoices</span>
               </a>
+            </router-link>           
+          </li>
+          <li v-show="userRole === 'tenant'">
+            <router-link to="/tenant-invoices" custom v-slot="{ href, navigate, isActive }">
+              <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
+                <i class="bi bi-circle"></i><span>My Invoices</span>
+              </a>
             </router-link>
           </li>
+          <li v-show="userRole === 'service_provider'">
+            <router-link to="/provider-invoices" custom v-slot="{ href, navigate, isActive }">
+              <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
+                <i class="bi bi-circle"></i><span>My Invoices</span>
+              </a>
+            </router-link>
+          </li>           
         </ul>
       </li>
 

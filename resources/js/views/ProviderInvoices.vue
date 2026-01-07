@@ -96,40 +96,12 @@
                     </div>
     
                       <div class="card-body pb-0">
-                        <h5 class="card-title">Unpaid Invoices <span>| {{ awaitinginvoicing.length }} unpaid invoices</span></h5>
+                        <h5 class="card-title">My Invoices <span>| {{ awaitinginvoicing.length }} unpaid invoices</span></h5>
                         <p class="card-text">
                           <div class="row">
                             <div class="col d-flex">
                               <button v-if="awaitinginvoicing.length !== 0" class="me-2" @click="exportToExcel">Export</button>
-                              <router-link to="#" custom v-slot="{ href, navigate, isActive }">
-                                <a
-                                  :href="href"
-                                  :class="{ active: isActive }"
-                                   @click="openModal"
-                                  class="btn btn-sm btn-primary rounded-pill me-2"
-                                  style="background-color: darkgreen; border-color: darkgreen;"
-                                >
-                                  Create Invoice
-                                </a>
-                              </router-link>
-                                <!-- Auto-generate Invoices -->
-                              <button
-                                class="btn btn-sm btn-warning rounded-pill me-2"
-                                style="background-color: darkorange; border-color: darkorange;"
-                                @click="autoGenerateInvoices"
-                              >
-                                Auto-Generate
-                              </button>
-                              <router-link v-if="awaitinginvoicing.length !== 0" to="#" custom v-slot="{ href, navigate, isActive }">
-                                <a
-                                  :href="href"
-                                  :class="{ active: isActive }"
-                                  class="btn btn-sm btn-primary rounded-pill me-2"
-                                  style="background-color: darkorange; border-color: darkorange;"
-                                >
-                                  ({{ awaitinginvoicing.length }}) Remaining
-                                </a>
-                              </router-link>
+
                             </div>
                             <div class="col-auto d-flex justify-content-end">
                               <div class="btn-group" role="group">
@@ -175,7 +147,6 @@
                           <table id="AllStatementsTable" class="table table-borderless">
                             <thead>
                               <tr>
-                                <th scope="col">Name</th>
                                 <th scope="col">Rent Month / Services</th>
                                 <th scope="col">Amount Due</th>
                                 <th scope="col">Due Date</th>
@@ -198,10 +169,6 @@
                             <!-- Invoice rows -->
                             <tbody v-else>
                               <tr v-for="statement in awaitinginvoicing" :key="statement.id">
-                                <!-- Name -->
-                                <td>
-                                  {{ statement.type === 'tenant' ? (statement.tenant ? statement.tenant.name : 'N/A') : (statement.provider ? statement.provider.name : 'N/A') }}
-                                </td>
 
                                 <!-- Rent month or services -->
                                 <td>
@@ -1987,18 +1954,18 @@
           const year = currentDate.getFullYear();
           return `${months[monthIndex]} ${year}`;
         },
-        loadLists() {
+        loadLists(id) {
           this.initializing = true; // Start spinner
-          axios.get('api/lists')
+          axios.get('api/provider-invoices/'+ id)
             .then((response) => {
-              this.awaitinginvoicing = response.data.lists.awaitinginvoicing;
+              this.awaitinginvoicing = response.data.providerinvoices;
 
-              this.services = response.data.lists.services;
-              this.tenants = response.data.lists.tenants;
-              this.filteredTenants = this.tenants;
-              this.serviceproviders = response.data.lists.serviceproviders;
-              this.filteredProviders = this.serviceproviders;              
-              this.expenses = response.data.lists.pmsexpenses;
+            //   this.services = response.data.lists.services;
+            //   this.tenants = response.data.lists.tenants;
+            //   this.filteredTenants = this.tenants;
+            //   this.serviceproviders = response.data.lists.serviceproviders;
+            //   this.filteredProviders = this.serviceproviders;              
+            //   this.expenses = response.data.lists.pmsexpenses;
               // Calculate the total amount paid
               this.totalAmountPaid = this.calculateTotalAmountPaid();
               setTimeout(() => {
@@ -2081,12 +2048,11 @@
         }
       },      
       mounted(){
-        this.loadLists();
         this.months = this.generateMonthsArray();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
         this.userId = this.user.id;
-        // this.getUserPermissions(this.userId);
+        this.loadLists(this.userId);
         this.currentMonth = this.getCurrentMonth();
         this.loadLogo();
         this.currentUser = JSON.parse(localStorage.getItem('user')) || {};

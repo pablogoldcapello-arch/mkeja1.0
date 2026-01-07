@@ -14,6 +14,9 @@ import Tenants from '../views/Tenants.vue';
 import PropertyTenants from '../views/PropertyTenants.vue';
 import Units from '../views/Units.vue';
 import AwaitingInvoicing from '../views/AwaitingInvoicing.vue';
+import TenantInvoices from '../views/TenantInvoices.vue';
+import ProviderInvoices from '../views/ProviderInvoices.vue';
+import PropertyInvoices from '../views/PropertyInvoices.vue';
 import PendingTickets from '../views/PendingTickets.vue';
 import ClosedTickets from '../views/ClosedTickets.vue';
 import ActivityLogs from '../views/ActivityLogs.vue';
@@ -38,6 +41,9 @@ const routes = [
   { path: '/units/:id', name: 'units', component: Units, meta: { requiresAuth: true } },
   { path: '/tenants/:id', name: 'proptenants', component: PropertyTenants, meta: { requiresAuth: true } },
   { path: '/awaitinginvoicing', name: 'awaitinginvoicing', component: AwaitingInvoicing, meta: { requiresAuth: true } },
+  { path: '/tenant-invoices', name: 'tenant-invoices', component: TenantInvoices, meta: { requiresAuth: true } },
+  { path: '/provider-invoices', name: 'provider-invoices', component: ProviderInvoices, meta: { requiresAuth: true } },
+  { path: '/property-invoices/:id', name: 'property-invoices', component: PropertyInvoices, meta: { requiresAuth: true } },
   { path: '/pendingtickets', name: 'pendingtickets', component: PendingTickets, meta: { requiresAuth: true } },
   { path: '/closedtickets', name: 'closedtickets', component: ClosedTickets, meta: { requiresAuth: true } },
   { path: '/activitylogs', name: 'activitylogs', component: ActivityLogs, meta: { requiresAuth: true } },
