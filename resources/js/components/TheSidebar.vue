@@ -95,7 +95,7 @@
         </a>
 
         <ul id="build-nav" class="nav-content collapse">
-          <li>
+          <li v-show="userRole === 'admin'">
             <router-link to="/properties" custom v-slot="{ href, navigate, isActive }">
               <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
                 <i class="bi bi-circle"></i>
@@ -103,6 +103,15 @@
               </a>
             </router-link>
           </li>
+
+          <li v-show="userRole === 'landlord'">
+            <router-link to="/landlord-properties" custom v-slot="{ href, navigate, isActive }">
+              <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
+                <i class="bi bi-circle"></i>
+                <span>My Properties</span>
+              </a>
+            </router-link>
+          </li>          
 
           <li v-show="userRole === 'landlord'">
             <router-link to="/caretakers" custom v-slot="{ href, navigate, isActive }">

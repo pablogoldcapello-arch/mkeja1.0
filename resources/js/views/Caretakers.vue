@@ -283,16 +283,44 @@
 
                           </div>
 
-                          <!-- Password -->
-                          <div class="col-md-6">
-                            <label class="form-label">Password*</label>
-                            <div class="input-group">
-                              <input id="password" :type="showPassword ? 'text' : 'password'" class="form-control" v-model="data.password" required>
-                              <span class="input-group-text" style="cursor:pointer" @click="showPassword = !showPassword">
-                                <i :class="showPassword ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
-                              </span>
-                            </div>
-                          </div>
+<!-- Password -->
+<div class="col-md-6">
+  <label class="form-label">
+    Password*
+    <small class="text-muted">(auto-generate or type manually)</small>
+  </label>
+
+  <div class="input-group">
+    <input
+      id="password"
+      :type="showPassword ? 'text' : 'password'"
+      class="form-control"
+      v-model="data.password"
+      required
+    />
+
+    <span
+      class="input-group-text"
+      style="cursor:pointer"
+      @click="showPassword = !showPassword"
+    >
+      <i :class="showPassword ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
+    </span>
+
+    <button
+      class="btn btn-outline-secondary"
+      type="button"
+      @click="generatePassword"
+    >
+      Generate
+    </button>
+  </div>
+
+  <small class="text-muted">
+    A strong password will be generated automatically if you prefer
+  </small>
+</div>
+
 
                           <!-- Phone -->
                           <div class="col-md-6">
@@ -337,7 +365,6 @@
                             </select>
                           </div>
 
-                          <!-- Additional Fields -->
                           <!-- Assign Properties to Caretaker (Landlord only) -->
                           <div
                             v-if="userRole === 'landlord'"
@@ -347,6 +374,12 @@
                               Assign Properties
                               <small class="text-muted">(optional)</small>
                             </label>
+
+                            <small class="text-muted d-block mb-1">
+                              <i class="bi bi-keyboard me-1"></i>
+                              Hold CTRL (or ⌘ on Mac) to select multiple properties
+                            </small>
+
 
                             <select
                               class="form-select"
@@ -728,6 +761,26 @@
         }
       },      
       methods: {
+        generatePassword() {
+          const length = 12;
+          const chars =
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=';
+
+          let password = '';
+          for (let i = 0; i < length; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+
+          this.data.password = password;
+          this.showPassword = true;
+
+          // Optional toast feedback
+          toast.fire({
+            icon: 'success',
+            title: 'Password generated',
+            text: 'You can copy or change it before saving'
+          });
+        },
         handlePhotoUpload(event) {
           const file = event.target.files[0];
           if (!file) return;

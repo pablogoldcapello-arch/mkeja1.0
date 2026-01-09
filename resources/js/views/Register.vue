@@ -78,6 +78,13 @@
                         <div class="invalid-feedback" v-if="!form.confirm_password">Please confirm password!</div>
                         <div class="invalid-feedback" v-if="form.password !== form.confirm_password">Passwords do not match!</div>
                       </div>
+
+                      <ul v-if="Object.keys(errors).length" class="alert alert-danger">
+  <li v-for="(error, key) in errors" :key="key">
+    {{ error[0] }}
+  </li>
+</ul>
+
                     </div>
 
                     <div class="row g-3">
@@ -132,8 +139,10 @@
           first_name: '',
           last_name: '',
           email: '',
-          password: ''
+          password: '',
+          role: 'tenant'
         },
+        errors: {},
         isPasswordVisible: false,
       }
     },
@@ -181,52 +190,46 @@
           }
           return isValid;
        },
-        create_user(){
-            if (this.validateForm()) {                                 
-                
-          axios
-          .post('api/register',this.form)
-          .then((response) =>{
-            console.log(response)
-              //reset form after submission
-              this.form.first_name = '';
-              this.form.last_name = '';
-              this.form.phone_number = '';
-              this.form.email = '';
-              this.form.password = '';
-              if(response["data"]["status"] == "error")
-             {
-               Swal.fire({
-                title: 'OPPS',
-                text:   "error",
-                icon: 'warning',
-              
-            });
-             }
-             else
-             {
-               toast.fire({
-                    title: 'Hurry',
-                    text:   "You have been registered successfully. Contact admin for activation.",
-                    icon: 'success',
-                  
-                });
-               this.$router.push('/login');
-             }
-              //success message alert
-            //   Swal.fire({
-            //   title: 'Hurry',
-            //   text:   "User has been registered successfully",
-            //   icon: 'success',
-              
-            // });
-          })
-          .catch((e)=>{
-              console.log(e); 
-              Swal.fire({ title: 'Hurry', text:   e, icon: 'warning', });
-          })
-          }
-        }
+create_user() {
+  if (!this.validateForm()) return;
+
+  this.errors = {}; // clear old errors
+
+  axios.post('api/register', this.form)
+    .then(response => {
+      toast.fire({
+        title: 'Hurry',
+        text: 'You have been registered successfully. Contact admin for activation.',
+        icon: 'success',
+      });
+
+      this.$router.push('/login');
+    })
+    .catch(error => {
+      console.log(error.response);
+
+      // ✅ Laravel validation errors (422)
+      if (error.response && error.response.status === 422) {
+        this.errors = error.response.data.errors;
+
+        // Optional toast summary
+        Swal.fire({
+          title: 'Validation error',
+          text: Object.values(this.errors)[0][0],
+          icon: 'warning',
+        });
+      } 
+      // ❌ Other server errors
+      else {
+        Swal.fire({
+          title: 'Error',
+          text: 'Something went wrong. Please try again.',
+          icon: 'error',
+        });
+      }
+    });
+}
+
   }
 }
   </script>

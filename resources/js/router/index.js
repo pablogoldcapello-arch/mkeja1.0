@@ -5,6 +5,7 @@ import Register from '../views/Register.vue';
 import Home from '../views/Home.vue';
 import Users from '../views/Users.vue';
 import Properties from '../views/Properties.vue';
+import LandlordProperties from '../views/LandlordProperties.vue';
 import Listings from '../views/Listings.vue';
 import LandlordListings from '../views/LandlordListings.vue';
 import Landlords from '../views/Landlords.vue';
@@ -32,6 +33,7 @@ const routes = [
   { path: '/dashboard', name: 'dashboard', component: Home, meta: { requiresAuth: true } },
   { path: '/users', name: 'users', component: Users, meta: { requiresAuth: true } },
   { path: '/properties', name: 'properties', component: Properties, meta: { requiresAuth: true } },
+  { path: '/landlord-properties', name: 'landlordproperties', component: LandlordProperties, meta: { requiresAuth: true } },
   { path: '/property-listings', name: 'listings', component: Listings, meta: { requiresAuth: true } },
   { path: '/landlord-listings', name: 'landlordlistings', component: LandlordListings, meta: { requiresAuth: true } },
   { path: '/landlords', name: 'landlords', component: Landlords, meta: { requiresAuth: true } },

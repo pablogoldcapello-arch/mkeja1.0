@@ -25,34 +25,36 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
         $user = User::create([
-            'first_name' => $request->first_name,
-            'last_name'  => $request->last_name,
+            'name' => $request->first_name + " " + $request->last_name,
             'email'      => $request->email,
             'password'   => Hash::make($request->password),
-            'role'       => 'user',
+            'role'       => $request->role ?? 'user',
             'status'     => 1,
         ]);
 
-        $token = auth('api')->login($user); // use api guard explicitly
+        $token = auth('api')->login($user);
 
-        //record actvity log
-        $user = auth()->user(); // or JWTAuth::parseToken()->authenticate();
+        // ✅ Use the created user, NOT auth()->user()
         ActivityLog::create([
             'user_id' => $user->id,
-            'description' => $user->name.' created account'
-        ]);        
+            'description' => $user->first_name.' '.$user->last_name.' created account'
+        ]);
 
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'User registered successfully.',
-            'user'   => $user,
-            'token'  => $token,
+            'user'    => $user,
+            'token'   => $token,
         ], 201);
     }
+
 
     /**
      * Login user and return JWT

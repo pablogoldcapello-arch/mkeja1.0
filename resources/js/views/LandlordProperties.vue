@@ -19,9 +19,9 @@
                         <li><a class="dropdown-item" href="#">This Year</a></li>
                       </ul> -->
                     </div>
-    
-                    <div v-show="userRole == 'admin'" class="card-body pb-0">
-                      <h5 class="card-title">All Properties <span>| Properties of M-Keja</span></h5>
+
+                    <div class="card-body pb-0">
+                      <h5 class="card-title">My Properties <span>| Properties under M-Keja management</span></h5>
                       <p class="card-text">
                         <div class="row">
                           <div class="col d-flex">
@@ -55,11 +55,11 @@
             
                       </p>
     
-                      <table id="AllPropertiesTable" class="table table-borderless">
+                      <table id="LandlordPropertiesTable" class="table table-borderless">
                         <thead>
                           <tr>
                             <th scope="col">Title</th>
-                            <th scope="col">Landlord</th>
+                            <th scope="col">Location</th>
                             <th scope="col">Type</th>
                             <th scope="col">Action</th>
                           </tr>
@@ -75,9 +75,9 @@
                           </tr>
                         </tbody>
                         <tbody v-else>
-                          <tr v-for="item in properties" :key="item.id">
+                          <tr v-for="item in landlordproperties" :key="item.id">
                             <td>{{item.title ?? "N/A"}}</td>
-                            <td>{{item.landlord.name}}</td>
+                            <td>{{item.location ?? "N/A"}}</td>
                             <td>{{item.type ?? "N/A"}}</td>
                             <td>
                               <div class="btn-group" role="group">
@@ -94,7 +94,11 @@
                                       class="dropdown-item">
                                       <i class="ri-eye-fill mr-2"></i>View Tenants
                                   </router-link>
-                                  
+                                  <router-link 
+                                      :to="`/property-invoices/${item.id}`" 
+                                      class="dropdown-item">
+                                      <i class="ri-eye-fill mr-2"></i>View Invoices
+                                  </router-link>
                                   <a @click="editProperty(item)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
                                   <a @click="deleteProperty(item.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
                                   </div>
@@ -104,7 +108,7 @@
                         </tbody>
                       </table>
     
-                    </div>                 
+                    </div>                    
     
                   </div>
                 </div><!-- End Top Selling -->
