@@ -32,12 +32,13 @@ class AuthController extends Controller
         }
 
         $user = User::create([
-            'name' => $request->first_name + " " + $request->last_name,
+            'name'       => $request->first_name . ' ' . $request->last_name,
             'email'      => $request->email,
             'password'   => Hash::make($request->password),
             'role'       => $request->role ?? 'user',
             'status'     => 1,
         ]);
+
 
         $token = auth('api')->login($user);
 

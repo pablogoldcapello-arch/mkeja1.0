@@ -80,10 +80,10 @@
                       </div>
 
                       <ul v-if="Object.keys(errors).length" class="alert alert-danger">
-  <li v-for="(error, key) in errors" :key="key">
-    {{ error[0] }}
-  </li>
-</ul>
+                        <li v-for="(error, key) in errors" :key="key">
+                          {{ error[0] }}
+                        </li>
+                      </ul>
 
                     </div>
 
@@ -190,45 +190,45 @@
           }
           return isValid;
        },
-create_user() {
-  if (!this.validateForm()) return;
+       create_user() {
+          if (!this.validateForm()) return;
 
-  this.errors = {}; // clear old errors
+          this.errors = {}; // clear old errors
 
-  axios.post('api/register', this.form)
-    .then(response => {
-      toast.fire({
-        title: 'Hurry',
-        text: 'You have been registered successfully. Contact admin for activation.',
-        icon: 'success',
-      });
+          axios.post('api/register', this.form)
+            .then(response => {
+              toast.fire({
+                title: 'Hurry',
+                text: 'You have been registered successfully.',
+                icon: 'success',
+              });
 
-      this.$router.push('/login');
-    })
-    .catch(error => {
-      console.log(error.response);
+              this.$router.push('/login');
+            })
+            .catch(error => {
+              console.log(error.response);
 
-      // ✅ Laravel validation errors (422)
-      if (error.response && error.response.status === 422) {
-        this.errors = error.response.data.errors;
+              // ✅ Laravel validation errors (422)
+              if (error.response && error.response.status === 422) {
+                this.errors = error.response.data.errors;
 
-        // Optional toast summary
-        Swal.fire({
-          title: 'Validation error',
-          text: Object.values(this.errors)[0][0],
-          icon: 'warning',
-        });
-      } 
-      // ❌ Other server errors
-      else {
-        Swal.fire({
-          title: 'Error',
-          text: 'Something went wrong. Please try again.',
-          icon: 'error',
-        });
-      }
-    });
-}
+                // Optional toast summary
+                Swal.fire({
+                  title: 'Validation error',
+                  text: Object.values(this.errors)[0][0],
+                  icon: 'warning',
+                });
+              } 
+              // ❌ Other server errors
+              else {
+                Swal.fire({
+                  title: 'Error',
+                  text: 'Something went wrong. Please try again.',
+                  icon: 'error',
+                });
+              }
+            });
+        }
 
   }
 }

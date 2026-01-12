@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use App\Models\Unit;
+use App\Models\SupportTicket;
 
 class Property extends Model
 {
@@ -49,6 +51,14 @@ class Property extends Model
             'caretaker_id'
         )->withTimestamps();
     }
+
+    public function tickets()
+    {
+        return SupportTicket::whereIn('user_id', function($q) {
+            $q->select('tenant_id')->from('leases')->where('status','active');
+        });
+    }
+
 
     
 }

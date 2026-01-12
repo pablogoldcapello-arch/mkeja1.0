@@ -182,5 +182,70 @@ class UserSeeder extends Seeder
                 $unit->update(['status' => 'rented']);
             }
         }
+
+        // 8️⃣ Service Providers (predefined for auto-login)
+        $serviceProvidersData = [
+        [
+            'name' => 'Peter Plumber',
+            'email' => 'peter.plumber@mk.com',
+            'password' => Hash::make('provider123'),
+            'role' => 'service_provider',
+            'phone' => '+254700000005',
+            'skills' => json_encode(['plumbing', 'cleaning']),
+            'is_email_verified' => true,
+            'status' => 'active',
+            'dob' => '1990-02-15',
+            'gender' => 'male',
+            'address' => '12 Service Road',
+            'city' => 'Nairobi',
+            'county' => 'Nairobi County',
+            'postal_code' => '00100',
+            'last_login' => now(),
+            'email_verified_at' => now(),
+        ],
+        [
+            'name' => 'Emma Electrician',
+            'email' => 'emma.electrician@mk.com',
+            'password' => Hash::make('provider123'),
+            'role' => 'service_provider',
+            'phone' => '+254700000006',
+            'skills' => json_encode(['electrical', 'painting']),
+            'is_email_verified' => true,
+            'status' => 'active',
+            'dob' => '1992-06-10',
+            'gender' => 'female',
+            'address' => '34 Service Lane',
+            'city' => 'Mombasa',
+            'county' => 'Mombasa County',
+            'postal_code' => '80100',
+            'last_login' => now(),
+            'email_verified_at' => now(),
+        ],
+        [
+            'name' => 'Sam Gardener',
+            'email' => 'sam.gardener@mk.com',
+            'password' => Hash::make('provider123'),
+            'role' => 'service_provider',
+            'phone' => '+254700000007',
+            'skills' => json_encode(['gardening', 'security']),
+            'is_email_verified' => true,
+            'status' => 'active',
+            'dob' => '1988-09-25',
+            'gender' => 'male',
+            'address' => '56 Garden Street',
+            'city' => 'Nakuru',
+            'county' => 'Nakuru County',
+            'postal_code' => '20100',
+            'last_login' => now(),
+            'email_verified_at' => now(),
+        ],
+        ];
+
+        // Loop and create service providers
+        foreach ($serviceProvidersData as $spData) {
+        User::create($spData);
+        }
+
+
     }
 }

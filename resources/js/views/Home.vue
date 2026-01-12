@@ -2,205 +2,30 @@
   <Master>
     <section class="section dashboard">
       <div class="row">
-        <div class="col-lg-12">
-          <div class="row">
+        <div
+          v-for="(card, index) in dashboardCards"
+          :key="index"
+          class="col-xxl-2 col-md-3 col-sm-4 mb-3"
+        >
+          <div class="card info-card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title" :class="`text-${card.color}`">
+                {{ card.title }}
+              </h5>
 
-            <!-- Members Card -->
-            <div class="col-xxl-2 col-md-3 col-sm-4 mb-3">
-              <div class="card info-card sales-card shadow-sm">
-                <div class="card-body">
-                  <h5 class="card-title text-success">Members</h5>
-                  <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
-                      <span style="color: darkgreen;"><i class="bi bi-building"></i></span>
-                    </div>
-                    <div class="ps-3">
-                      <h6>0</h6>
-                    </div>
-                  </div>
+              <div class="d-flex align-items-center">
+                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
+                  <i :class="`bi ${card.icon} text-${card.color}`"></i>
                 </div>
-              </div>
-            </div><!-- End Members Card -->
-
-            <!-- Rented Units Card -->
-            <div class="col-xxl-2 col-md-3 col-sm-4 mb-3">
-              <div class="card info-card revenue-card shadow-sm">
-                <div class="card-body">
-                  <h5 class="card-title text-warning">Rented</h5>
-                  <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
-                      <i class="bi bi-house-door" style="color: orange;"></i>
-                    </div>
-                    <div class="ps-3">
-                      <h6>9</h6>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div><!-- End Rented Units Card -->
-
-            <!-- Vacant Units Card -->
-            <div  class="col-xxl-2 col-md-3 col-sm-4 mb-3">
-              <div class="card info-card revenue-card shadow-sm">
-                <div class="card-body">
-                  <h5 class="card-title text-danger">Vacant</h5>
-                  <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
-                    <i class="bi bi-box-arrow-right" style="color: darkslategray;"></i>
-                    </div>
-                    <div class="ps-3">
-                      <h6>11</h6>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div><!-- End Vacant Units Card -->
-
-            <!-- Users Card -->
-            <div class="col-xxl-2 col-md-3 col-sm-4 mb-3">
-              <div class="card info-card customers-card shadow-sm">
-                <div class="card-body">
-                  <h5 class="card-title text-primary">Users</h5>
-                  <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
-                      <i class="bi bi-people" style="color: blue;"></i>
-                    </div>
-                    <div class="ps-3">
-                      <h6>7</h6>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div><!-- End Users Card -->
-
-            <!-- Landlords Card -->
-            <div class="col-xxl-2 col-md-3 col-sm-4 mb-3">
-              <div class="card info-card customers-card shadow-sm">
-                <div class="card-body">
-                  <h5 class="card-title text-info">Landlords</h5>
-                  <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
-                      <i class="bi bi-person-lines-fill" style="color: teal;"></i>
-                    </div>
-                    <div class="ps-3">
-                      <h6>49</h6>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div><!-- End Landlords Card -->
-
-            <!-- Tenants Card -->
-            <div class="col-xxl-2 col-md-3 col-sm-4 mb-3">
-              <div class="card info-card customers-card shadow-sm">
-                <div class="card-body">
-                  <h5 class="card-title text-secondary">Tenants</h5>
-                  <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
-                      <!-- Using bi-people for all tenants -->
-                      <i class="bi bi-people" style="color: darkslategray;"></i>
-                    </div>
-                    <div class="ps-3">
-                      <h6>10</h6>
-                    </div>
-                  </div>
+                <div class="ps-3">
+                  <h6>{{ card.value ?? 0 }}</h6>
                 </div>
               </div>
             </div>
-            <!-- End Tenants Card -->
-
-            <!-- Right side columns -->
-            <div class="col-lg-12">
-              <!-- Recent Activity -->
-              <div class="card">
-                <div class="filter">
-                  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li>
-                      <router-link to="/todayactivities" custom v-slot="{ href, navigate, isActive }">
-                        <a
-                            :href="href"
-                            :class="{ active: isActive }"
-                            class="dropdown-item"
-                            @click="navigate"
-                        >
-                          Today
-                        </a>
-                      </router-link>
-                    </li>
-                    <li>
-                      <router-link to="/monthactivities" custom v-slot="{ href, navigate, isActive }">
-                        <a
-                            :href="href"
-                            :class="{ active: isActive }"
-                            class="dropdown-item"
-                            @click="navigate"
-                        >
-                          This Month
-                        </a>
-                      </router-link>
-                    </li>
-                    <li>
-                      <router-link to="/yearactivities" custom v-slot="{ href, navigate, isActive }">
-                        <a
-                            :href="href"
-                            :class="{ active: isActive }"
-                            class="dropdown-item"
-                            @click="navigate"
-                        >
-                          This Year
-                        </a>
-                      </router-link>
-                    </li>
-                    <li>
-                      <router-link to="/activities" custom v-slot="{ href, navigate, isActive }">
-                        <a
-                            :href="href"
-                            :class="{ active: isActive }"
-                            class="dropdown-item"
-                            @click="navigate"
-                        >
-                          All Time
-                        </a>
-                      </router-link>
-                    </li>
-                  </ul>
-                </div>
-
-                <div class="card-body">
-                  <h5 class="card-title">Recent Activity <span>| User Monitoring</span></h5>
-
-                  <div class="activity">
-
-                   <div v-for="item in dashboardactivities" :key="item.id" class="activity-item d-flex">
-                    <div class="activite-label">{{ getRelativeTime(item.created_at) }}</div>
-                    <i
-                      class="bi bi-circle-fill activity-badge align-self-start"
-                      :class="getRandomBadgeClass()"
-                    ></i>
-                    <div class="activity-content">
-                      {{ item.description }}
-                    </div>
-                  </div>
-
-                  </div>
-
-                </div>
-              </div>
-              <!-- End Recent Activity -->
-
-            </div>
-
           </div>
-        </div><!-- End Left side columns -->
-
-        
-
+        </div>
       </div>
+
     </section>
 
   </Master>
@@ -227,6 +52,9 @@ export default {
     return {
       currentYear: '',
       user: {},
+      currentUser: {},
+      userRole: null,
+      stats: {},
       properties: [],
       openproperties: [],
       closedproperties: [],
@@ -254,7 +82,75 @@ export default {
       settledInvoicesCount: 0,
     };
   },
+  computed: {
+    dashboardCards() {
+      const cards = {
+        admin: [
+          { title: 'Total Users', value: this.stats.users, icon: 'bi-people', color: 'primary' },
+          { title: 'Landlords', value: this.stats.landlords, icon: 'bi-person-lines-fill', color: 'info' },
+          { title: 'Tenants', value: this.stats.tenants, icon: 'bi-people', color: 'secondary' },
+          { title: 'Properties', value: this.stats.properties, icon: 'bi-building', color: 'success' },
+          { title: 'Rented Units', value: this.stats.rented, icon: 'bi-house-door', color: 'warning' },
+          { title: 'Vacant Units', value: this.stats.vacant, icon: 'bi-box-arrow-right', color: 'danger' },
+          { title: 'Tickets Open', value: this.stats.tickets_open, icon: 'bi-circle', color: 'warning' },
+          { title: 'Tickets In Progress', value: this.stats.tickets_in_progress, icon: 'bi-hourglass-split', color: 'info' },
+          { title: 'Tickets Resolved', value: this.stats.tickets_resolved, icon: 'bi-check-circle', color: 'success' },
+        ],
+
+        landlord: [
+          { title: 'My Properties', value: this.stats.properties, icon: 'bi-building', color: 'success' },
+          { title: 'Rented Units', value: this.stats.rented, icon: 'bi-house-door', color: 'warning' },
+          { title: 'Vacant Units', value: this.stats.vacant, icon: 'bi-box-arrow-right', color: 'danger' },
+          { title: 'Tenants', value: this.stats.tenants, icon: 'bi-people', color: 'secondary' },
+          { title: 'Tickets Open', value: this.stats.tickets_open, icon: 'bi-circle', color: 'warning' },
+          { title: 'Tickets In Progress', value: this.stats.tickets_in_progress, icon: 'bi-hourglass-split', color: 'info' },
+          { title: 'Tickets Resolved', value: this.stats.tickets_resolved, icon: 'bi-check-circle', color: 'success' },
+        ],
+
+        caretaker: [
+          { title: 'Assigned Units', value: this.stats.units, icon: 'bi-house-gear', color: 'info' },
+          { title: 'Occupied', value: this.stats.rented, icon: 'bi-house-check', color: 'success' },
+          { title: 'Vacant', value: this.stats.vacant, icon: 'bi-house-dash', color: 'danger' },
+          { title: 'Tickets Open', value: this.stats.tickets_open, icon: 'bi-circle', color: 'warning' },
+          { title: 'Tickets In Progress', value: this.stats.tickets_in_progress, icon: 'bi-hourglass-split', color: 'info' },
+          { title: 'Tickets Resolved', value: this.stats.tickets_resolved, icon: 'bi-check-circle', color: 'success' },
+        ],
+
+        service_provider: [
+          { title: 'Assigned Jobs', value: this.stats.jobs, icon: 'bi-briefcase', color: 'primary' },
+          { title: 'Completed', value: this.stats.completed, icon: 'bi-check-circle', color: 'success' },
+          { title: 'Pending', value: this.stats.pending, icon: 'bi-clock', color: 'warning' },
+          { title: 'In Progress', value: this.stats.in_progress, icon: 'bi-hourglass-split', color: 'info' },
+        ],
+
+        tenant: [
+          { title: 'My Unit', value: this.stats.unit, icon: 'bi-house', color: 'primary' },
+          { title: 'Rent Status', value: this.stats.rent_status, icon: 'bi-cash-coin', color: 'success' },
+          { title: 'Open Requests', value: this.stats.requests, icon: 'bi-circle', color: 'warning' },
+          { title: 'Tickets In Progress', value: this.stats.tickets_in_progress, icon: 'bi-hourglass-split', color: 'info' },
+          { title: 'Tickets Resolved', value: this.stats.tickets_resolved, icon: 'bi-check-circle', color: 'success' },
+          { title: 'Lease Start', value: this.stats.lease_start || 'N/A', icon: 'bi-calendar-check', color: 'info' },
+          { title: 'Lease End', value: this.stats.lease_end || 'N/A', icon: 'bi-calendar-x', color: 'danger' },
+        ],
+      };
+
+      // Remove cards with null, 0, or 'N/A' values for cleaner UI
+      return (cards[this.userRole] || []).filter(card => {
+        return card.value !== null && card.value !== 0 && card.value !== 'N/A';
+      });
+    }
+  },
   methods: {
+    fetchDashboardStats() {
+      axios
+        .get('/api/dashboard/stats')
+        .then(response => {
+          this.stats = response.data.stats;
+        })
+        .catch(error => {
+          console.error('Dashboard stats error:', error);
+        });
+    },
     navigateTo(location) {
       this.$router.push(location);
     },
@@ -347,13 +243,15 @@ export default {
     const storedUser = JSON.parse(localStorage.getItem('user')) || {};
     this.user = storedUser;
     this.currentUser = storedUser;
+    this.userRole = this.user.role;
     this.current_user_id = storedUser.id;
     this.current_user = `${storedUser.first_name || ''} ${storedUser.last_name || ''}`.trim();
-
+    // console.log("rem", this.userRole)
     // this.loadLists();
     // this.getActivities();
     // this.getUserActivities();
     this.getCurrentYear();
+    this.fetchDashboardStats();
   }
 };
 </script>

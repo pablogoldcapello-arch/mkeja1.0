@@ -227,8 +227,8 @@ export default {
           password: "tenant123"
         },
         service_provider: {
-          email: "service.pro@mk.com",
-          password: "service123"
+          email: "peter.plumber@mk.com",
+          password: "provider123"
         }        
       };
 

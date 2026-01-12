@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Models\Property;
+use App\Models\SupportTicket;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -99,6 +101,24 @@ class User extends Authenticatable implements JWTSubject
             'property_id'         // foreign key on pivot for Property
         )->withTimestamps();
     }
+
+    public function leases()
+    {
+        return $this->hasMany(Lease::class, 'tenant_id');
+    }
+
+    // Tickets created by this user
+    public function supportTickets()
+    {
+        return $this->hasMany(SupportTicket::class, 'user_id');
+    }
+
+    // Tickets assigned to this user (e.g., caretaker/service provider)
+    public function assignedTickets()
+    {
+        return $this->hasMany(SupportTicket::class, 'assigned_to');
+    }
+
 
 
 }

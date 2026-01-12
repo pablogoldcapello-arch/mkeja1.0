@@ -26,6 +26,17 @@ class Unit extends Model
     
     public function property()
     {
-        return $this->belongsTo(Property::class,'pms_property_id');
+        return $this->belongsTo(Property::class,'property_id');
     }    
+
+    public function leases()
+    {
+        return $this->hasMany(Lease::class);
+    }
+
+    public function activeLease()
+    {
+        return $this->hasOne(Lease::class)->where('status', 'active');
+    }
+
 }
