@@ -283,43 +283,43 @@
 
                           </div>
 
-<!-- Password -->
-<div class="col-md-6">
-  <label class="form-label">
-    Password*
-    <small class="text-muted">(auto-generate or type manually)</small>
-  </label>
+                          <!-- Password -->
+                          <div class="col-md-6">
+                            <label class="form-label">
+                              Password*
+                              <small class="text-muted">(auto-generate or type manually)</small>
+                            </label>
 
-  <div class="input-group">
-    <input
-      id="password"
-      :type="showPassword ? 'text' : 'password'"
-      class="form-control"
-      v-model="data.password"
-      required
-    />
+                            <div class="input-group">
+                              <input
+                                id="password"
+                                :type="showPassword ? 'text' : 'password'"
+                                class="form-control"
+                                v-model="data.password"
+                                required
+                              />
 
-    <span
-      class="input-group-text"
-      style="cursor:pointer"
-      @click="showPassword = !showPassword"
-    >
-      <i :class="showPassword ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
-    </span>
+                              <span
+                                class="input-group-text"
+                                style="cursor:pointer"
+                                @click="showPassword = !showPassword"
+                              >
+                                <i :class="showPassword ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
+                              </span>
 
-    <button
-      class="btn btn-outline-secondary"
-      type="button"
-      @click="generatePassword"
-    >
-      Generate
-    </button>
-  </div>
+                              <button
+                                class="btn btn-outline-secondary"
+                                type="button"
+                                @click="generatePassword"
+                              >
+                                Generate
+                              </button>
+                            </div>
 
-  <small class="text-muted">
-    A strong password will be generated automatically if you prefer
-  </small>
-</div>
+                            <small class="text-muted">
+                              A strong password will be generated automatically if you prefer
+                            </small>
+                          </div>
 
 
                           <!-- Phone -->

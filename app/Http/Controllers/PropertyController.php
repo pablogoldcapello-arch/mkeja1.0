@@ -15,7 +15,13 @@ class PropertyController extends Controller
      */
     public function index()
     {
-        $properties = Property::with('product', 'client')->get();
+        $properties = Property::with([
+            'landlord',
+            'agent',
+            'units',
+            'caretakers'
+        ])->get();
+
 
         //record actvity log
         $user = auth()->user(); // or JWTAuth::parseToken()->authenticate();

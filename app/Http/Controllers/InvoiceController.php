@@ -19,7 +19,13 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        $invoices = Invoice::with('tenancy')->get();
+        $invoices = Invoice::with([
+            'tenant',
+            'provider',
+            'property'
+        ])->get();
+
+        
         return response()->json($invoices);         
     }
 
