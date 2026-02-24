@@ -18,6 +18,7 @@ class Invoice extends Model
         'services',
         'rent_month',
         'amount_due',
+        'total_amount',
         'due_date',
         'status'
     ];
@@ -39,6 +40,11 @@ class Invoice extends Model
     public function property()
     {
         return $this->belongsTo(Property::class, 'property_id');
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'invoice_id');
     }
 
     // Optional: convenience attribute for frontend

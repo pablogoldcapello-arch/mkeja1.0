@@ -68,6 +68,7 @@ class InvoiceController extends Controller
                 'provider_id' => $request->provider_id,
                 'services'    => $request->services,
                 'amount_due'  => $request->amount_due,
+                'total_amount'  => $request->amount_due,
                 'due_date'    => $request->due_date,
             ]);
         } else {

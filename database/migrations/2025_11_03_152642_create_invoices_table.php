@@ -48,9 +48,9 @@ return new class extends Migration
             $table->decimal('amount_due', 12, 2);
             $table->string('rent_month')->nullable(); //for tenants
             $table->date('due_date')->nullable();
-
+            $table->decimal('total_amount', 12, 2);
             $table->enum('status', [
-                'draft', 'sent', 'unpaid', 'paid', 'overdue'
+                'draft', 'partial', 'paid', 'overdue'
             ])->default('draft');
 
             $table->timestamps();

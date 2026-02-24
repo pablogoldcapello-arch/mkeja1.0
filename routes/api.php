@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LedgerController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -80,8 +81,9 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/invoices/auto-generate', [InvoiceController::class, 'autoGenerate']);
 
     Route::post('/mpesa/stk-push', [MpesaController::class, 'stkPush']);
+    Route::post('/payments/initiate', [PaymentController::class, 'initiate']);
 
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
-
+    Route::get('/ledger', [LedgerController::class, 'index']);
 
 });

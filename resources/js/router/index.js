@@ -14,8 +14,10 @@ import ServiceProviders from '../views/ServiceProviders.vue';
 import Tenants from '../views/Tenants.vue';
 import PropertyTenants from '../views/PropertyTenants.vue';
 import Units from '../views/Units.vue';
-import AwaitingInvoicing from '../views/AwaitingInvoicing.vue';
 import TenantInvoices from '../views/TenantInvoices.vue';
+import DraftInvoices from '../views/DraftInvoices.vue';
+import PartialInvoices from '../views/PartialInvoices.vue';
+import PaidInvoices from '../views/PaidInvoices.vue';
 import ProviderInvoices from '../views/ProviderInvoices.vue';
 import PropertyInvoices from '../views/PropertyInvoices.vue';
 import PendingTickets from '../views/PendingTickets.vue';
@@ -42,7 +44,9 @@ const routes = [
   { path: '/tenants', name: 'tenants', component: Tenants, meta: { requiresAuth: true } },
   { path: '/units/:id', name: 'units', component: Units, meta: { requiresAuth: true } },
   { path: '/tenants/:id', name: 'proptenants', component: PropertyTenants, meta: { requiresAuth: true } },
-  { path: '/awaitinginvoicing', name: 'awaitinginvoicing', component: AwaitingInvoicing, meta: { requiresAuth: true } },
+  { path: '/draft-invoices', name: 'draft-invoices', component: DraftInvoices, meta: { requiresAuth: true } },
+  { path: '/partial-invoices', name: 'partial-invoices', component: PartialInvoices, meta: { requiresAuth: true } },
+  { path: '/paid-invoices', name: 'paid-invoices', component: PaidInvoices, meta: { requiresAuth: true } },
   { path: '/tenant-invoices', name: 'tenant-invoices', component: TenantInvoices, meta: { requiresAuth: true } },
   { path: '/provider-invoices', name: 'provider-invoices', component: ProviderInvoices, meta: { requiresAuth: true } },
   { path: '/property-invoices/:id', name: 'property-invoices', component: PropertyInvoices, meta: { requiresAuth: true } },

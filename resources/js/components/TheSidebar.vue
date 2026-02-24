@@ -134,16 +134,23 @@
         </a>
         <ul id="invoice-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
           <li v-show="userRole === 'admin'">
-            <router-link to="/awaitinginvoicing" custom v-slot="{ href, navigate, isActive }">
+            <router-link to="/draft-invoices" custom v-slot="{ href, navigate, isActive }">
               <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
-                <i class="bi bi-circle"></i><span>Unpaid Invoices</span>
+                <i class="bi bi-circle"></i><span>Draft Invoices</span>
               </a>
             </router-link>
           </li>
           <li v-show="userRole === 'admin'">
+            <router-link to="/partial-invoices" custom v-slot="{ href, navigate, isActive }">
+              <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
+                <i class="bi bi-circle"></i><span>Partially Paid Invoices</span>
+              </a>
+            </router-link>
+          </li>          
+          <li v-show="userRole === 'admin'">
             <router-link to="/paid-invoices" custom v-slot="{ href, navigate, isActive }">
               <a :href="href" :class="{ active: isActive }" class="nav-link" @click="navigate">
-                <i class="bi bi-circle"></i><span>Paid Invoices</span>
+                <i class="bi bi-circle"></i><span>Fully Paid Invoices</span>
               </a>
             </router-link>           
           </li>

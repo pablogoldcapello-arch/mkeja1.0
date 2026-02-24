@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use App\Services\MpesaService;
 
@@ -32,32 +33,34 @@ class MpesaController extends Controller
     public function stkPush(Request $request)
     {
         $request->validate([
+            'payment_id' => 'required|exists:payments,id',
             'phone' => 'required|string|min:9',
-            'amount' => 'required|numeric|min:1',
             'account_reference' => 'required|string',
-            'statement_id' => 'required|integer'
+            'description' => 'nullable|string'
         ]);
 
-        $phone  = $this->formatPhone($request->phone);
-        $amount = $request->amount;
+        $payment = Payment::findOrFail($request->payment_id);
+        $phone = $this->formatPhone($request->phone);
 
         try {
             $response = $this->mpesa->stkPush([
                 'phone' => $phone,
-                'amount' => $amount,
+                'amount' => $payment->amount, // ✅ locked
                 'account_reference' => $request->account_reference,
                 'transaction_desc' => $request->description ?? 'Rent payment',
             ]);
 
-            return response()->json([
-                'message' => 'STK Push sent successfully',
-                'response' => $response
+            $payment->update([
+                'checkout_request_id' => $response['CheckoutRequestID'] ?? null
             ]);
 
+            return response()->json(['message' => 'STK Push sent']);
+
         } catch (\Exception $e) {
+            $payment->update(['status' => 'failed']); // ✅ goes here
+
             return response()->json([
-                'message' => 'Failed to send STK Push',
-                'error' => $e->getMessage()
+                'message' => 'Failed to send STK Push'
             ], 500);
         }
     }

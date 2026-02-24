@@ -37,9 +37,10 @@ class InvoiceService
             'service_id'     => null, // rent
             'invoice_number' => Invoice::generateInvoiceNumber(),
             'amount_due'     => $unit->monthly_rent,
+            'total_amount'     => $unit->monthly_rent,
             'rent_month'     => $month,
             'due_date'       => Carbon::now()->addDays(5),
-            'status'         => 'unpaid',
+            'status'         => 'draft',
         ]);
     }
 
@@ -65,9 +66,10 @@ class InvoiceService
             'provider_id'    => $data['provider_id'],
             'services'       => json_encode($data['services']), // store multiple services
             'amount_due'     => $data['amount_due'],
+            'total_amount'     => $data['amount_due'],
             'due_date'       => $data['due_date'],
             'type'           => 'service_provider',
-            'status'         => 'unpaid',
+            'status'         => 'draft',
             'invoice_number' => Invoice::generateInvoiceNumber(),
         ]);
     }

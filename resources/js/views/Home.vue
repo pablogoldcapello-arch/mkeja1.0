@@ -102,6 +102,15 @@ export default {
           { title: 'Rented Units', value: this.stats.rented, icon: 'bi-house-door', color: 'warning' },
           { title: 'Vacant Units', value: this.stats.vacant, icon: 'bi-box-arrow-right', color: 'danger' },
           { title: 'Tenants', value: this.stats.tenants, icon: 'bi-people', color: 'secondary' },
+
+          // 🔑 Ledger / KPI cards
+          { title: 'Total Due', value: this.stats.kpis?.total_due, icon: 'bi-cash-stack', color: 'primary' },
+          { title: 'Total Paid', value: this.stats.kpis?.total_paid, icon: 'bi-cash-coin', color: 'success' },
+          { title: 'Collection Rate', value: this.stats.kpis?.collection_rate + '%', icon: 'bi-percent', color: 'info' },
+          { title: 'Paid Invoices', value: this.stats.kpis?.paid_invoices, icon: 'bi-check-circle', color: 'success' },
+          { title: 'Partial Invoices', value: this.stats.kpis?.partial_invoices, icon: 'bi-hourglass-split', color: 'warning' },
+          { title: 'Overdue Invoices', value: this.stats.kpis?.overdue_invoices, icon: 'bi-exclamation-triangle', color: 'danger' },
+
           { title: 'Tickets Open', value: this.stats.tickets_open, icon: 'bi-circle', color: 'warning' },
           { title: 'Tickets In Progress', value: this.stats.tickets_in_progress, icon: 'bi-hourglass-split', color: 'info' },
           { title: 'Tickets Resolved', value: this.stats.tickets_resolved, icon: 'bi-check-circle', color: 'success' },
@@ -143,12 +152,23 @@ export default {
   methods: {
     fetchDashboardStats() {
       axios
-        .get('/api/dashboard/stats')
+        .get('/api/dashboard/stats') // existing stats
         .then(response => {
-          this.stats = response.data.stats;
+          this.stats = response.data.stats || {};
+
+          // 🔑 Fetch KPI-specific ledger info
+          axios.get('/api/ledger')
+            .then(res => {
+              this.stats.kpis = res.data.kpis || {};
+            })
+            .catch(err => {
+              console.error('Failed to fetch KPIs:', err);
+              toast.fire({ icon: 'error', title: 'Failed to load KPIs' });
+            });
         })
         .catch(error => {
           console.error('Dashboard stats error:', error);
+          toast.fire({ icon: 'error', title: 'Failed to load dashboard stats' });
         });
     },
     navigateTo(location) {

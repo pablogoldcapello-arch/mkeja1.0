@@ -27,8 +27,17 @@ class ListController extends Controller
         $listings = Listing::with('images')->latest()->get();
         $awaitinginvoicing = Invoice::latest()
         ->with(['tenant','provider','property'])
-        ->where('status', 'unpaid')
+        ->where('status', 'draft')
         ->get();
+        $partialinvoices = Invoice::latest()
+        ->with(['tenant','provider','property'])
+        ->where('status', 'partial')
+        ->get();        
+        $paidinvoices = Invoice::latest()
+            ->with(['tenant','provider','property'])
+            ->withSum('payments as total_paid', 'amount')   // total_paid will be available per invoice
+            ->where('status', 'paid')
+            ->get();        
         $pendingtickets = SupportTicket::with(['images','user'])
         ->where('status', 'open')
         ->orWhere('status', 'in progress')
@@ -49,6 +58,8 @@ class ListController extends Controller
                 'tenants' => $tenants,
                 'properties' => $properties,
                 'awaitinginvoicing' => $awaitinginvoicing,
+                'partialinvoices' => $partialinvoices,
+                'paidinvoices' => $paidinvoices,
                 'listings' => $listings,
                 'pendingtickets' => $pendingtickets,
                 'closedtickets' => $closedtickets,

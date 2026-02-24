@@ -15,7 +15,7 @@
                         </li>
     
                         <li>
-                            <router-link to="/awaitinginvoicing/" custom v-slot="{ href, navigate, isActive }">
+                            <router-link to="/paidinvoices/" custom v-slot="{ href, navigate, isActive }">
                             <a
                                 :href="href"
                                 :class="{ active: isActive }"
@@ -26,7 +26,7 @@
                             </router-link>
                         </li>
                         <li>
-                            <router-link to="/lastmonthawaitinginvoicing" custom v-slot="{ href, navigate, isActive }">
+                            <router-link to="/lastmonthpaidinvoices" custom v-slot="{ href, navigate, isActive }">
                             <a
                                 :href="href"
                                 :class="{ active: isActive }"
@@ -37,7 +37,7 @@
                             </router-link>
                         </li>
                         <li>
-                            <router-link to="/lastninetyawaitinginvoicing" custom v-slot="{ href, navigate, isActive }">
+                            <router-link to="/lastninetypaidinvoices" custom v-slot="{ href, navigate, isActive }">
                             <a
                                 :href="href"
                                 :class="{ active: isActive }"
@@ -48,7 +48,7 @@
                             </router-link>
                         </li>
                         <li>
-                            <router-link to="/quarterawaitinginvoicing" custom v-slot="{ href, navigate, isActive }">
+                            <router-link to="/quarterpaidinvoices" custom v-slot="{ href, navigate, isActive }">
                             <a
                                 :href="href"
                                 :class="{ active: isActive }"
@@ -59,7 +59,7 @@
                             </router-link>
                         </li>
                         <li>
-                            <router-link to="/yearawaitinginvoicing" custom v-slot="{ href, navigate, isActive }">
+                            <router-link to="/yearpaidinvoices" custom v-slot="{ href, navigate, isActive }">
                             <a
                                 :href="href"
                                 :class="{ active: isActive }"
@@ -70,7 +70,7 @@
                             </router-link>
                         </li>
                         <li>
-                            <router-link to="/lastyearawaitinginvoicing" custom v-slot="{ href, navigate, isActive }">
+                            <router-link to="/lastyearpaidinvoices" custom v-slot="{ href, navigate, isActive }">
                             <a
                                 :href="href"
                                 :class="{ active: isActive }"
@@ -81,7 +81,7 @@
                             </router-link>
                         </li>
                         <li>
-                            <router-link to="/allawaitinginvoicing" custom v-slot="{ href, navigate, isActive }">
+                            <router-link to="/allpaidinvoices" custom v-slot="{ href, navigate, isActive }">
                             <a
                                 :href="href"
                                 :class="{ active: isActive }"
@@ -96,12 +96,12 @@
                     </div>
     
                       <div class="card-body pb-0">
-                        <h5 class="card-title">Unpaid Invoices <span>| {{ awaitinginvoicing.length }} unpaid invoices</span></h5>
+                        <h5 class="card-title">Paid Invoices <span>| {{ paidinvoices.length }} Paid invoices</span></h5>
                         <p class="card-text">
                           <div class="row">
                             <div class="col d-flex">
-                              <button v-if="awaitinginvoicing.length !== 0" class="me-2" @click="exportToExcel">Export</button>
-                              <router-link to="#" custom v-slot="{ href, navigate, isActive }">
+                              <button v-if="paidinvoices.length !== 0" class="me-2" @click="exportToExcel">Export</button>
+                              <!-- <router-link to="#" custom v-slot="{ href, navigate, isActive }">
                                 <a
                                   :href="href"
                                   :class="{ active: isActive }"
@@ -112,7 +112,6 @@
                                   Create Invoice
                                 </a>
                               </router-link>
-                                <!-- Auto-generate Invoices -->
                               <button
                                 class="btn btn-sm btn-warning rounded-pill me-2"
                                 style="background-color: darkorange; border-color: darkorange;"
@@ -120,16 +119,16 @@
                               >
                                 Auto-Generate
                               </button>
-                              <router-link v-if="awaitinginvoicing.length !== 0" to="#" custom v-slot="{ href, navigate, isActive }">
+                              <router-link v-if="paidinvoices.length !== 0" to="#" custom v-slot="{ href, navigate, isActive }">
                                 <a
                                   :href="href"
                                   :class="{ active: isActive }"
                                   class="btn btn-sm btn-primary rounded-pill me-2"
                                   style="background-color: darkorange; border-color: darkorange;"
                                 >
-                                  ({{ awaitinginvoicing.length }}) Remaining
+                                  ({{ paidinvoices.length }}) Remaining
                                 </a>
-                              </router-link>
+                              </router-link> -->
                             </div>
                             <div class="col-auto d-flex justify-content-end">
                               <div class="btn-group" role="group">
@@ -146,7 +145,7 @@
                                   <i class="ri-add-line"></i>
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                  <a @click="navigateTo('/awaitinginvoicing')" class="dropdown-item" href="#">
+                                  <a @click="navigateTo('/paidinvoices')" class="dropdown-item" href="#">
                                     <i class="ri-file-list-2-fill mr-2"></i>Awaiting Invoicing
                                   </a>
                                   <a @click="navigateTo('/invoicestosettle')" class="dropdown-item" href="#">
@@ -177,7 +176,7 @@
                               <tr>
                                 <th scope="col">Name</th>
                                 <th scope="col">Rent Month / Services</th>
-                                <th scope="col">Amount Due</th>
+                                <th scope="col">Amount Paid</th>
                                 <th scope="col">Due Date</th>
                                 <th scope="col">Status</th>
                                 <th scope="col">Action</th>
@@ -197,7 +196,7 @@
 
                             <!-- Invoice rows -->
                             <tbody v-else>
-                              <tr v-for="statement in awaitinginvoicing" :key="statement.id">
+                              <tr v-for="statement in paidinvoices" :key="statement.id">
                                 <!-- Name -->
                                 <td>
                                   {{ statement.type === 'tenant' ? (statement.tenant ? statement.tenant.name : 'N/A') : (statement.provider ? statement.provider.name : 'N/A') }}
@@ -211,9 +210,9 @@
                                   </span>
                                 </td>
 
-                                <!-- Amount Due -->
+                                <!-- Amount Paid -->
                                 <td>
-                                  {{ statement.amount_due ? 'KES ' + statement.amount_due.toLocaleString() : '-' }}
+                                  {{ 'KES ' + statement.total_paid.toLocaleString()}}
                                 </td>
 
 
@@ -259,13 +258,13 @@
 
                                       <!-- Tenant-specific actions -->
                                       <template v-if="statement.type === 'tenant'">
-                                        <a v-if="statement.status == 'unpaid'" @click="invoiceTenant(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Pay</a>
+                                        <a v-if="statement.status == 'draft'" @click="invoiceTenant(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Pay</a>
                                         <!-- <a v-if="statement.status == 'unpaid'" @click="settleTenant(statement.id, statement.tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a> -->
                                       </template>
 
                                       <!-- Service provider-specific actions -->
                                       <template v-else-if="statement.type === 'service_provider'">
-                                        <a v-if="statement.status == 'unpaid'" @click="invoiceProvider(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Pay</a>
+                                        <a v-if="statement.status == 'draft'" @click="invoiceProvider(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Pay</a>
                                       </template>
 
                                       <!-- Common actions -->
@@ -314,10 +313,18 @@
                               <strong>Rent Month:</strong> N/A
                             </p>
                             <p v-if="selectedStatement">
-                              <strong>Amount Due:</strong> {{ formatNumber(selectedStatement.amount_due) }}
+                              <strong>Amount Paid:</strong> {{ formatNumber(selectedStatement.amount_due) }}
                             </p>
-                            <p v-else>
-                              <strong>Amount Due:</strong> N/A
+                            <p>
+                              <strong>Enter Amount to Pay:</strong>
+                              <input 
+                                type="number" 
+                                class="form-control" 
+                                v-model.number="partialPaymentAmount"
+                                :max="selectedStatement.amount_due"
+                                min="1"
+                                placeholder="Enter amount to pay"
+                              >
                             </p>
                             <p v-if="selectedStatement && selectedStatement.tenant">
                               <strong>Phone Number:</strong>
@@ -450,9 +457,9 @@
                             <!-- Amount -->
                             <div class="text-end">
                               <h5>
-                                Amount Due:
+                                Amount Paid:
                                 <span class="fw-bold text-primary">
-                                  KES {{ Number(selectedStatement.amount_due).toLocaleString() }}
+                                  KES {{ Number(selectedStatement.total_paid).toLocaleString() }}
                                 </span>
                               </h5>
                             </div>
@@ -738,7 +745,7 @@
     export default {
       data(){
         return {
-          awaitinginvoicing: [],
+          paidinvoices: [],
           tenants: [],
           serviceproviders: [],
           services: [],
@@ -747,6 +754,7 @@
           expensesTotal: 0,
           user: [],
           rentMonth: '',
+          partialPaymentAmount: null,
           selectedStatement: {
             tenant: {
               phone: ''
@@ -807,6 +815,11 @@
           }
           // Reset selected service if provider changes
           this.form.service_id = null;
+        },
+        selectedStatement(newVal) {
+        if (newVal) {
+                this.partialPaymentAmount = newVal.amount_due;
+            }
         }
       },
       methods: {
@@ -1171,58 +1184,56 @@
           const modal = new bootstrap.Modal(document.getElementById('invoiceTenantModal'));
           modal.show();
         },
-        confirmInvoiceTenant() {
-          if (!this.selectedStatement || !this.selectedStatement.id) {
-            console.log("No statement selected.");
-            return;
-          }
+        async confirmInvoiceTenant() {
+          if (!this.selectedStatement?.id) return;
 
-          if (!this.selectedStatement.tenant?.phone) {
-            this.errors.phone = 'Phone number is required';
-            return;
-          }
+          const amount = this.partialPaymentAmount || this.selectedStatement.amount_due;
 
           this.invoicing = true;
           this.errors = {};
-          this.successMessage = '';
 
-          const payload = {
-            statement_id: this.selectedStatement.id,
-            phone: this.selectedStatement.tenant.phone,
-            amount: this.selectedStatement.amount_due,
-            account_reference: this.selectedStatement.invoice_number,
-            description: `Rent payment for ${this.selectedStatement.rent_month}`
-          };
-
-          console.log('Sending STK Push:', payload);
-
-          axios.post('/api/mpesa/stk-push', payload)
-            .then(response => {
-              Swal.fire(
-                'STK Sent!',
-                'Please complete payment on your phone.',
-                'success'
-              );
-            })
-            .catch(error => {
-              console.error(error);
-
-              toast.fire(
-                'Error!',
-                error.response?.data?.message || 'Failed to send STK Push.',
-                'error'
-              );
-            })
-            .finally(() => {
-              this.invoicing = false;
-
-              const modal = bootstrap.Modal.getInstance(
-                document.getElementById('invoiceTenantModal')
-              );
-              modal.hide();
-
-              this.loadLists();
+          try {
+            // 1️⃣ Create payment + ledger
+            const initRes = await axios.post('/api/payments/initiate', {
+              tenant_id: this.selectedStatement.tenant_id,
+              landlord_id: this.selectedStatement.landlord_id,
+              property_id: this.selectedStatement.property_id,
+              unit_id: this.selectedStatement.unit_id,
+              rent_period: this.selectedStatement.rent_month,
+              amount: amount,
+              invoice_id: this.selectedStatement.id
             });
+
+            const paymentId = initRes.data.payment_id;
+
+            // 2️⃣ Trigger STK Push
+            await axios.post('/api/mpesa/stk-push', {
+              payment_id: paymentId,
+              phone: this.selectedStatement.tenant.phone,
+              account_reference: this.selectedStatement.invoice_number,
+              description: `Rent payment for ${this.selectedStatement.rent_month}`
+            });
+
+            Swal.fire(
+              'STK Sent!',
+              'Please complete payment on your phone.',
+              'success'
+            );
+
+          } catch (error) {
+            toast.fire(
+              'Error',
+              error.response?.data?.message || 'Payment failed',
+              'error'
+            );
+          } finally {
+            this.invoicing = false;
+            bootstrap.Modal.getInstance(
+              document.getElementById('invoiceTenantModal')
+            ).hide();
+
+            this.loadLists();
+          }
         },
                 
         settleTenant(id, tenantId){
@@ -1274,7 +1285,7 @@
           return str.charAt(0).toUpperCase() + str.slice(1);
         },
         exportToExcel() {
-          const invoicesData = this.awaitinginvoicing.map(statement => ({
+          const invoicesData = this.paidinvoices.map(statement => ({
             "PROPERTY": statement.property ? statement.property.name : 'N/A',
             "H/S NO": statement.unit ? statement.unit.unit_number : 'N/A',
             "TENANT": statement.tenant ? statement.tenant.first_name + ' ' + statement.tenant.last_name : 'N/A',
@@ -1389,7 +1400,7 @@
             let currentPage = 1;
             let currentRow = 0;
 
-            this.awaitinginvoicing.forEach((statement, index) => {
+            this.paidinvoices.forEach((statement, index) => {
                 if (currentRow >= maxRowsPerPage) {
                     doc.addPage();
                     headerYPos = 20;
@@ -1991,7 +2002,7 @@
           this.initializing = true; // Start spinner
           axios.get('api/lists')
             .then((response) => {
-              this.awaitinginvoicing = response.data.lists.awaitinginvoicing;
+              this.paidinvoices = response.data.lists.paidinvoices;
 
               this.services = response.data.lists.services;
               this.tenants = response.data.lists.tenants;
@@ -2047,7 +2058,7 @@
         calculateTotal(property) {
           // Function to calculate total for Total, Paid, and Bal columns
 
-          return this.awaitinginvoicing.reduce((total, statement) => total + (statement[property] || 0), 0);
+          return this.paidinvoices.reduce((total, statement) => total + (statement[property] || 0), 0);
         },
       },
       components : {
