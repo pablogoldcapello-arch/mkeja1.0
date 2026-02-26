@@ -96,7 +96,7 @@
                     </div>
     
                       <div class="card-body pb-0">
-                        <h5 class="card-title">Prtially Paid Invoices <span>| {{ partialinvoices.length }} unpaid invoices</span></h5>
+                        <h5 class="card-title">Partially Paid Invoices <span>| {{ partialinvoices.length }} unpaid invoices</span></h5>
                         <p class="card-text">
                           <div class="row">
                             <div class="col d-flex">
@@ -259,13 +259,13 @@
 
                                       <!-- Tenant-specific actions -->
                                       <template v-if="statement.type === 'tenant'">
-                                        <a v-if="statement.status == 'draft'" @click="invoiceTenant(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Pay</a>
+                                        <a v-if="statement.status == 'partial'" @click="invoiceTenant(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Pay</a>
                                         <!-- <a v-if="statement.status == 'unpaid'" @click="settleTenant(statement.id, statement.tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a> -->
                                       </template>
 
                                       <!-- Service provider-specific actions -->
                                       <template v-else-if="statement.type === 'service_provider'">
-                                        <a v-if="statement.status == 'draft'" @click="invoiceProvider(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Pay</a>
+                                        <a v-if="statement.status == 'partial'" @click="invoiceProvider(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Pay</a>
                                       </template>
 
                                       <!-- Common actions -->

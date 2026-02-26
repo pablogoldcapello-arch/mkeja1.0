@@ -15,42 +15,64 @@ class LedgerController extends Controller
     {
         $user = $request->user();
 
-        // Base ledger query for this landlord
-        $ledgerQuery = LedgerEntry::where('landlord_id', $user->id)
-            ->orderBy('created_at', 'asc');
+        /** --------------------
+         * Ledger
+         * -------------------*/
+        $ledgerEntries = LedgerEntry::where('landlord_id', $user->id)
+            ->when($request->filled('rent_period'), fn ($q) =>
+                $q->where('rent_period', $request->rent_period)
+            )
+            ->when($request->filled('unit_id'), fn ($q) =>
+                $q->where('unit_id', $request->unit_id)
+            )
+            ->orderBy('created_at')
+            ->get();
 
-        // Optional filters
+        $openingBalance = 0; // unless you implement carry-forward logic
+        $closingBalance = $ledgerEntries->sum('amount');
+
+        /** --------------------
+         * Invoices (CORRECT)
+         * -------------------*/
+        $baseInvoiceQuery = Invoice::whereHas('property', fn ($q) =>
+            $q->where('landlord_id', $user->id)
+        );
+
         if ($request->filled('rent_period')) {
-            $ledgerQuery->where('rent_period', $request->rent_period);
+            $baseInvoiceQuery->where('rent_month', $request->rent_period);
         }
 
         if ($request->filled('unit_id')) {
-            $ledgerQuery->where('unit_id', $request->unit_id);
+            $baseInvoiceQuery->where('property_id', $request->unit_id);
         }
 
-        $ledgerEntries = $ledgerQuery->get();
+        /** --------------------
+         * KPIs
+         * -------------------*/
+        $totalDue = (clone $baseInvoiceQuery)->sum('amount_due');
 
-        // Opening balance = sum of all previous ledger amounts
-        $openingBalance = $ledgerEntries->sum('amount') - $ledgerEntries->sum('amount'); // could adjust for prior months if needed
+        $totalPaid = \DB::table('payments')
+            ->join('invoices', 'payments.invoice_id', '=', 'invoices.id')
+            ->join('properties', 'invoices.property_id', '=', 'properties.id')
+            ->where('properties.landlord_id', $user->id)
+            ->where('payments.status', 'successful')
+            ->sum('payments.amount');
 
-        // Closing balance = sum of all ledger amounts
-        $closingBalance = $ledgerEntries->sum('amount');
+        $pendingPayments = \DB::table('payments')
+        ->join('invoices', 'payments.invoice_id', '=', 'invoices.id')
+        ->join('properties', 'invoices.property_id', '=', 'properties.id')
+        ->where('properties.landlord_id', $user->id)
+        ->where('payments.status', 'pending')
+        ->sum('payments.amount');    
 
-        // KPIs: get invoices for this landlord
-        $invoiceQuery = Invoice::where('property_id', $request->unit_id ? $request->unit_id : null)
-            ->whereHas('property', fn($q) => $q->where('landlord_id', $user->id));
+        $collectionRate = $totalDue > 0
+            ? round(($totalPaid / ($totalDue + $totalPaid)) * 100, 2)
+            : 0;
 
-        if ($request->filled('rent_period')) {
-            $invoiceQuery->where('rent_month', $request->rent_period);
-        }
-
-        $totalDue = $invoiceQuery->sum('amount_due') + $invoiceQuery->sum('total_amount') - $invoiceQuery->sum('amount_due');
-        $totalPaid = $invoiceQuery->withSum('payments as total_paid', 'amount')->get()->sum('total_paid');
-
-        $collectionRate = $totalDue > 0 ? round(($totalPaid / $totalDue) * 100, 2) : 0;
-        $paidInvoices = $invoiceQuery->where('status', 'paid')->count();
-        $partialInvoices = $invoiceQuery->where('status', 'partial')->count();
-        $overdueInvoices = $invoiceQuery->where('status', 'overdue')->count();
+        $draftInvoices = (clone $baseInvoiceQuery)->where('status', 'draft')->count();
+        $paidInvoices = (clone $baseInvoiceQuery)->where('status', 'paid')->count();
+        $partialInvoices = (clone $baseInvoiceQuery)->where('status', 'partial')->count();
+        $overdueInvoices = (clone $baseInvoiceQuery)->where('status', 'overdue')->count();
 
         return response()->json([
             'opening_balance' => $openingBalance,
@@ -59,7 +81,9 @@ class LedgerController extends Controller
             'kpis' => [
                 'total_due' => $totalDue,
                 'total_paid' => $totalPaid,
+                'pending_payments' => $pendingPayments,
                 'collection_rate' => $collectionRate,
+                'draft_invoices' => $draftInvoices,
                 'paid_invoices' => $paidInvoices,
                 'partial_invoices' => $partialInvoices,
                 'overdue_invoices' => $overdueInvoices,
