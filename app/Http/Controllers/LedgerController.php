@@ -90,4 +90,12 @@ class LedgerController extends Controller
             ]
         ]);
     }
+
+    public function landlordLedger($id) {
+        $entries = LedgerEntry::with(['property', 'unit', 'tenant'])
+            ->whereHas('property', fn($q) => $q->where('landlord_id', $id))
+            ->get();
+
+        return response()->json(['ledger_entries' => $entries]);
+    }
 }

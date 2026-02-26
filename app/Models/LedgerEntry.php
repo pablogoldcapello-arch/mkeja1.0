@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Unit;
-use App\Models\Tenant;
 use App\Models\User;
+use App\Models\Property;
 
 class LedgerEntry extends Model
 {
@@ -41,6 +41,11 @@ class LedgerEntry extends Model
 
     public function tenant()
     {
-        return $this->belongsTo(Tenant::class);
-    }    
+        return $this->belongsTo(User::class);
+    } 
+    
+    public function property()
+    {
+        return $this->belongsTo(Property::class, 'property_id');
+    }
 }

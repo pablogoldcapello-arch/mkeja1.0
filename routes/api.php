@@ -85,5 +85,5 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
     Route::get('/ledger', [LedgerController::class, 'index']);
-
+    Route::get('/landlords/{id}/ledger', [LedgerController::class, 'landlordLedger'])->name('landlord.ledger');
 });

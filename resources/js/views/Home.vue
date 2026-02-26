@@ -24,6 +24,15 @@
                   >
                     {{ card.isCurrency ? `KES ${formatAmount(card.value)}` : card.value ?? 0 }}
                   </h6>
+
+                  <!-- Ledger button for monetary cards (landlord only) -->
+                  <button
+                    v-if="card.isCurrency && userRole === 'landlord'"
+                    @click="openLedgerModal(card.title)"
+                    class="btn btn-sm btn-outline-primary mt-1"
+                  >
+                    View Ledger
+                  </button>
                 </div>
               </div>
             </div>
@@ -31,6 +40,51 @@
         </div>
       </div>
     </section>
+
+    <!-- Ledger Modal (Landlord Only) -->
+    <b-modal
+      v-if="userRole === 'landlord'"
+      v-model="showLedgerModal"
+      title="Ledger Entries"
+      size="lg"
+      centered
+    >
+      <div>
+        <select v-model="selectedPropertyId" class="form-select mb-2">
+          <option value="">All Properties</option>
+          <option
+            v-for="prop in properties"
+            :key="prop.id"
+            :value="prop.id"
+          >
+            {{ prop.name }}
+          </option>
+        </select>
+
+        <table class="table table-sm table-striped">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Property</th>
+              <th>Unit</th>
+              <th>Tenant</th>
+              <th>Type</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="entry in filteredLedger" :key="entry.id">
+              <td>{{ new Date(entry.created_at).toLocaleDateString() }}</td>
+              <td>{{ entry.property_name }}</td>
+              <td>{{ entry.unit_name || '-' }}</td>
+              <td>{{ entry.tenant_name || '-' }}</td>
+              <td>{{ entry.entry_type }}</td>
+              <td>KES {{ formatAmount(entry.amount) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </b-modal>
   </Master>
 </template>
 
@@ -56,6 +110,10 @@ export default {
       currentUser: {},
       userRole: null,
       stats: {},
+      properties: [],
+      showLedgerModal: false,
+      selectedPropertyId: '',
+      ledgerEntries: [],
       badgeClasses: [
         'text-success', 'text-danger', 'text-primary', 'text-info', 'text-warning', 'text-muted'
       ],
@@ -80,8 +138,6 @@ export default {
           { title: 'Rented Units', value: this.stats.rented, icon: 'bi-house-door', color: 'warning' },
           { title: 'Vacant Units', value: this.stats.vacant, icon: 'bi-box-arrow-right', color: 'danger' },
           { title: 'Tenants', value: this.stats.tenants, icon: 'bi-people', color: 'secondary' },
-
-          // Ledger / KPI cards
           { title: 'Total Due', value: this.stats.kpis?.total_due, icon: 'bi-cash-stack', color: 'primary', isCurrency: true },
           { title: 'Total Paid', value: this.stats.kpis?.total_paid, icon: 'bi-cash-coin', color: 'success', isCurrency: true },
           { title: 'Pending Payments', value: this.stats.kpis?.pending_payments, icon: 'bi-hourglass', color: 'warning', isCurrency: true },
@@ -90,7 +146,6 @@ export default {
           { title: 'Fully Paid Invoices', value: this.stats.kpis?.paid_invoices, icon: 'bi-check-circle', color: 'success' },
           { title: 'Partially Paid Invoices', value: this.stats.kpis?.partial_invoices, icon: 'bi-hourglass-split', color: 'warning' },
           { title: 'Overdue Invoices', value: this.stats.kpis?.overdue_invoices, icon: 'bi-exclamation-triangle', color: 'danger' },
-
           { title: 'Tickets Open', value: this.stats.tickets_open, icon: 'bi-circle', color: 'warning' },
           { title: 'Tickets In Progress', value: this.stats.tickets_in_progress, icon: 'bi-hourglass-split', color: 'info' },
           { title: 'Tickets Resolved', value: this.stats.tickets_resolved, icon: 'bi-check-circle', color: 'success' },
@@ -119,6 +174,11 @@ export default {
       return (cards[this.userRole] || []).filter(card =>
         card.value !== null && card.value !== undefined && card.value !== 'N/A'
       );
+    },
+
+    filteredLedger() {
+      if (!this.selectedPropertyId) return this.ledgerEntries;
+      return this.ledgerEntries.filter(entry => entry.property_id === this.selectedPropertyId);
     }
   },
   methods: {
@@ -132,10 +192,44 @@ export default {
         })
         .catch(() => toast.fire({ icon: 'error', title: 'Failed to load dashboard stats' }));
     },
+
+    openLedgerModal() {
+      // HARD STOP: extra safety
+      if (this.userRole !== 'landlord') {
+        return;
+      }
+
+      this.selectedPropertyId = '';
+      this.showLedgerModal = false;
+
+      axios.get(`/api/landlords/${this.current_user_id}/ledger`)
+        .then(res => {
+          this.ledgerEntries = res.data.ledger_entries.map(entry => ({
+            ...entry,
+            property_name: entry.property?.name || 'N/A',
+            unit_name: entry.unit?.name || null,
+            tenant_name: entry.tenant?.name || null,
+          }));
+
+          this.showLedgerModal = true;
+        })
+        .catch(() =>
+          toast.fire({ icon: 'error', title: 'Failed to load ledger entries' })
+        );
+    },
+    fetchProperties(landlordId) {
+      axios.get(`/api/landlords/${landlordId}/properties`)
+        .then(res => {
+          this.properties = res.data.properties || [];
+        })
+        .catch(() => toast.fire({ icon: 'error', title: 'Failed to load properties' }));
+    },
+
     formatAmount(value) {
       if (!value) return '0';
       return Number(value).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     },
+
     dynamicFontSize(value) {
       if (!value) return '1rem';
       const length = String(Math.floor(value)).length;
@@ -144,6 +238,7 @@ export default {
       if (length <= 12) return '0.7rem';
       return '0.6rem';
     },
+
     navigateTo(location) { this.$router.push(location); },
     getRandomBadgeClass() { return this.badgeClasses[Math.floor(Math.random() * this.badgeClasses.length)]; },
     getCurrentYear() { this.currentYear = new Date().getFullYear(); },
@@ -157,7 +252,12 @@ export default {
     this.current_user = `${storedUser.first_name || ''} ${storedUser.last_name || ''}`.trim();
     this.getCurrentYear();
     this.fetchDashboardStats();
-  }
+    
+    if (this.userRole === 'landlord') {
+      this.fetchProperties(this.current_user_id); // pass user id
+    }
+  },
+
 };
 </script>
 
