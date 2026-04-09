@@ -962,8 +962,18 @@
             const fields = [
               "name", "email", "role", "phone", "address", "city",
               "county", "postal_code", "dob", "gender",
-              "status", "property_count", "assigned_properties"
+              "status", "property_count"
             ];
+
+            // ✅ Handle Assigned Properties (IMPORTANT FIX)
+            if (
+              Array.isArray(this.form.assigned_properties) &&
+              this.form.assigned_properties.length > 0
+            ) {
+              this.form.assigned_properties.forEach(id => {
+                formData.append('assigned_properties[]', id);
+              });
+            }
 
             fields.forEach(field => {
               if (this.form[field] !== undefined) {

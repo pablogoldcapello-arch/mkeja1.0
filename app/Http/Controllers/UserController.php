@@ -252,24 +252,40 @@ class UserController extends Controller
             $validated['profile_photo_url'] = $request->profile_photo_url;
         }
 
-        // ⭐ Handle Agreement upload
-        if ($request->hasFile('agreement_file')) {
-            $file = $request->file('agreement_file');
-            $filename = 'agreement_' . Str::random(8) . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('documents', $filename, 'public');
+    /* ======================================================
+       📄 AGREEMENT UPDATE (user_documents)
+       ====================================================== */
+    if ($request->hasFile('agreement_file')) {
 
-            // Delete old agreement file if exists
-            if ($user->agreement_file && Storage::disk('public')->exists($user->agreement_file)) {
-                Storage::disk('public')->delete($user->agreement_file);
+        $file = $request->file('agreement_file');
+
+        $filename = 'agreement_' . Str::random(8) . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('documents', $filename, 'public');
+
+        // 🔁 Replace existing agreement (same role)
+        $old = UserDocument::where('user_id', $user->id)
+            ->where('type', $user->role . '_agreement')
+            ->latest()
+            ->first();
+
+        if ($old) {
+            if ($old->file_name && Storage::disk('public')->exists($old->file_name)) {
+                Storage::disk('public')->delete($old->file_name);
             }
-
-            $validated['agreement_file'] = $path;
-            $validated['agreement_url'] = null;
-        } elseif ($request->filled('agreement_url')) {
-            $validated['agreement_file'] = null;
-            $validated['agreement_url'] = $request->agreement_url;
+            $old->delete();
         }
 
+        // ✅ Save new agreement
+        UserDocument::create([
+            'user_id'       => $user->id,
+            'type'          => $user->role . '_agreement',
+            'file_name'     => $path,
+            'original_name' => $file->getClientOriginalName(),
+            'file_url'      => asset('storage/' . $path),
+            'status'        => 'approved',
+        ]);
+    }        
+        
         // Update user
         $user->update($validated);
 
