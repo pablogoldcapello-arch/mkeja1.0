@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\UserDocument;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Tenancy;
@@ -48,6 +49,7 @@ class UserController extends Controller
             '2fa_enabled'       => 'nullable|boolean',
             'profile_photo'     => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120', // <= 5MB
             'profile_photo_url' => 'nullable|url', // URL option
+            'agreement'         => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240', // <-- new
 
         ]);
 
@@ -91,6 +93,7 @@ class UserController extends Controller
         } else {
             $data['assigned_properties'] = null;
         }
+               
 
         // Handle skills similarly
         if ($request->has('skills')) {
@@ -122,6 +125,23 @@ class UserController extends Controller
 
         // Create user with mass assignment using fillable attributes
         $user = User::create($data);
+
+        // Handle agreement upload
+        if ($request->hasFile('agreement')) {
+            $file = $request->file('agreement');
+            $filename = 'agreement_' . Str::random(8) . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('documents', $filename, 'public');
+
+            // Optional: store in a separate table if you want to track multiple documents per user
+            UserDocument::create([
+                'user_id'       => $user->id,
+                'type'          => $user->role.'_agreement',
+                'file_name'     => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'file_url'      => asset('storage/'.$path),
+                'status'        => 'pending', // or approved by default
+            ]);
+        }         
 
         // ✅ Create tenancy if role is tenant and property selected
         if ($user->role === 'tenant' && $request->property_id) {
@@ -186,6 +206,9 @@ class UserController extends Controller
 
             'profile_photo'     => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
             'profile_photo_url' => 'nullable|url',
+
+            'agreement_file'    => 'nullable|file|mimes:pdf,jpeg,png,jpg,gif|max:10240', // 10MB max
+            'agreement_url'     => 'nullable|url',            
         ]);
 
         // Optional password update
@@ -227,6 +250,24 @@ class UserController extends Controller
         elseif ($request->filled('profile_photo_url')) {
             $validated['profile_photo'] = null;
             $validated['profile_photo_url'] = $request->profile_photo_url;
+        }
+
+        // ⭐ Handle Agreement upload
+        if ($request->hasFile('agreement_file')) {
+            $file = $request->file('agreement_file');
+            $filename = 'agreement_' . Str::random(8) . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('documents', $filename, 'public');
+
+            // Delete old agreement file if exists
+            if ($user->agreement_file && Storage::disk('public')->exists($user->agreement_file)) {
+                Storage::disk('public')->delete($user->agreement_file);
+            }
+
+            $validated['agreement_file'] = $path;
+            $validated['agreement_url'] = null;
+        } elseif ($request->filled('agreement_url')) {
+            $validated['agreement_file'] = null;
+            $validated['agreement_url'] = $request->agreement_url;
         }
 
         // Update user
