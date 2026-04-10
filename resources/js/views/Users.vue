@@ -888,7 +888,7 @@
         {
           this.form = {
             id: landlord.id,
-            name: landlord.name ?? "",
+            name: landlord.full_name ?? "",
             email: landlord.email ?? "",
             role: landlord.role ?? "",
             phone: landlord.phone ?? "",

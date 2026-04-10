@@ -436,6 +436,16 @@
                             <div v-if="errors.profile_photo" class="text-danger small mt-1">{{ errors.profile_photo }}</div>
                           </div>
 
+                          <div class="col-md-12">
+                            <label class="form-label">Upload Landlord Agreement (PDF/Image)</label>
+                            <input type="file" class="form-control" accept=".pdf,image/*" @change="handleAgreementUpload">
+                            
+                            <!-- Preview for images only -->
+                            <div v-if="data.agreement_preview" class="mt-2">
+                              <img v-if="isAgreementImage" :src="data.agreement_preview" class="img-thumbnail" style="max-height: 130px;">
+                              <div v-else class="small text-muted">{{ data.agreement_file?.name }}</div>
+                            </div>
+                          </div>                          
 
                         </form>
                       </div>
@@ -595,6 +605,17 @@
                               <img :src="form.profile_photo_preview" class="img-thumbnail" style="max-height: 130px;">
                             </div>
 
+                            <div class="col-md-12">
+                              <label class="form-label">Upload Landlord Agreement (PDF/Image)</label>
+                              <input type="file" class="form-control" accept=".pdf,image/*" @change="handleFormAgreementUpload">
+                              
+                              <!-- Preview for images only -->
+                              <div v-if="form.agreement_preview" class="mt-2">
+                                <img v-if="isAgreementImage" :src="form.agreement_preview" class="img-thumbnail" style="max-height: 130px;">
+                                <div v-else class="small text-muted">{{ form.agreement_file?.name }}</div>
+                              </div>
+                            </div>
+
                           </div>
 
                         </form>
@@ -665,6 +686,11 @@
             skills: [],
             status: "active",
 
+            agreement_file: null,
+            agreement_url: "",
+            agreement_preview: null,
+            agreement_preview_type: null, // 'image' or 'pdf'
+
             profile_photo_file: null,
             profile_photo_preview: null,
             profile_photo_url: '' // for URL input
@@ -687,6 +713,9 @@
             assigned_properties: "",
             skills: [],
             status: "active",
+
+            agreement_file: null,          // <-- add this
+            agreement_preview: null,       // optional for images
 
             profile_photo_file: null,
             profile_photo_preview: null,
@@ -720,6 +749,50 @@
         }
       },      
       methods: {
+        // Handle file selection
+        handleFormAgreementUpload(event) {
+          const file = event.target.files[0];
+          if (!file) return;
+
+          // Save file in form object
+          this.form.agreement_file = file;
+
+          // Preview for images only
+          if (file.type.startsWith("image/")) {
+            this.form.agreement_preview = URL.createObjectURL(file);
+            this.isAgreementImage = true;
+          } else {
+            this.form.agreement_preview = null; // no preview for PDFs
+            this.isAgreementImage = false;
+          }
+        },
+
+        // Optional: Clean up URL object when removing file
+        removeAgreementFile() {
+          if (this.form.agreement_preview) {
+            URL.revokeObjectURL(this.form.agreement_preview);
+          }
+          this.form.agreement_file = null;
+          this.form.agreement_preview = null;
+          this.isAgreementImage = false;
+        },        
+        handleAgreementUpload(e) {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          this.data.agreement_file = file;
+          this.isAgreementImage = file.type.startsWith('image/');
+
+          if (this.isAgreementImage) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              this.data.agreement_preview = event.target.result;
+            };
+            reader.readAsDataURL(file);
+          } else {
+            this.data.agreement_preview = null; // PDFs won't preview
+          }
+        },        
         generatePassword() {
           const length = 12;
           const chars =
@@ -882,16 +955,22 @@
           try {
             let formData = new FormData();
 
-            // Merge names back to single "name" for backend
-            const fullName = `${this.form.first_name} ${this.form.last_name}`.trim();
-            formData.append("name", fullName);
-
             // Append normal fields
             const fields = [
-              "email", "role", "phone", "address", "city",
+              "name", "email", "role", "phone", "address", "city",
               "county", "postal_code", "dob", "gender",
-              "status", "property_count", "assigned_properties"
+              "status", "property_count"
             ];
+
+            // ✅ Handle Assigned Properties (IMPORTANT FIX)
+            if (
+              Array.isArray(this.form.assigned_properties) &&
+              this.form.assigned_properties.length > 0
+            ) {
+              this.form.assigned_properties.forEach(id => {
+                formData.append('assigned_properties[]', id);
+              });
+            }
 
             fields.forEach(field => {
               if (this.form[field] !== undefined) {
@@ -913,6 +992,16 @@
             if (this.photoMode === "url" && this.form.profile_photo_url) {
               formData.append("profile_photo_url", this.form.profile_photo_url);
             }
+
+            // ✅ Handle Agreement Upload (PDF/Image)
+            if (this.form.agreement_file) {
+              formData.append("agreement_file", this.form.agreement_file);
+            }
+
+            // Handle Agreement URL (if you want to allow URL instead of file)
+            if (this.form.agreement_url) {
+              formData.append("agreement_url", this.form.agreement_url);
+            }            
 
             const response = await axios.post(
               `/api/users/${this.form.id}?_method=PUT`,
@@ -998,10 +1087,11 @@
 
             // Append all fields
             for (const key in this.data) {
-              if (key === 'profile_photo_file' && this.data.profile_photo_file) {
-                // append the actual file
+             if (key === 'profile_photo_file' && this.data.profile_photo_file) {
                 formData.append('profile_photo', this.data.profile_photo_file);
-              } else if (key !== 'profile_photo_file') {
+              } else if (key === 'agreement_file' && this.data.agreement_file) {
+                formData.append('agreement', this.data.agreement_file);  // <-- append agreement file
+              } else if (key !== 'profile_photo_file' && key !== 'agreement_file') {
                 formData.append(key, this.data[key]);
               }
             }

@@ -343,13 +343,40 @@
 
                           <!-- Password -->
                           <div class="col-md-6">
-                            <label class="form-label">Password*</label>
+                            <label class="form-label">
+                              Password*
+                              <small class="text-muted">(auto-generate or type manually)</small>
+                            </label>
+
                             <div class="input-group">
-                              <input id="password" :type="showPassword ? 'text' : 'password'" class="form-control" v-model="data.password" required>
-                              <span class="input-group-text" style="cursor:pointer" @click="showPassword = !showPassword">
+                              <input
+                                id="password"
+                                :type="showPassword ? 'text' : 'password'"
+                                class="form-control"
+                                v-model="data.password"
+                                required
+                              />
+
+                              <span
+                                class="input-group-text"
+                                style="cursor:pointer"
+                                @click="showPassword = !showPassword"
+                              >
                                 <i :class="showPassword ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
                               </span>
+
+                              <button
+                                class="btn btn-outline-secondary"
+                                type="button"
+                                @click="generatePassword"
+                              >
+                                Generate
+                              </button>
                             </div>
+
+                            <small class="text-muted">
+                              A strong password will be generated automatically if you prefer
+                            </small>
                           </div>
 
                           <!-- Phone -->
@@ -469,6 +496,16 @@
                             <div v-if="errors.profile_photo" class="text-danger small mt-1">{{ errors.profile_photo }}</div>
                           </div>
 
+                          <div class="col-md-12">
+                            <label class="form-label">Upload Tenant Agreement (PDF/Image)</label>
+                            <input type="file" class="form-control" accept=".pdf,image/*" @change="handleAgreementUpload">
+                            
+                            <!-- Preview for images only -->
+                            <div v-if="data.agreement_preview" class="mt-2">
+                              <img v-if="isAgreementImage" :src="data.agreement_preview" class="img-thumbnail" style="max-height: 130px;">
+                              <div v-else class="small text-muted">{{ data.agreement_file?.name }}</div>
+                            </div>
+                          </div>
 
                         </form>
                       </div>
@@ -630,6 +667,17 @@
 
                           </div>
 
+                          <div class="col-md-12">
+                            <label class="form-label">Upload Tenant Agreement (PDF/Image)</label>
+                            <input type="file" class="form-control" accept=".pdf,image/*" @change="handleFormAgreementUpload">
+                            
+                            <!-- Preview for images only -->
+                            <div v-if="form.agreement_preview" class="mt-2">
+                              <img v-if="isAgreementImage" :src="form.agreement_preview" class="img-thumbnail" style="max-height: 130px;">
+                              <div v-else class="small text-muted">{{ form.agreement_file?.name }}</div>
+                            </div>
+                          </div>                          
+
                         </form>
                       </div>
 
@@ -701,6 +749,11 @@
             skills: [],
             status: "active",
 
+            agreement_file: null,
+            agreement_url: "",
+            agreement_preview: null,
+            agreement_preview_type: null, // 'image' or 'pdf'
+
             profile_photo_file: null,
             profile_photo_preview: null,
             profile_photo_url: '' // for URL input
@@ -725,6 +778,9 @@
             assigned_properties: "",
             skills: [],
             status: "active",
+
+            agreement_file: null,          // <-- add this
+            agreement_preview: null,       // optional for images
 
             profile_photo_file: null,
             profile_photo_preview: null,
@@ -775,6 +831,43 @@
         }
         },
       methods: {
+        handleAgreementUpload(e) {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          this.data.agreement_file = file;
+          this.isAgreementImage = file.type.startsWith('image/');
+
+          if (this.isAgreementImage) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              this.data.agreement_preview = event.target.result;
+            };
+            reader.readAsDataURL(file);
+          } else {
+            this.data.agreement_preview = null; // PDFs won't preview
+          }
+        },        
+        generatePassword() {
+          const length = 12;
+          const chars =
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=';
+
+          let password = '';
+          for (let i = 0; i < length; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+
+          this.data.password = password;
+          this.showPassword = true;
+
+          // Optional toast feedback
+          toast.fire({
+            icon: 'success',
+            title: 'Password generated',
+            text: 'You can copy or change it before saving'
+          });
+        },        
         async loadUnits() {
         if (!this.data.property_id) {
             this.units = [];
@@ -932,8 +1025,18 @@
             const fields = [
               "name", "email", "role", "phone", "address", "city",
               "county", "postal_code", "dob", "gender",
-              "status", "property_count", "assigned_properties"
+              "status", "property_count"
             ];
+
+            // ✅ Handle Assigned Properties (IMPORTANT FIX)
+            if (
+              Array.isArray(this.form.assigned_properties) &&
+              this.form.assigned_properties.length > 0
+            ) {
+              this.form.assigned_properties.forEach(id => {
+                formData.append('assigned_properties[]', id);
+              });
+            }            
 
             fields.forEach(field => {
               if (this.form[field] !== undefined) {
@@ -955,6 +1058,16 @@
             if (this.photoMode === "url" && this.form.profile_photo_url) {
               formData.append("profile_photo_url", this.form.profile_photo_url);
             }
+
+            // ✅ Handle Agreement Upload (PDF/Image)
+            if (this.form.agreement_file) {
+              formData.append("agreement_file", this.form.agreement_file);
+            }
+
+            // Handle Agreement URL (if you want to allow URL instead of file)
+            if (this.form.agreement_url) {
+              formData.append("agreement_url", this.form.agreement_url);
+            }            
 
             const response = await axios.post(
               `/api/users/${this.form.id}?_method=PUT`,
@@ -1041,9 +1154,10 @@
             // Append all fields
             for (const key in this.data) {
               if (key === 'profile_photo_file' && this.data.profile_photo_file) {
-                // append the actual file
                 formData.append('profile_photo', this.data.profile_photo_file);
-              } else if (key !== 'profile_photo_file') {
+              } else if (key === 'agreement_file' && this.data.agreement_file) {
+                formData.append('agreement', this.data.agreement_file);  // <-- append agreement file
+              } else if (key !== 'profile_photo_file' && key !== 'agreement_file') {
                 formData.append(key, this.data[key]);
               }
             }
